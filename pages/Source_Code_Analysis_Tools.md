@@ -280,8 +280,14 @@ Static Analysis](https://endler.dev/awesome-static-analysis/)
     (Synopsys) - Scans code for insecure coding and configurations
     automatically as an IDE plugin for Eclipse, IntelliJ, and Visual
     Studio etc. Supports (Java, .NET, PHP, and JavaScript)
+  - [Security Reviewer](https://www.securityreviewer.net) Static Analysis for C#, Vb.NET, VB6, ASP, ASPX, JAVA, JSP, JavaScript, 
+    TypeScript, Java Server Faces, Ruby, Python, R, GO, Kotlin, Groovy, Flex, ActionScript, PowerShell, LUA, HTML5, XML, XPath, JSON, C,
+    C++, PHP, SCALA, Rust, IBM Streams SPL, Objective-C, Objective-C++, SWIFT, COBOL, JCL, RPG, PL/I, ABAP, SAP-HANA, PL/SQL, T/SQL, 
+    U-SQL, Teradata SQL, SAS-SQL, ANSI SQL, IBM DB2, IBM Informix, MySQL, FireBird, PostGreSQL, SQLite, MongoDB. 
+    Jenkins Plugin for Software Composition Analysis
   - [Sentinel
     Source](https://www.whitehatsec.com/products/static-application-security-testing/)
+    (Whitehat)
     (Whitehat)
   - [Seeker](https://www.synopsys.com/software-integrity/products/interactive-application-security-testing.html)
     (Synopsys) Seeker performs code security without actually doing
