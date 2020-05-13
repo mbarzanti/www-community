@@ -278,6 +278,7 @@ and legal teams an opportunity to create solutions for healthy open source usage
 | [NPM Audit] | NPM | Open Source | SaaS |
 | [PHP Security Checker] | SensioLabs | Open Source | SaaS |
 | [Renovate] | Key Location | Open Source | SaaS |
+| [Security Reviewer SCA] | Security Reviewer | Commercial | Cross Platform |
 | [Snyk] | Snyk | Commercial / Freemium | SaaS |
 | [SourceClear] | Veracode | Commercial | Cross Platform / SaaS |
 | [Nexus IQ] | Sonatype | Commercial | Cross Platform |
@@ -307,6 +308,7 @@ and legal teams an opportunity to create solutions for healthy open source usage
 [NPM Audit]: https://www.npmjs.com/
 [PHP Security Checker]: https://github.com/sensiolabs/security-checker
 [Renovate]: https://renovatebot.com/
+[Security Reviewer SCA]: https://www.securityreviewer.net/
 [Snyk]: https://snyk.io/
 [SourceClear]: https://www.sourceclear.com/
 [Nexus IQ]: https://www.sonatype.com/
