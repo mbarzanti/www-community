@@ -1,0 +1,60 @@
+import 'package:fiery_gg/ui/widgets/chat_item.dart';
+
+final List<ChatItem> chatItems = [
+  const ChatItem(
+    avatar: 'assets/images/avt.png',
+    name: 'Savannah Nguyen',
+    message: 'Thank you for your help with the recent project!',
+    time: '09:00',
+    isOnline: false,
+    rank: 'Gold',
+  ),
+  const ChatItem(
+    avatar: 'assets/images/avt.png',
+    name: 'Robert Fox',
+    message: 'I just sent you an email. Please check it when you have time.',
+    time: '09:20',
+    isOnline: false,
+    rank: null,
+  ),
+  const ChatItem(
+    avatar: 'assets/images/avt.png',
+    name: 'Guy Hawkins',
+    message: 'Remember to bring the documents for tomorrow\'s meeting.',
+    time: '09:30',
+    isOnline: false,
+    rank: 'Silver',
+  ),
+  const ChatItem(
+    avatar: 'assets/images/avt.png',
+    name: 'Leslie Alexander',
+    message: 'Have you seen the new movie? It\'s amazing!',
+    time: '10:05',
+    isOnline: false,
+    rank: null,
+  ),
+  const ChatItem(
+    avatar: 'assets/images/avt.png',
+    name: 'Jenny Wilson',
+    message: 'Let\'s go for a picnic this weekend!',
+    time: '12:15',
+    isOnline: true,
+    rank: 'Bronze',
+  ),
+  const ChatItem(
+    avatar: 'assets/images/avt.png',
+    name: 'Cameron Williamson',
+    message: 'I just finished the new project. Would you like to take a look?',
+    time: '14:30',
+    isOnline: false,
+    rank: 'Silver',
+  ),
+  const ChatItem(
+    avatar: 'assets/images/avt.png',
+    name: 'Annette Black',
+    message: 'She took a deep breath and prepared to jump off the high dive',
+    time: '15:54',
+    isOnline: false,
+    rank: 'Bronze',
+  ),
+];

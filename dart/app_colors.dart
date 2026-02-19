@@ -1,0 +1,115 @@
+import 'dart:ui';
+
+import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:memno/database/toggles_data.dart';
+
+class AppColors extends ChangeNotifier {
+  late Box<TogglesData> _togglesBox;
+  // Check if system is in dark mode
+  bool _isDarkMode =
+      PlatformDispatcher.instance.platformBrightness == Brightness.dark;
+  bool _isCompactHeader = false;
+
+  AppColors() {
+    init();
+  }
+
+  Future<void> init() async {
+    Hive.registerAdapter(TogglesDataAdapter());
+    _togglesBox = await Hive.openBox<TogglesData>('togglesData');
+
+    TogglesData? togglesData = _togglesBox.get(0);
+
+    if (togglesData == null) {
+      await _togglesBox.put(
+        0,
+        TogglesData(darkMode: _isDarkMode, compactHeader: _isCompactHeader),
+      );
+    } else {
+      _isDarkMode = togglesData.darkMode;
+      _isCompactHeader = togglesData.compactHeader;
+    }
+    notifyListeners();
+  }
+
+  bool get isDarkMode => _isDarkMode;
+  bool get isCompactHeader => _isCompactHeader;
+
+  final _light = LightColors();
+  final _dark = DarkColors();
+
+  // Toggle dark mode and save it to the togglesData box
+  Future<void> toggleTheme() async {
+    _isDarkMode = !_isDarkMode;
+    TogglesData togglesData =
+        TogglesData(darkMode: _isDarkMode, compactHeader: _isCompactHeader);
+    await _togglesBox.put(0, togglesData);
+    notifyListeners();
+  }
+
+  // Toggle compact header and save it to the togglesData box
+  Future<void> toggleCompactHeader() async {
+    _isCompactHeader = !_isCompactHeader;
+    TogglesData togglesData =
+        TogglesData(darkMode: _isDarkMode, compactHeader: _isCompactHeader);
+    await _togglesBox.put(0, togglesData);
+    notifyListeners();
+  }
+
+  Color get bgClr => _isDarkMode ? _dark.bgClr : _light.bgClr;
+  Color get fgClr => _isDarkMode ? _dark.fgClr : _light.fgClr;
+  Color get box => _isDarkMode ? _dark.box : _light.box;
+  Color get search => _isDarkMode ? _dark.search : _light.search;
+  Color get accnt => _isDarkMode ? _dark.accnt : _light.accnt;
+  Color get accntPill => _isDarkMode ? _dark.accntPill : _light.accntPill;
+  Color get accntText => _isDarkMode ? _dark.accntText : _light.accntText;
+  Color get textClr => _isDarkMode ? _dark.textClr : _light.textClr;
+  Color get iconClr => _isDarkMode ? _dark.iconClr : _light.iconClr;
+  Color get btnClr => _isDarkMode ? _dark.btnClr : _light.btnClr;
+  Color get btnIcon => _isDarkMode ? _dark.btnIcon : _light.btnIcon;
+  Color get pill => _isDarkMode ? _dark.pill : _light.pill;
+  Color get toastBg => _isDarkMode ? _dark.toastBg : _light.toastBg;
+  Color get toastText => _isDarkMode ? _dark.toastText : _light.toastText;
+  Color get thumbClr => _isDarkMode ? _dark.thumbClr : _light.thumbClr;
+  Color get switchTrackOutlineClr =>
+      _isDarkMode ? _dark.switchTrackOutlineClr : _light.switchTrackOutlineClr;
+}
+
+class LightColors {
+  final Color bgClr = Colors.white;
+  final Color fgClr = Colors.black;
+  final Color box = Colors.grey[100]!;
+  final Color search = Colors.black;
+  final Color accnt = const Color(0xFFdafc08);
+  final Color accntPill = const Color(0xFFf6fec2);
+  final Color accntText = Colors.black;
+  final Color textClr = Colors.black;
+  final Color iconClr = Colors.black;
+  final Color btnClr = Colors.black;
+  final Color btnIcon = Colors.white;
+  final Color pill = Colors.grey[300]!;
+  final Color toastBg = Colors.grey[900]!;
+  final Color toastText = Colors.white;
+  final Color thumbClr = Colors.black54;
+  final Color switchTrackOutlineClr = Colors.black54;
+}
+
+class DarkColors {
+  final Color bgClr = Colors.black;
+  final Color fgClr = Colors.white;
+  final Color box = Colors.grey[900]!;
+  final Color search = const Color(0xFFdafc08);
+  final Color accnt = const Color(0xFFdafc08);
+  final Color accntPill = Colors.black;
+  final Color accntText = Colors.white;
+  final Color textClr = Colors.white;
+  final Color iconClr = Colors.white;
+  final Color btnClr = Colors.grey[800]!.withValues(alpha: 0.5);
+  final Color btnIcon = Colors.white;
+  final Color pill = Colors.grey[800]!;
+  final Color toastBg = Colors.grey[100]!;
+  final Color toastText = Colors.black;
+  final Color thumbClr = Colors.white;
+  final Color switchTrackOutlineClr = Colors.transparent;
+}

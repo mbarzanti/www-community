@@ -1,0 +1,15 @@
+name: soos_sample_project
+description: This repository is an example of a vulnerable package on a public registry
+version: 1.0.2
+repository: https://github.com/soos-io/sample-project-dart
+homepage: https://github.com/soos-io/sample-project-dart
+
+environment:
+  sdk: '>=2.18.1 <3.0.0'
+
+dependencies:
+  personnummer: '3.0.2'
+  dio: '4.0.0'
+
+dev_dependencies:
+  lints: ^2.0.0

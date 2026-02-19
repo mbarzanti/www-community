@@ -1,0 +1,126 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fyx/components/bottom_sheets/post_context_menu.dart';
+import 'package:fyx/components/content_box_layout.dart';
+import 'package:fyx/components/gesture_feedback.dart';
+import 'package:fyx/components/post/post_avatar.dart';
+import 'package:fyx/controllers/ApiController.dart';
+import 'package:fyx/controllers/IApiProvider.dart';
+import 'package:fyx/features/message/domain/message_settings.dart';
+import 'package:fyx/features/message/presentation/message_screen.dart';
+import 'package:fyx/features/message/presentation/viewmodel/message_viewmodel.dart';
+import 'package:fyx/model/Mail.dart';
+import 'package:fyx/model/MainRepository.dart';
+import 'package:fyx/model/post/content/Regular.dart';
+
+import 'package:fyx/shared/services/service_locator.dart';
+import 'package:fyx/state/mail_provider.dart';
+import 'package:fyx/theme/Helpers.dart';
+import 'package:fyx/theme/IconReply.dart';
+import 'package:fyx/theme/skin/Skin.dart';
+import 'package:fyx/theme/skin/SkinColors.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+
+class MailListItem extends ConsumerStatefulWidget {
+  final Mail mail;
+  final bool isPreview;
+  final Function? onUpdate;
+
+  const MailListItem(this.mail, {this.isPreview = false, this.onUpdate});
+
+  @override
+  _MailListItemState createState() => _MailListItemState();
+}
+
+class _MailListItemState extends ConsumerState<MailListItem> {
+  void showMailContext() {
+    showCupertinoModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) => PostContextMenu<Mail>(
+              parentContext: context,
+              item: widget.mail,
+              flagPostCallback: (mailId) => MainRepository().settings.blockMail(mailId),
+            ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    SkinColors colors = Skin.of(context).theme.colors;
+    final isDeleted = ref.watch(MailsToDelete.provider).contains(widget.mail);
+    final _newMessage = MessageScreen(key: UniqueKey());
+
+    return Visibility(
+      visible: !isDeleted,
+      child: ContentBoxLayout(
+        isHighlighted: widget.mail.isNew,
+        isPreview: widget.isPreview == true,
+        content: widget.mail.content,
+        topLeftWidget: Expanded(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onLongPress: showMailContext,
+            child: PostAvatar(widget.mail.direction == MailDirection.from ? widget.mail.participant : MainRepository().credentials!.nickname,
+                description:
+                    '→ ${widget.mail.direction == MailDirection.to ? widget.mail.participant : MainRepository().credentials!.nickname}, ${Helpers.absoluteTime(widget.mail.time)} ~${Helpers.relativeTime(widget.mail.time)}'),
+          ),
+        ),
+        topRightWidget: Row(
+          children: <Widget>[
+            Visibility(
+              visible: widget.mail.isOutgoing && widget.mail.isUnread,
+              child: Icon(
+                MdiIcons.emailMarkAsUnread,
+                color: colors.text.withOpacity(0.38),
+              ),
+            ),
+            SizedBox(
+              width: 4,
+            ),
+            GestureFeedback(
+              child: Icon(Icons.more_vert, color: colors.text.withOpacity(0.38)),
+              onTap: showMailContext,
+            ),
+          ],
+        ),
+        bottomWidget: widget.isPreview == true
+            ? null
+            : Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[IconReply(), Text('Odpovědět', style: TextStyle(color: colors.text.withOpacity(0.38), fontSize: 14))],
+                  ),
+                  onTap: () {
+                    final viewModel = getIt<MessageViewModel>();
+                    viewModel.initializeFromSettings(MessageSettings(
+                        onSubmit: (String? inputField, String message, List<Map<ATTACHMENT, dynamic>> attachments) async {
+                          if (inputField == null) {
+                            return false;
+                          }
+                          var response = await ApiController().sendMail(inputField, message, attachments: attachments);
+                          return response.isOk;
+                        },
+                        onClose: this.widget.onUpdate!,
+                        inputFieldPlaceholder: widget.mail.participant,
+                        hasInputField: true,
+                        replyWidget: MailListItem(
+                          widget.mail,
+                          isPreview: true,
+                        )));
+
+                    showCupertinoModalBottomSheet(
+                        context: context,
+                        backgroundColor: colors.barBackground,
+                        barrierColor: colors.dark.withOpacity(0.5),
+                        builder: (_) => _newMessage);
+                  },
+                )
+              ]),
+      ),
+    );
+  }
+}

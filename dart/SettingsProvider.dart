@@ -1,0 +1,217 @@
+import 'package:fyx/model/Settings.dart';
+import 'package:fyx/model/enums/DefaultView.dart';
+import 'package:fyx/model/enums/FirstUnreadEnum.dart';
+import 'package:fyx/model/enums/LaunchModeEnum.dart';
+import 'package:fyx/model/enums/SkinEnum.dart';
+import 'package:fyx/model/enums/ThemeEnum.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
+class SettingsProvider {
+  static final SettingsProvider _singleton = SettingsProvider._internal();
+  late Settings _settings;
+  late Box<dynamic> _box;
+
+  Box<dynamic> get box => _box;
+
+  ThemeEnum get theme => _settings.theme;
+  set theme(ThemeEnum theme) {
+    _box.put('theme', theme);
+    _settings.theme = theme;
+  }
+
+  SkinEnum get skin => _settings.skin;
+  set skin(SkinEnum skin) {
+    _box.put('skin', skin);
+    _settings.skin = skin;
+  }
+
+  double get fontSize => _settings.fontSize;
+  set fontSize(double fontSize) {
+    _box.put('fontSize', fontSize);
+    _settings.fontSize = fontSize;
+  }
+
+  String get whatsNew => _settings.whatsNew;
+  set whatsNew(String whatsNew) {
+    _box.put('whatsNew', whatsNew);
+    _settings.whatsNew = whatsNew;
+  }
+
+  DefaultView get defaultView => _settings.defaultView;
+  set defaultView(DefaultView view) {
+    _box.put('defaultView', view);
+    _settings.defaultView = view;
+  }
+
+  DefaultView get latestView => _settings.latestView;
+  set latestView(DefaultView view) {
+    _box.put('latestView', view);
+    _settings.latestView = view;
+  }
+
+  FirstUnreadEnum get firstUnread => _settings.firstUnread;
+  set firstUnread(FirstUnreadEnum value) {
+    _box.put('firstUnread', value);
+    _settings.firstUnread = value;
+  }
+
+  bool get useCompactMode => _settings.useCompactMode;
+  set useCompactMode(bool mode) {
+    _box.put('useCompactMode', mode);
+    _settings.useCompactMode = mode;
+  }
+
+  bool get useBulkActions => _settings.useBulkActions;
+  set useBulkActions(bool mode) {
+    _box.put('useBulkActions', mode);
+    _settings.useBulkActions = mode;
+  }
+
+  bool get useMarkdown => _settings.useMarkdown;
+  set useMarkdown(bool mode) {
+    _box.put('useMarkdown', mode);
+    _settings.useMarkdown = mode;
+  }
+
+  bool get quickRating => _settings.quickRating;
+  set quickRating(bool mode) {
+    _box.put('quickRating', mode);
+    _settings.quickRating = mode;
+  }
+
+  bool get useFyxImageCache => _settings.useFyxImageCache;
+  set useFyxImageCache(bool mode) {
+    _box.put('useFyxImageCache', mode);
+    _settings.useFyxImageCache = mode;
+  }
+
+  bool get useAutocorrect => _settings.useAutocorrect;
+  set useAutocorrect(bool autocorrect) {
+    _box.put('useAutocorrect', autocorrect);
+    _settings.useAutocorrect = autocorrect;
+  }
+
+  LaunchModeEnum get linksMode => _settings.linksMode;
+  set linksMode(LaunchModeEnum mode) {
+    _box.put('linksMode', mode);
+    _settings.linksMode = mode;
+  }
+
+  List get blockedMails => _box.get('blockedMails', defaultValue: Settings().blockedMails);
+
+  List get blockedPosts => _box.get('blockedPosts', defaultValue: Settings().blockedPosts);
+
+  List get blockedUsers => _box.get('blockedUsers', defaultValue: Settings().blockedUsers);
+
+  List<String> get savedSearch => _box.get('savedSearch', defaultValue: Settings().savedSearch);
+
+  Map get nsfwDiscussionList => _box.get('nsfwDiscussionList', defaultValue: Settings().nsfwDiscussionList);
+
+  factory SettingsProvider() {
+    return _singleton;
+  }
+
+  SettingsProvider._internal();
+
+  Future<SettingsProvider> init() async {
+    await Hive.initFlutter();
+    Hive.registerAdapter(DefaultViewAdapter());
+    Hive.registerAdapter(ThemeEnumAdapter());
+    Hive.registerAdapter(FirstUnreadEnumAdapter());
+    Hive.registerAdapter(SkinEnumAdapter());
+    Hive.registerAdapter(LaunchModeEnumAdapter());
+    _box = await Hive.openBox('settings');
+
+    _settings = new Settings();
+    _settings.theme = _box.get('theme', defaultValue: Settings().theme);
+    _settings.fontSize = _box.get('fontSize', defaultValue: Settings().fontSize);
+    _settings.defaultView = _box.get('defaultView', defaultValue: Settings().defaultView);
+    _settings.latestView = _box.get('latestView', defaultValue: Settings().latestView);
+    _settings.quickRating = _box.get('quickRating', defaultValue: Settings().quickRating);
+    _settings.useFyxImageCache = _box.get('useFyxImageCache', defaultValue: Settings().useFyxImageCache);
+    _settings.useCompactMode = _box.get('useCompactMode', defaultValue: Settings().useCompactMode);
+    _settings.useBulkActions = _box.get('useBulkActions', defaultValue: Settings().useBulkActions);
+    _settings.useAutocorrect = _box.get('useAutocorrect', defaultValue: Settings().useAutocorrect);
+    _settings.firstUnread = _box.get('firstUnread', defaultValue: Settings().firstUnread);
+    _settings.skin = _box.get('skin', defaultValue: Settings().skin);
+    _settings.linksMode = _box.get('linksMode', defaultValue: Settings().linksMode);
+    _settings.whatsNew = _box.get('whatsNew', defaultValue: Settings().whatsNew);
+    _settings.savedSearch = _box.get('savedSearch', defaultValue: Settings().savedSearch);
+
+    return _singleton;
+  }
+
+  bool isPostBlocked(int postId) => _box.get('blockedPosts', defaultValue: Settings().blockedPosts).indexOf(postId) >= 0;
+
+  bool isMailBlocked(int mailId) => _box.get('blockedMails', defaultValue: Settings().blockedMails).indexOf(mailId) >= 0;
+
+  void blockPost(int postId) {
+    List<int> blockedPosts = _box.get('blockedPosts', defaultValue: Settings().blockedPosts);
+    if (blockedPosts.indexOf(postId) == -1) {
+      blockedPosts.add(postId);
+    }
+    _box.put('blockedPosts', blockedPosts);
+  }
+
+  void blockMail(int mailId) {
+    List<int> blockedMails = _box.get('blockedMails', defaultValue: Settings().blockedMails);
+    if (blockedMails.indexOf(mailId) == -1) {
+      blockedMails.add(mailId);
+    }
+    _box.put('blockedMails', blockedMails);
+  }
+
+  void resetBlockedContent() {
+    _box.delete('blockedPosts');
+    _box.delete('blockedMails');
+    _box.delete('blockedUsers');
+  }
+
+  bool isUserBlocked(String user) => _box.get('blockedUsers', defaultValue: Settings().blockedUsers).indexOf(user) >= 0;
+
+  void blockUser(String user) {
+    List<String> blockedUsers = _box.get('blockedUsers', defaultValue: Settings().blockedUsers);
+    if (blockedUsers.indexOf(user) == -1) {
+      blockedUsers.add(user);
+    }
+    _box.put('blockedUsers', blockedUsers);
+  }
+
+  void toggleSavedSearch(String term) {
+    List<String> savedSearch = _box.get('savedSearch', defaultValue: Settings().savedSearch);
+    if (savedSearch.contains(term)) {
+      savedSearch.remove(term);
+    } else {
+      savedSearch.add(term);
+    }
+    _box.put('savedSearch', savedSearch);
+  }
+
+  bool isSearchTermSaved(String term) {
+    List<String> savedSearch = _box.get('savedSearch', defaultValue: Settings().savedSearch);
+    return savedSearch.contains(term);
+  }
+
+  void addNsfwDiscussion(int id, String name) {
+    Map list = _box.get('nsfwDiscussionList', defaultValue: Settings().nsfwDiscussionList);
+    list[id] = name;
+    _box.put('nsfwDiscussionList', list);
+  }
+
+  void removeNsfwDiscussion(int id) {
+    Map list = _box.get('nsfwDiscussionList', defaultValue: Settings().nsfwDiscussionList);
+    if (this.isNsfw(id)) {
+      list.remove(id);
+    }
+    _box.put('nsfwDiscussionList', list);
+  }
+
+  void resetNsfwDiscussion() {
+    _box.delete('nsfwDiscussionList');
+  }
+
+  bool isNsfw(int id) {
+    Map list = _box.get('nsfwDiscussionList', defaultValue: Settings().nsfwDiscussionList);
+    return list.containsKey(id);
+  }
+}
