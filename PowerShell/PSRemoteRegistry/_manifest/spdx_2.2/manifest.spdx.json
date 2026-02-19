@@ -1,0 +1,315 @@
+{
+  "files": [
+    {
+      "fileName": "./issues/1/1.json",
+      "SPDXID": "SPDXRef-File--issues-1-1.json-582318F8E616B76F8DD9210E50E3AEA21697BDA0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a35c9214f92aba406d35557bb66d9bb85b1c609675421defd95febc5d17f2a31"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "582318f8e616b76f8dd9210e50e3aea21697bda0"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./license/license.json",
+      "SPDXID": "SPDXRef-File--license-license.json-1ADF82F5DA205C9CC06247D2175EF9889668978C",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c83aea23d971f457dc782081d2cbbb456f5b0a9a1f4e8898e43d93e57cb37ecb"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "1adf82f5da205c9cc06247d2175ef9889668978c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./issues/issues.json",
+      "SPDXID": "SPDXRef-File--issues-issues.json-1B68CDA4BDB72527F97AE5E75E22D98E5A41E01A",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "bd6b2d6cf783f997c1a1b3b165ae3901eb14cdc4a18ccd3a84ba13cd33ad13d8"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "1b68cda4bdb72527f97ae5e75e22d98e5a41e01a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./releases/0/a31d0975-ebb5-4e15-aaa1-3547272ead2d",
+      "SPDXID": "SPDXRef-File--releases-0-a31d0975-ebb5-4e15-aaa1-3547272ead2d-711CFBFDAD648081F1D2FE90829A3079E98EBA06",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ac5d47da4bd9618f08bd0e560142ee0eb9f80eeceeb43cf931da1e329c68e72d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "711cfbfdad648081f1d2fe90829a3079e98eba06"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./issues/2/2.json",
+      "SPDXID": "SPDXRef-File--issues-2-2.json-E5AC6E1A8BBCDD5CB5ED8A30353097EDC47F2D33",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7b56d06f9db2a74c8c02deeee3b3631b7a856e24b34147f3cf7caf6fcc7a7313"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e5ac6e1a8bbcdd5cb5ed8a30353097edc47f2d33"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./sourceCode/psremoteregistry/.hg/hgrc",
+      "SPDXID": "SPDXRef-File--sourceCode-psremoteregistry-.hg-hgrc-4FEAF5066506A1C5AC3166E4DE66E9E3519C2874",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e9995916e53b3f0a6c4f7849cfc17cd4cccdafc3cfd3a246268fb1dd4da34192"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "4feaf5066506a1c5ac3166e4de66e9e3519c2874"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./sourceCode/psremoteregistry/.hg/requires",
+      "SPDXID": "SPDXRef-File--sourceCode-psremoteregistry-.hg-requires-D877E64353AE2B8F76EEDEC69F2038FD65FE8366",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ab5a4e89f6552f95ab71fbdef7700e17f48d7dcf79922d5c85e86874b548a937"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "d877e64353ae2b8f76eedec69f2038fd65fe8366"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./wiki/Render/documents.json",
+      "SPDXID": "SPDXRef-File--wiki-Render-documents.json-B925FB1AAEA9C06AA9ACA1184F6895EF842EC099",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "348f8015540102a83419b68f4c695bab8d45fb6caf8aa1e2293cbac3df2dfc45"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b925fb1aaea9c06aa9aca1184f6895ef842ec099"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./discussions/653075.json",
+      "SPDXID": "SPDXRef-File--discussions-653075.json-96E21BEDF593F729F32E3CF4EC14875500E927E8",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6b51e4ccb1376c9703d1b71e3923d57153b263ae617fa444bed24035ef06142d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "96e21bedf593f729f32e3cf4ec14875500e927e8"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./releases/0/a62566e1-4065-4dee-b740-4257a77bf530",
+      "SPDXID": "SPDXRef-File--releases-0-a62566e1-4065-4dee-b740-4257a77bf530-56BABE9A3C1E92ABF15091FBA37E29E068F9B9B0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1d5536249336b3e171fa25252235bd0b513e09036e3a7a6351b094aeaff47fab"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "56babe9a3c1e92abf15091fba37e29e068f9b9b0"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./discussions/discussions.json",
+      "SPDXID": "SPDXRef-File--discussions-discussions.json-00C6F6B54C63EF8E12B12B4BA34441C313FB7FC0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d591368b8b7d57a53c13a45d108ff556ed679d31103a704ec43489612b460faa"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "00c6f6b54c63ef8e12b12b4ba34441c313fb7fc0"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./releases/releaseList.json",
+      "SPDXID": "SPDXRef-File--releases-releaseList.json-EDF1346BCCCC478E49C7DCDB9B986BE95526BD70",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ad8a1891c1b53148d4a36ad4c7b2ef4324532a3781203980262328d56e362689"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "edf1346bcccc478e49c7dcdb9b986be95526bd70"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./sourceCode/psremoteregistry/.hg/00changelog.i",
+      "SPDXID": "SPDXRef-File--sourceCode-psremoteregistry-.hg-00changelog.i-EA1FC9573957D6E537B3C5441DCF4E9F4ED6C1E6",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a33451bc1a46c3645d0a71511838a51983709a923e639faeae4d93442baf2f48"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ea1fc9573957d6e537b3c5441dcf4e9f4ed6c1e6"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    }
+  ],
+  "packages": [
+    {
+      "name": "PSTest",
+      "SPDXID": "SPDXRef-RootPackage",
+      "downloadLocation": "NOASSERTION",
+      "packageVerificationCode": {
+        "packageVerificationCodeValue": "8efdbd8129ac5587f253b6cee795af0c48f40e39"
+      },
+      "filesAnalyzed": true,
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoFromFiles": [
+        "NOASSERTION"
+      ],
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "7",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:swid/SecurityReviewer/www.securityreviewer.net/PSTest@7?tag_id=43f4543a-9780-4db3-9063-6f836cd13568"
+        }
+      ],
+      "supplier": "Organization: SecurityReviewer",
+      "hasFiles": [
+        "SPDXRef-File--releases-0-a62566e1-4065-4dee-b740-4257a77bf530-56BABE9A3C1E92ABF15091FBA37E29E068F9B9B0",
+        "SPDXRef-File--discussions-653075.json-96E21BEDF593F729F32E3CF4EC14875500E927E8",
+        "SPDXRef-File--wiki-Render-documents.json-B925FB1AAEA9C06AA9ACA1184F6895EF842EC099",
+        "SPDXRef-File--issues-2-2.json-E5AC6E1A8BBCDD5CB5ED8A30353097EDC47F2D33",
+        "SPDXRef-File--sourceCode-psremoteregistry-.hg-hgrc-4FEAF5066506A1C5AC3166E4DE66E9E3519C2874",
+        "SPDXRef-File--issues-issues.json-1B68CDA4BDB72527F97AE5E75E22D98E5A41E01A",
+        "SPDXRef-File--license-license.json-1ADF82F5DA205C9CC06247D2175EF9889668978C",
+        "SPDXRef-File--sourceCode-psremoteregistry-.hg-00changelog.i-EA1FC9573957D6E537B3C5441DCF4E9F4ED6C1E6",
+        "SPDXRef-File--discussions-discussions.json-00C6F6B54C63EF8E12B12B4BA34441C313FB7FC0",
+        "SPDXRef-File--sourceCode-psremoteregistry-.hg-requires-D877E64353AE2B8F76EEDEC69F2038FD65FE8366",
+        "SPDXRef-File--issues-1-1.json-582318F8E616B76F8DD9210E50E3AEA21697BDA0",
+        "SPDXRef-File--releases-releaseList.json-EDF1346BCCCC478E49C7DCDB9B986BE95526BD70",
+        "SPDXRef-File--releases-0-a31d0975-ebb5-4e15-aaa1-3547272ead2d-711CFBFDAD648081F1D2FE90829A3079E98EBA06"
+      ]
+    }
+  ],
+  "externalDocumentRefs": [],
+  "relationships": [
+    {
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-RootPackage",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    }
+  ],
+  "spdxVersion": "SPDX-2.2",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "PSTest 7",
+  "documentNamespace": "https://www.securityreviewer.net/SBOM/PSTest/7/9kRzhgpdMUaCMwWXWNTOBQ",
+  "creationInfo": {
+    "created": "2026-02-15T16:30:30Z",
+    "creators": [
+      "Organization: SecurityReviewer",
+      "Tool: Microsoft.SBOMTool-4.1.5"
+    ]
+  },
+  "documentDescribes": [
+    "SPDXRef-RootPackage"
+  ]
+}

@@ -1,0 +1,2875 @@
+{
+  "files": [
+    {
+      "fileName": "./Test-WingetInstall.ps1",
+      "SPDXID": "SPDXRef-File--Test-WingetInstall.ps1-EAD77E770579A2C2A607BCB93DB84C1D2EC0707D",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f8f902a6fd4b3a2dd2af9f903378fcea1321a0ed383f8e31fa57dd3e2dfd29a0"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ead77e770579a2c2a607bcb93db84c1d2ec0707d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./LICENSE",
+      "SPDXID": "SPDXRef-File--LICENSE-3DFE3BD7D9FA97C3D2B59AB61921C1231425807A",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "469b54dadfa5c0d0002291e452fcaa32165356d3459e1dee040404db5439fb1c"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3dfe3bd7d9fa97c3d2b59ab61921c1231425807a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./windev.ps1",
+      "SPDXID": "SPDXRef-File--windev.ps1-CF40DC3D049C1370D0A102BB51BD2F085F71C185",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "25dc04a92770c3762ce61d7d14bb7bfff41b0382c87fe735b09d85b6e050d72e"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "cf40dc3d049c1370d0a102bb51bd2f085f71c185"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.gitignore",
+      "SPDXID": "SPDXRef-File--.gitignore-0764854FEFDB4EDB8D1FDC9E10CDBA406912E9CB",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c03b1431225c4c9b161c4d453658d0cce506ca9ac71f83a18ac5b76d7c8c5c92"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "0764854fefdb4edb8d1fdc9e10cdba406912e9cb"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/SECURITY.md",
+      "SPDXID": "SPDXRef-File--.github-SECURITY.md-2FE0305C78A54BBF1FA8D2BF24463855C230FA57",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2e81be4632b9a519f6ddbdc5fd479c95217f234351d3c37da99e20a7e68d96ef"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2fe0305c78a54bbf1fa8d2bf24463855c230fa57"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/CODE_OF_CONDUCT.md",
+      "SPDXID": "SPDXRef-File--.github-CODE-OF-CONDUCT.md-8ADF6D4AA5D315CC9E08BCCC06DA1D203150354E",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "dd54b425bd522920b8efa054539d8ad0de0bc7f66565a3013775c13c6d44fc7b"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "8adf6d4aa5d315cc9e08bccc06da1d203150354e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/workflows/pre-release.yaml",
+      "SPDXID": "SPDXRef-File--.github-workflows-pre-release.yaml-4ECADB97984D3A65CC532CBD11A2DA2F7122A4F7",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ac5e409d342731335ae8188c44bb29c69c9b8bd52ff280768aa60d4acb2d57ce"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "4ecadb97984d3a65cc532cbd11a2da2f7122a4f7"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/ISSUE_TEMPLATE/config.yml",
+      "SPDXID": "SPDXRef-File--.github-ISSUE-TEMPLATE-config.yml-3906722787124E25F8A1C6EDDD9E83A7A8520CF1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0c2b925734f935ad2e0cda532e7f06b9efbcf6845d9c0dc541b724e27f43c818"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3906722787124e25f8a1c6eddd9e83a7a8520cf1"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./README.md",
+      "SPDXID": "SPDXRef-File--README.md-62A33154AA1D2CE538C5A50B64CBDCEF7C8D35A6",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1da9581f9828ed90fb45259be2d183ea11a37e31612d47d77a13cc822ac25b5c"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "62a33154aa1d2ce538c5a50b64cbdcef7c8d35a6"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/workflows/sponsors.yaml",
+      "SPDXID": "SPDXRef-File--.github-workflows-sponsors.yaml-E2E5FDAEBC75FBA0E9CF19FD6B7B645F15BD406F",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "51545ea15451d7e9d0837c1ae2f69fd16101348379f3ab2a7188ebdfd8ee8746"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e2e5fdaebc75fba0e9cf19fd6b7b645f15bd406f"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./config/feature.json",
+      "SPDXID": "SPDXRef-File--config-feature.json-5167A94EADE0A1DD28F9292FC3FD334C3020246F",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "861b4c5804566bcc72c84bd16b9d1f77b8c294f688fb2c3445c69081006956f6"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5167a94eade0a1dd28f9292fc3fd334c3020246f"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./config/themes.json",
+      "SPDXID": "SPDXRef-File--config-themes.json-EA81F07499B830A87BDA3248BF9CD2BB0C2A7C16",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "107354466b58d1dac2e064dfa0e684836e66c899245766bfa6ca01472b984b0f"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ea81f07499b830a87bda3248bf9cd2bb0c2a7c16"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/microwin/Microwin-CopyToUSB.ps1",
+      "SPDXID": "SPDXRef-File--functions-microwin-Microwin-CopyToUSB.ps1-5AB239FA1D336169E7DCC7A71A14C6D931A7C5BD",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1ca87f4ae93fb08903d5cd1ceb8a3ef388666763c5a4f0e01b5555aa1d5fae6b"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5ab239fa1d336169e7dcc7a71a14c6d931a7c5bd"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/microwin/Microwin-GetLangFromCulture.ps1",
+      "SPDXID": "SPDXRef-File--functions-microwin-Microwin-GetLangFromCulture.ps1-E61D4AD2D6901CDD866DCF99E807B18B00559D93",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "463a9a8864cfb1ca43e6045b5c089f24867db120f8dbabb9e4499cf4f505563d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e61d4ad2d6901cdd866dcf99e807b18b00559d93"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/microwin/Microwin-RemovePackages.ps1",
+      "SPDXID": "SPDXRef-File--functions-microwin-Microwin-RemovePackages.ps1-D644943172789995C7883BC1DC19EA4D4292926B",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "eefd3a7106926f8d3052d579a2c6a77c421f2be8c4ce7459b7a1ad7f080c8af7"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "d644943172789995c7883bc1dc19ea4d4292926b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Get-LocalizedYesNo.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Get-LocalizedYesNo.ps1-F4F16A70451F7F79D94B3BA259648E50B374C251",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8b0926150b0f11280dd0a6a2e93e9b890362c30f213f116588cd4a609bc601b9"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "f4f16a70451f7f79d94b3ba259648e50b374c251"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./sign.bat",
+      "SPDXID": "SPDXRef-File--sign.bat-D4849D92242C7F60D5436A80D78AFE1464E24752",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a870bb236d5cd984bebb6bd13d70c9fedde9ef0c134c9669da741c5c71d965af"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "d4849d92242c7f60d5436a80d78afe1464e24752"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/PULL_REQUEST_TEMPLATE.md",
+      "SPDXID": "SPDXRef-File--.github-PULL-REQUEST-TEMPLATE.md-FC4978B1EA24350573096975FDA4E7B98328269A",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "161e89ccd39ec965d45240056dec350f34e4fc32972b4edca13ae086d6673ca9"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "fc4978b1ea24350573096975fda4e7b98328269a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/workflows/compile-check.yaml",
+      "SPDXID": "SPDXRef-File--.github-workflows-compile-check.yaml-000EF481D2A13FC7D2276F7B911A4BFA82DF747B",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c65437a1228265521a4df20a6d67fc99b82ba52a1b9059de7efa803d72b62ae8"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "000ef481d2a13fc7d2276f7b911a4bfa82df747b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./config/autounattend.xml",
+      "SPDXID": "SPDXRef-File--config-autounattend.xml-6F875BD4A7E557234A2897D3AC70B0E1D7A3373C",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b5b499b2ee639fbd96f1064333c894d5f405d1d99703b9c45f0c795aa1d5d660"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "6f875bd4a7e557234a2897d3ac70b0e1d7a3373c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/microwin/Invoke-MicrowinGetIso.ps1",
+      "SPDXID": "SPDXRef-File--functions-microwin-Invoke-MicrowinGetIso.ps1-97618EA53F99D3BF08F9C582842F5EBB532753ED",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3b916f345cc64c59335a989b2b61238c1f0ab0f511931355b58250d095b90990"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "97618ea53f99d3bf08f9c582842f5ebb532753ed"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/microwin/Microwin-NewFirstRun.ps1",
+      "SPDXID": "SPDXRef-File--functions-microwin-Microwin-NewFirstRun.ps1-3FAF3511A925E7E47FC4413DC28E93F282D3318C",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f6f065122a97087450e4b8efcf74aa1f2c4cc79b630c9701b12024bc7ed32c59"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3faf3511a925e7e47fc4413dc28e93f282d3318c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Add-SelectedAppsMenuItem.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Add-SelectedAppsMenuItem.ps1-B1EBE3C8DC1749556E9E27A62EDB7A89BB92BC79",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4b396494ba87401a36aa7500de9c38e76458a90dc4c29bec06159b7600179f21"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b1ebe3c8dc1749556e9e27a62edb7a89bb92bc79"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.gitattributes",
+      "SPDXID": "SPDXRef-File--.gitattributes-69A5DDF1FE201C12A7D4E7EA69C9225D21D24EC2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "33dcae708d6559858020a05364bb9cc47aa67a9c48846e87cdc945b3482eba21"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "69a5ddf1fe201c12a7d4e7ea69c9225d21d24ec2"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/CODEOWNERS",
+      "SPDXID": "SPDXRef-File--.github-CODEOWNERS-F7B266F3A883ED9CA358CD852DF94D3BAAD7902D",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "aeb3d30c01c546a922b6ffa9663b9a64175f47c48cdce05507fdbcf6fb81e9f0"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "f7b266f3a883ed9ca358cd852df94d3baad7902d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/ISSUE_TEMPLATE/bug_report.yaml",
+      "SPDXID": "SPDXRef-File--.github-ISSUE-TEMPLATE-bug-report.yaml-2F69733506C97125F409FA0340D0B14615F0D01B",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f072f036a9fcc7429665ce5d99768c6490cfe5215d15eae2cc36ce998cf1decd"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2f69733506c97125f409fa0340d0b14615f0d01b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/workflows/remove-winutil.yaml",
+      "SPDXID": "SPDXRef-File--.github-workflows-remove-winutil.yaml-B168C7524C0734F4D5006EDD68B49E8EAA0AF935",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1665a4e560606e1940fd7acd5f7f3c3c192016d534711c24bba1e2001e0b8911"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b168c7524c0734f4d5006edd68b49e8eaa0af935"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./config/preset.json",
+      "SPDXID": "SPDXRef-File--config-preset.json-99302ECC097774024F3465E4CDFBA013E27BB5C2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5b2846af86187b837c8da5ecd243baffda03445b6ea79c9b05c791b15614346d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "99302ecc097774024f3465e4cdfba013e27bb5c2"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/microwin/Microwin-CopyVirtIO.ps1",
+      "SPDXID": "SPDXRef-File--functions-microwin-Microwin-CopyVirtIO.ps1-1654C7A1CEBCEE36CC1D7FCCE706873E8BDB92FD",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a3d5ed39a2b4fb001c3917cf4cff75e6e5e2db2030bbe2a48f648d997c48dfac"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "1654c7a1cebcee36cc1d7fcce706873e8bdb92fd"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/microwin/Microwin-RemoveFileOrDirectory.ps1",
+      "SPDXID": "SPDXRef-File--functions-microwin-Microwin-RemoveFileOrDirectory.ps1-7B2F407B29B21BE8F61BA0FA2FCAE27D4E34D94C",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5cbbd994ce3be0734e65beb89802a24926ee6feda0b4ab3dda3ca7dd8fe0bf40"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "7b2f407b29b21be8f61ba0fa2fcae27d4e34d94c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Find-TweaksByNameOrDescription.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Find-TweaksByNameOrDescription.ps1-6DF2253B09946551A729AA28CC52E774A2A2A4D3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f71bf17a33bbc53ce84007f6a84944f62422d91aaeae3da3bfa48872e402204d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "6df2253b09946551a729aa28cc52e774a2a2a4d3"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Compile.ps1",
+      "SPDXID": "SPDXRef-File--Compile.ps1-5409ACD82790F6F01BCAD8DA68E59FFCE9D6FF03",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2db631d708fe7f6900cac5978f6f51c00892bc43bf68f079cd9ba23eb848d8b3"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5409acd82790f6f01bcad8da68e59ffce9d6ff03"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/CONTRIBUTING.md",
+      "SPDXID": "SPDXRef-File--.github-CONTRIBUTING.md-2F3B9974FBD5649B61DF7188BCA43CB2D1FF9239",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f995ee49a9114cbc46a2e2bc39f788c49e1ddeab36b265d0be5d4af5deb84d80"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2f3b9974fbd5649b61df7188bca43cb2d1ff9239"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/ISSUE_TEMPLATE/feature_request.yaml",
+      "SPDXID": "SPDXRef-File--.github-ISSUE-TEMPLATE-feature-request.yaml-83F5DEEDC571EDBF539127382FF041340C743605",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8c44349f27a9d0c43b8cd2bfbafe13dec9c0bb55e2cefa9f42d12eb8a984e364"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "83f5deedc571edbf539127382ff041340c743605"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/workflows/unittests.yaml",
+      "SPDXID": "SPDXRef-File--.github-workflows-unittests.yaml-C036C4DBC1356821291F10AC63C895D341E3C75F",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5a00bbe42d612e945d6ed3668d20bc884f1f7e4dc7484aa76f0b6d51fbfbb125"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "c036c4dbc1356821291f10ac63c895d341e3c75f"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./config/tweaks.json",
+      "SPDXID": "SPDXRef-File--config-tweaks.json-947EBD0C3F1FF17F9A04A1FB9D5AEBCDD96F94EC",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4da03022b210a30892f70e89f445396bb55fe61af3fe9770bf0c021bd54bc5e0"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "947ebd0c3f1ff17f9a04a1fb9d5aebcdd96f94ec"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/microwin/Microwin-GetLocalizedUsers.ps1",
+      "SPDXID": "SPDXRef-File--functions-microwin-Microwin-GetLocalizedUsers.ps1-FFD61E5802D35D25AFB033FE7792D2C50B5A283B",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ad76d72071252c57d953b4e52b3d1ce0eda452e3322d0d280b28a47d99b4dbd4"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ffd61e5802d35d25afb033fe7792d2c50b5a283b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/microwin/Microwin-RemoveProvisionedPackages.ps1",
+      "SPDXID": "SPDXRef-File--functions-microwin-Microwin-RemoveProvisionedPackages.ps1-432B0E21804A2BE07F2B5ACEB1C151782D6DB98C",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c55a1daf9805646074cca04f18678ee4b52297e26f2821b18b2148c764fbf97f"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "432b0e21804a2be07f2b5aceb1c151782d6db98c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Get-WinUtilCheckBoxes.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Get-WinUtilCheckBoxes.ps1-1760C0F9B7F7D97E6A1A60F03C298637ED257465",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b7b1a14f96bb550f5e66eb2888ee061f0ad47b3633f6815a7374027cd52fabc0"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "1760c0f9b7f7d97e6a1a60f03c298637ed257465"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/microwin/Microwin-RemoveFeatures.ps1",
+      "SPDXID": "SPDXRef-File--functions-microwin-Microwin-RemoveFeatures.ps1-776B7C147737086E50246748979405505894A90F",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b9ff723b7f25ef8251cf74e1bb88b8d58e5215ac787046941b3defbe4c4917cd"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "776b7c147737086e50246748979405505894a90f"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Find-AppsByNameOrDescription.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Find-AppsByNameOrDescription.ps1-61343FCD6A44841D940CDD5D5344B5E69DAE9D67",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "468186b82d27c1bc798ea575d415eee39d32fd084ec63fbc98cb9e6574f49f41"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "61343fcd6a44841d940cdd5d5344b5e69dae9d67"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Get-WPFObjectName.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Get-WPFObjectName.ps1-3097129AA7D3526148BB2B0341D88139BBE2C875",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "637d17d936c4edea10636939641cadfd4610820fb5249fcb55ab3c2356c22bba"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3097129aa7d3526148bb2b0341d88139bbe2c875"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/FUNDING.yml",
+      "SPDXID": "SPDXRef-File--.github-FUNDING.yml-5D674C17EA34118BEBFDF7D47DBCDA8FEEE1520D",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d7690be4b96847b9b049a87b3063c190c974161be52cfc32fce2ca5c3d0b9610"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5d674c17ea34118bebfdf7d47dbcda8feee1520d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/workflows/close-old-issues.yaml",
+      "SPDXID": "SPDXRef-File--.github-workflows-close-old-issues.yaml-ED69FFF34D901866A1F8A6957C252290594AD601",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "dcc3f433d06a92ea9e599205d792f978d8a332fed30b986a446a1acbbfafbe48"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ed69fff34d901866a1f8a6957c252290594ad601"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./config/appnavigation.json",
+      "SPDXID": "SPDXRef-File--config-appnavigation.json-FBF28018837BF2EFFDE86BD8CDB41BEF476ECC6C",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a55c79da7bf442e3e9e05f1dd858f0c5323ce5aa8cb630ac9726220181c8d31e"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "fbf28018837bf2effde86bd8cdb41bef476ecc6c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/microwin/Invoke-MicrowinBusyInfo.ps1",
+      "SPDXID": "SPDXRef-File--functions-microwin-Invoke-MicrowinBusyInfo.ps1-FF4A7E887287CBA4A967FB99F587915DB05DCB91",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7bd89d3d7983657b93e93fae79f3d920ad8c5f9916bca13b2470c27dea46aa66"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ff4a7e887287cba4a967fb99f587915db05dcb91"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/microwin/Microwin-NewCheckInstall.ps1",
+      "SPDXID": "SPDXRef-File--functions-microwin-Microwin-NewCheckInstall.ps1-3079EA9C119C4762CBBC93E0AE8FC8E86B1326F2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "73470a7d3ff5cb4a6eae92350c23ec116502dac64038b6c83f39ef4ac947a999"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3079ea9c119c4762cbbc93e0ae8fc8e86b1326f2"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/release-drafter.yml",
+      "SPDXID": "SPDXRef-File--.github-release-drafter.yml-36E86CE27644DA459CE2753482F4DCE1FD846BEA",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c78af1ef199d14d102c7c5dcef6aa09b5c2ff9f810c3fed3e7aabb8a088f4102"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "36e86ce27644da459ce2753482f4dce1fd846bea"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/dependabot.yml",
+      "SPDXID": "SPDXRef-File--.github-dependabot.yml-C2ABF52F19393EDA05B8109DBA3A364F110880D0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f561ad2f5dbc3d4f78c743c95a5e93fb4c836b5f1f6c7ad03dc94423fc1b9a93"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "c2abf52f19393eda05b8109dba3a364f110880d0"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/workflows/issue-slash-commands.yaml",
+      "SPDXID": "SPDXRef-File--.github-workflows-issue-slash-commands.yaml-F0E80472C151F95C184BD84566773469C274036E",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c6eb2ac09e0bcbb65c3ff44c02962be7d56c2c3ee8c51c3d1d81332cd8da8083"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "f0e80472c151f95c184bd84566773469c274036e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/workflows/close-discussion-on-pr.yaml",
+      "SPDXID": "SPDXRef-File--.github-workflows-close-discussion-on-pr.yaml-523275052CD45BA5667BF986C2EBF41CC498B61C",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "69ed6d05580feac55959f039d504a35a4f01c9f54088e5e585c936b62e672235"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "523275052cd45ba5667bf986c2ebf41cc498b61c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./config/dns.json",
+      "SPDXID": "SPDXRef-File--config-dns.json-29B3FA1D4E032B8109AB27960089E44D6A9F3BF0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e6f2996ff5c1e182006a59f89b35fbe8895c1deaa05d5c312bd6ba90d72da695"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "29b3fa1d4e032b8109ab27960089e44d6a9f3bf0"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./config/applications.json",
+      "SPDXID": "SPDXRef-File--config-applications.json-E5E5126A90CFE50142AD66FF6C28831D6C3BE1C1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c5d9461a89e50e4aafecd3e5a70ceb9858b5039958f497f9fa9fe63da2092fb2"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e5e5126a90cfe50142ad66ff6c28831d6c3be1c1"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/microwin/Microwin-Classes.ps1",
+      "SPDXID": "SPDXRef-File--functions-microwin-Microwin-Classes.ps1-150A1FE0D3AB68020470F7A1BCB3FA96D86BF35B",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5d89ce904fb9ff2e28f10b69d4c2e81236cf380b3f20153ed7b4d750e5d4a1b8"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "150a1fe0d3ab68020470f7a1bcb3fa96d86bf35b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/microwin/Invoke-Microwin.ps1",
+      "SPDXID": "SPDXRef-File--functions-microwin-Invoke-Microwin.ps1-DE4339919F199BEC9579E5E38D04EF5613C2E32F",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d8c18fa46a2d372894a85d569bc081ea708e8ddfc0383f168144693d582959d4"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "de4339919f199bec9579e5e38d04ef5613c2e32f"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/microwin/Microwin-NewUnattend.ps1",
+      "SPDXID": "SPDXRef-File--functions-microwin-Microwin-NewUnattend.ps1-2989601A70B425EF36AB8750F36BF1CA325A7F00",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "40435d8b139237e4d4e81df80148bae53adf07b5fd5ab6d3e1d3b9a752fd07fd"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2989601a70b425ef36ab8750f36bf1ca325a7f00"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Copy-Files.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Copy-Files.ps1-97C999A430E419E5E811CDE5F065E9F3FB22F821",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0d9aa865cb30e34919560517fa86a2bb924e6c73c6a4b89acf9492b4c2fe819b"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "97c999a430e419e5e811cde5f065e9f3fb22f821"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/microwin/Toggle-MicrowinPanel.ps1",
+      "SPDXID": "SPDXRef-File--functions-microwin-Toggle-MicrowinPanel.ps1-24F7DD24634F2CAC8D483C621FBBB1DC8AB3E723",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2540be1b29c269189b3eb100313cd8cde1a8dc7d97b5a041bd5d7321b2b4f804"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "24f7dd24634f2cac8d483c621fbbb1dc8ab3e723"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Get-WinUtilVariables.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Get-WinUtilVariables.ps1-4F954373C7B6155D03BE8E2AFDCC7324654ABD3A",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ff4985f2a5d926538eb2704dfc3f50779a879d436591a540b7fbd1099c2ac3bd"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "4f954373c7b6155d03be8e2afdcc7324654abd3a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Hide-WPFInstallAppBusy.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Hide-WPFInstallAppBusy.ps1-73B3669C62F210ABBEAF99213EBA0C962DDC088E",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "cdf9dc98ab97052ffde512c7a66e08f0fa185235499b3d32bb1fc62045bfcc79"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "73b3669c62f210abbeaf99213eba0c962ddc088e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Get-WinUtilSelectedPackages.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Get-WinUtilSelectedPackages.ps1-19FC7E33ACCAF1B534673A2E88EB63301BF14AF2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "aa103444592a23b5edda12284eb69f6d8e20aa046170cee796429d80fe4b737d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "19fc7e33accaf1b534673a2e88eb63301bf14af2"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Initialize-InstallAppArea.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Initialize-InstallAppArea.ps1-CB9256591587F893C44FE142A9E892ABFA2058E8",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b96d4697df8566469a510608d4db87b5beaee93080625cbbf2b1c5a8b4d91bfe"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "cb9256591587f893c44fe142a9e892abfa2058e8"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Install-WinUtilChoco.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Install-WinUtilChoco.ps1-A71C3A639A5A32538EF7F07E83446AA1BD241E83",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a33efccfd9f34dbffe28a4c0ece13d2ab71400707c73faf7b5d844bf6bc0e148"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "a71c3a639a5a32538ef7f07e83446aa1bd241e83"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Invoke-WinUtilFontScaling.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Invoke-WinUtilFontScaling.ps1-339E06397F0582550243B3F2270EDB7A64967795",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f09ebd89c6ecfd86e6dd755cf3f70d2a49b08c36d12682cf9415ab2475292215"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "339e06397f0582550243b3f2270edb7a64967795"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Install-WinUtilProgramWinget.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Install-WinUtilProgramWinget.ps1-9E9D41FA3CB5873BD96D3F2C78CA01A3B3D58D53",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a5955526ecc5d5eef1024752f3cee26840adb4901a355d2cb542be1aaa0a93f3"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "9e9d41fa3cb5873bd96d3f2c78ca01a3b3d58d53"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Initialize-InstallAppEntry.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Initialize-InstallAppEntry.ps1-73393A15901704E4F16635C9095B541D00F1E5EE",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c33e4f8ea8d495802a295f91696d5b330a89efe322ef572d23d1a4fd1ce2e3af"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "73393a15901704e4f16635c9095b541d00f1e5ee"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Get-WinUtilToggleStatus.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Get-WinUtilToggleStatus.ps1-7EA253F4A74CE5B709F331AACBEF9AE018D72F64",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b33087389400c2f2e7f5cf2d3602f8d7647a30a740d77e3a0730cf2ef0c29329"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "7ea253f4a74ce5b709f331aacbef9ae018d72f64"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Invoke-WinUtilCurrentSystem.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Invoke-WinUtilCurrentSystem.ps1-0D4B462FE7692ECE60D7F67091C8C166786B0CB0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "dc8e75d22f5de8b39fdd9613f1170ee8e9e6e53ee246e8892f21a411dfc4d14d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "0d4b462fe7692ece60d7f67091c8c166786b0cb0"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Install-WinUtilWinget.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Install-WinUtilWinget.ps1-DA3B447004C135CAEDB529DCEFC1DA12B4484A52",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "11a6f86b38f7169b08d22e32864e770acd3410e972ae5de64803fe48bda3434a"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "da3b447004c135caedb529dcefc1da12b4484a52"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Invoke-WinUtilAssets.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Invoke-WinUtilAssets.ps1-01952C3690C7D64F508FF4762580F3E78DDB7DEF",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "386bb564ef5ffb5e1b8c1912ab1ef7007beb5aee7869c49b0aa47b7fc89b59bc"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "01952c3690c7d64f508ff4762580f3e78ddb7def"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/microwin/Microwin-GetOscdimg.ps1",
+      "SPDXID": "SPDXRef-File--functions-microwin-Microwin-GetOscdimg.ps1-5D2CDB25E1C98471B8E0A2A2923088B047744B9E",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3117eef48bbf72fbff5cf36ca75501aec3514afe7b63d71e617f955bb10b8247"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5d2cdb25e1c98471b8e0a2a2923088b047744b9e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Invoke-WinUtilInstallPSProfile.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Invoke-WinUtilInstallPSProfile.ps1-99E8A427DE244541A3628FBD38746B5F40AD1A1A",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "83c26df3b49a68337de81c8b20e433890da007cc00a3a97052e07fdf5dd9e471"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "99e8a427de244541a3628fbd38746b5f40ad1a1a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Invoke-WinUtilUninstallPSProfile.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Invoke-WinUtilUninstallPSProfile.ps1-C6FB4275574FA73A86D0D07CF4FD71DE83784FC9",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "bfed07dd8862e793d3ad419b205b428a25ef7b66ec33ff054335936dcd7127cd"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "c6fb4275574fa73a86d0d07cf4fd71de83784fc9"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Invoke-WinUtilSSHServer.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Invoke-WinUtilSSHServer.ps1-321C78A9C9187B6F3B1735722BE86116353C5E61",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c9a2d61c3072e518ef9309d751177a01ebdddcca95692af6d50bd5a66e86d1d0"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "321c78a9c9187b6f3b1735722be86116353c5e61"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Invoke-WinUtilExplorerUpdate.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Invoke-WinUtilExplorerUpdate.ps1-26F8F4B018C44D3104B4827832FCB3B2546F7576",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c04aeffe23503e65be78615be3c9fdc99ef75fab6d5bcb94831737a556ae9123"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "26f8f4b018c44d3104b4827832fcb3b2546f7576"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Invoke-WinUtilSponsors.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Invoke-WinUtilSponsors.ps1-3B2F8C1588B51A22626A160F25D96A5817C8F9C3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9e9dd357e2aa0a7f1b1a2b8a1100a639e9b1e47f3ef9c5dc457bc41491550543"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3b2f8c1588b51a22626a160f25d96a5817c8f9c3"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Invoke-WinUtilScript.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Invoke-WinUtilScript.ps1-25E3D6F1C571BAF17274CD5BCDC2F1459BF0F6AE",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d6f6b963c41668934df1809bc902664cebeda036202ef6a7d8b0ed724d726779"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "25e3d6f1c571baf17274cd5bcdc2f1459bf0f6ae"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Install-WinUtilProgramChoco.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Install-WinUtilProgramChoco.ps1-CC0E51DBDD0F4999EE3E011566B0FBCA90425ACD",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "34ef849297cb1b015e9b2418774f9ffe1162f946782b5d8fc70782458aaf9319"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "cc0e51dbdd0f4999ee3e011566b0fbca90425acd"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Set-PackageManagerPreference.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Set-PackageManagerPreference.ps1-0C15CDCE73E633B8972CA70183425FAB2B5938F1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a8605402dd9dcb08fadee8ffb8bd13402dcdc771e36154e53917194b007744e9"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "0c15cdce73e633b8972ca70183425fab2b5938f1"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/microwin/Microwin-TestCompatibleImage.ps1",
+      "SPDXID": "SPDXRef-File--functions-microwin-Microwin-TestCompatibleImage.ps1-4D930B72D81A0DEF89454131F9FDE267CE0536B7",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e8f013980c934b943838f88e8f7f8cf46c3efaa724817f6b3b556684795a8a7c"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "4d930b72d81a0def89454131f9fde267ce0536b7"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Set-WinUtilTaskbarItem.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Set-WinUtilTaskbarItem.ps1-39DBAD09F973744D4091C990A8D82C32E035D177",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6f9d8105d97a2139bebbc69e47b94a0a1c4bf29939cb8c84ebd3dda2683daea5"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "39dbad09f973744d4091c990a8d82c32e035d177"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Set-WinUtilRegistry.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Set-WinUtilRegistry.ps1-2A51F22A89FC06A0F692E343554F5477234E43C4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "84fa1761c1d8e968bf977337c367339d6545d7de71df105efe8677fada7a63ed"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2a51f22a89fc06a0f692e343554f5477234e43c4"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Invoke-WinutilThemeChange.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Invoke-WinutilThemeChange.ps1-0DB5FE54BB9461844ECDA2E999D50005FE7132B0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "04af3cd581b29d0262e9b958fe078573ee53a98485ed2b2e4ca16d999a77c529"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "0db5fe54bb9461844ecda2e999d50005fe7132b0"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Set-WinUtilProgressbar.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Set-WinUtilProgressbar.ps1-D4586759BA846E9235829511D858F7EA67E205FF",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "dcfef2f16a40c0105e5ce862e534805cc953e04d85bcabe081ee02459b02d219"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "d4586759ba846e9235829511d858f7ea67e205ff"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Set-WinUtilDNS.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Set-WinUtilDNS.ps1-84D711B7EBB07D73A997D06FC5AF2C7D3D4196C8",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c7b632bfe8fce6639defc32d6ddb645f5b8dc85050e7938fc3048f9682b0a98b"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "84d711b7ebb07d73a997d06fc5af2c7d3d4196c8"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Invoke-WinUtilGPU.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Invoke-WinUtilGPU.ps1-B6C4EFACEEDD0F796A4200917F34530781F1A114",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "04ef5f07b2b540abc12159956b7c68a1da3764a4b459340d7fa5df19de7978e8"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b6c4efaceedd0f796a4200917f34530781f1a114"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Get-WinUtilInstallerProcess.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Get-WinUtilInstallerProcess.ps1-3325CF0B55BBC137D27D5287BAD237635386F0A4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "68d08693bbd0e4d8ad67a8d5c55560b63b1f9135643ffdfad8dada2509d6b5cf"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3325cf0b55bbc137d27d5287bad237635386f0a4"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Show-WPFInstallAppBusy.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Show-WPFInstallAppBusy.ps1-9E3C97CEFBA9C070D153DA786DEF14744BCA1FDC",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6aeb58387a209a34ad9716068b599b50bcc78192dcafe4306a225e8d9143c0b8"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "9e3c97cefba9c070d153da786def14744bca1fdc"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-ScratchDialog.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-ScratchDialog.ps1-3D2151FF9EB74CCA6F194969DA448B8294801938",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5ce138bfbb93a9c5fc7fb2ea67327499c096377ce86c9b0786f0fc35ee5fbdac"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3d2151ff9eb74cca6f194969da448b8294801938"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Update-WinUtilProgramWinget.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Update-WinUtilProgramWinget.ps1-B489A77FA3A46604D8525D4866C8903FAEF01898",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a700ffe22511f2598f1b11de4cccbefb3b540ec4727dda26560e7a64311391c4"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b489a77fa3a46604d8525d4866c8903faef01898"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Set-WinUtilScheduledTask.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Set-WinUtilScheduledTask.ps1-F8701B35D49FD10CBE88FC79D274F61A8097E7F3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c8f34b3f21ab44432153bafed9db3478d246049e5a7a452c9f7feda0b38ce026"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "f8701b35d49fd10cbe88fc79d274f61a8097e7f3"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Test-WinUtilPackageManager.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Test-WinUtilPackageManager.ps1-806F00AC92E067BF7572276414963C28DC114B87",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "397fbcc9806b1a5647c832d18c0087f5d34a9a4ac62491dea991dc9cad56a56c"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "806f00ac92e067bf7572276414963c28dc114b87"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Test-WinUtilInternetConnection.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Test-WinUtilInternetConnection.ps1-CA1265A76419949FE6F6EA1FD3FD35C4B880F88E",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2df89a9739e7c5de2a993ab32bcd45d2cf84b187ed9a6c6e0677360e5ed55c37"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ca1265a76419949fe6f6ea1fd3fd35c4b880f88e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Initialize-InstallCategoryAppList.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Initialize-InstallCategoryAppList.ps1-B5DC5B50A50321CD85972D715BA5568A08371A6F",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "02022b3c0fa51472e2f8e22a4289f74c2b384816634c1ffec579772211b8cbc4"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b5dc5b50a50321cd85972d715ba5568a08371a6f"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFGetInstalled.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFGetInstalled.ps1-900A1B926FACFCE135D5AB66DF81A3A27F2EFD71",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "45f7d48ba05e0136cec63f3ab3343b1ad2311130492d5c8d40ed73b4612965a2"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "900a1b926facfce135d5ab66df81a3a27f2efd71"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFCloseButton.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFCloseButton.ps1-C925376E3E60DDEBA9D8A688D25A011AE9EC43E4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0eff4075a96a913aed408264301768df6cb10c445e6b9068ecfe0ebfca4cafa1"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "c925376e3e60ddeba9d8a688d25a011ae9ec43e4"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFFixesNetwork.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFFixesNetwork.ps1-63F753B7D078E7D61D3E662F10C4AF7E1308BB63",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "47d70f670da9c9431ff9ef0099c6de0d6ae4b86831722b954396d8bdff0cae98"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "63f753b7d078e7d61d3e662f10c4af7e1308bb63"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Initialize-WPFUI.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Initialize-WPFUI.ps1-A4C31150CD086D30D8027F5E79CAAC036A487F93",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ab6631d1929a03424505a00430c2fd22fccc5e9aa5520d9df00f9005b507ac08"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "a4c31150cd086d30d8027f5e79caac036a487f93"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFFeatureInstall.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFFeatureInstall.ps1-E360ED5371C4C04A8DAFB740D7EE381BE9E80104",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "86bf4a057dc9e747f2044c00eedfb5c20d63d9e817aa77f826d1984ef7572165"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e360ed5371c4c04a8dafb740d7ee381be9e80104"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFControlPanel.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFControlPanel.ps1-8D9137B1BF638D94C74B6A26A9B55C4FFC297F42",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "539b997058ecebf2402af70dee72e93d45654c0c20815add414160020c71b9b4"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "8d9137b1bf638d94c74b6a26a9b55c4ffc297f42"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Invoke-WinUtilFeatureInstall.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Invoke-WinUtilFeatureInstall.ps1-CDB5CCEEBE2EEB2B9B5333FE3A07BA07BA46C002",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "299f0579adf753056d813903c09c7ae4d6f0ef7c654ea489919a334af7cb892e"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "cdb5cceebe2eeb2b9b5333fe3a07ba07ba46c002"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFRunAdobeCCCleanerTool.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFRunAdobeCCCleanerTool.ps1-5DE37EBC196EFA52B55EA57DCE46EA6E0C2ACF20",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9cbe12ef09a0c98cbbd8eb9023f793609df57606bd9ec1e7ad152258c4aa2ebd"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5de37ebc196efa52b55ea57dce46ea6e0c2acf20"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFInstall.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFInstall.ps1-FA0FEC73D02598CCEB379230303F6EC538D97D4E",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e9903ae374bc5c30fdd0642a0745b9e0ea00e8c830674a305232d06794654b06"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "fa0fec73d02598cceb379230303f6ec538d97d4e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFPanelAutologin.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFPanelAutologin.ps1-DD8EBF17F3255F25AAFB4A875C855C238FB00427",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9276317381dc011c6eca30e3482ef7a64a51d04155236e60aa9661513d54fa02"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "dd8ebf17f3255f25aafb4a875c855c238fb00427"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFFixesUpdate.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFFixesUpdate.ps1-8BA9AD206FFA3DA13AED03BB30DD0EDFFDE6E609",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6ff59a1a2535f1c1c576971cbde32f99712283d17306cf2d0776b8132084a929"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "8ba9ad206ffa3da13aed03bb30dd0edffde6e609"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFOOSU.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFOOSU.ps1-B204741AD4CCF0669449110BCB2A751328A5C29D",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b2d7e9d8bfad9879df4d3077cc089917c0101e0abaafcc289232f9c0a06839b8"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b204741ad4ccf0669449110bcb2a751328a5c29d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFInstallUpgrade.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFInstallUpgrade.ps1-35FDBBA1220AF585186C7CD217E6AF9DE645D2A1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0bd884f6f6f2d1acd9ebf8c865dc86aff4ed7c3c099e6698ce9cced086fa1952"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "35fdbba1220af585186c7cd217e6af9de645d2a1"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Invoke-WinUtilTweaks.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Invoke-WinUtilTweaks.ps1-6923D86206BA7E9B7BAF2C98686C6A94B87AAB5E",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9f63d06908ef8a7dd256e7973ab301c1ed95235978558d197482a23e6b6dea11"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "6923d86206ba7e9b7baf2c98686c6a94b87aab5e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFUIElements.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFUIElements.ps1-91BA1A712304C075C55BC08D1694CA14B78872E7",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2a0cbdcaaa1fa2b9586b2944fe7dee8633297bcac5c74736c63841e63aa3bcc6"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "91ba1a712304c075c55bc08d1694ca14b78872e7"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFSelectedAppsUpdate.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFSelectedAppsUpdate.ps1-B79A2E1E6B91F4EBDC25F7E2348D01434126AED1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "878dfd7e6630f60bda063d8f91375e9c85f8864e949a2d89d4e8308277fdf836"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b79a2e1e6b91f4ebdc25f7e2348d01434126aed1"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFTab.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFTab.ps1-C62038B4D32FD7C2938042819B187A34E0F1A97D",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "37a9679e66c34ce4a01065d2df047422bedae9d3c259fb864f109c6a504948a3"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "c62038b4d32fd7c2938042819b187a34e0f1a97d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFSystemRepair.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFSystemRepair.ps1-4FC71B28F0F7F66791E2DBACF96F394A5CECBE9A",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9e061a4231615dfdfd8011d890276edbbf2018e42db1bc511d42f455193f24e8"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "4fc71b28f0f7f66791e2dbacf96f394a5cecbe9a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFSSHServer.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFSSHServer.ps1-D9AF05D491EBE4F39D9390594D7FD099CFD945FA",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "286bb6d7aa47f9f72060e2bd170a5ea45f8af3a69b8c40d2e240211d4656d43d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "d9af05d491ebe4f39d9390594d7fd099cfd945fa"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFPopup.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFPopup.ps1-63D247EA4EDF024F3A753C67079EF0548A6B558A",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "cef1270c76acc73850f9a149fd5db9d708e8920bfdde4d58a1dcf11b8726bb13"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "63d247ea4edf024f3a753c67079ef0548a6b558a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Set-WinUtilService.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Set-WinUtilService.ps1-129A192B1CED327DBABFE7973A463AAB244AD73B",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d7762ffb87fe70e41c0530eda3b7eb690d173dfeda8e518821bb42be58c4eb65"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "129a192b1ced327dbabfe7973a463aab244ad73b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./lint/PSScriptAnalyser.ps1",
+      "SPDXID": "SPDXRef-File--lint-PSScriptAnalyser.ps1-08F5CD6E15BC545B7A6469C8A73EF88EEA562EF5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "72904705d4c78445e08969cc01dacf8074bfd6aa0bd21559852b1749ba77c648"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "08f5cd6e15bc545b7a6469c8a73ef88eea562ef5"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFundoall.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFundoall.ps1-17FCF33A88147BC08A3FD61583B7105267C79D61",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "17abcfcea93032087aa20b09c745d9c97e2a2d33ae7a11c09d7ccd4b53048f89"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "17fcf33a88147bc08a3fd61583b7105267c79d61"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFUpdatesdisable.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFUpdatesdisable.ps1-A7270EA9D6B6F69383C630F2E96503694C5B5CD3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a6493d3d1606d00ce81959ac02a33c2de4373790fb3f54902f1f0c91b4c0a570"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "a7270ea9d6b6f69383c630f2e96503694c5b5cd3"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFUpdatesdefault.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFUpdatesdefault.ps1-B95F8B8D9B96E7F54206AAD64E2E595FC84696DC",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8445ec2346a80568c5a6da018cac2143dfbbfd8dc0cced700c82170e82d81fe9"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b95f8b8d9b96e7f54206aad64e2e595fc84696dc"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./xaml/inputXML.xaml",
+      "SPDXID": "SPDXRef-File--xaml-inputXML.xaml-360CD9B5EAA82517A99A73E8A6F103EB86FA5908",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "55d937a955f324a2abd80cb80fcbeb60ce127ac6371b224a4dc84ca52799a4d8"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "360cd9b5eaa82517a99a73e8a6f103eb86fa5908"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFUnInstall.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFUnInstall.ps1-3EDB480182494A6D1500E6B0ABC34CE74860A43D",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "231979d8cada0af1516ce76a137baeff8b650dc16a91d37a73f0e20aec9fd4aa"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3edb480182494a6d1500e6b0abc34ce74860a43d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFTweakPS7.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFTweakPS7.ps1-ADFD29CF490D7428A1D9F10A143C2FF3EEF90B69",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "de17a8b4c2eb605ba74acf0e869fa1c775e7b2906f2cdebc520e7bd45d9b891e"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "adfd29cf490d7428a1d9f10a143c2ff3eef90b69"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-AutoConfigDialog.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-AutoConfigDialog.ps1-06C74A889E719504A320521A92F6D37625B63951",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "278796c825590f91270e5e4c879bca9ad0d9aef0bce5f0873982560b765121de"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "06c74a889e719504a320521a92f6d37625b63951"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./pester/functions.Tests.ps1",
+      "SPDXID": "SPDXRef-File--pester-functions.Tests.ps1-372ECE23C0C904888823E0F72DA24E41E59717EA",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2eff146f13951450b0a5925e6411aefed0f9eb11b42ce699156bea00c9762367"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "372ece23c0c904888823e0f72da24e41e59717ea"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./scripts/start.ps1",
+      "SPDXID": "SPDXRef-File--scripts-start.ps1-6421C98962E1515071F7F30EFD4F44949CECFDE5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "49c52006bc42f6ae860154e7ccbd69b8d0a89e259f071966cbcaaeee20b4b9ba"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "6421c98962e1515071f7f30efd4f44949cecfde5"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./releases/oscdimg.exe",
+      "SPDXID": "SPDXRef-File--releases-oscdimg.exe-77DBC963A9BAC733DACDA2A47648492761CE4E5B",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ab9e161049d293b544961bfdf2d61244ade79376d6423df4f60bf9b147d3c78d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "77dbc963a9bac733dacda2a47648492761ce4e5b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./scripts/main.ps1",
+      "SPDXID": "SPDXRef-File--scripts-main.ps1-5D90A2D3BEF0B20F1BBD088FC4983B6C59EF468B",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e7f18f904a5872ff5dc8d1897b891d085a229a6885a0f5374e74c0e452921d63"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5d90a2d3bef0b20f1bbd088fc4983b6c59ef468b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFUpdatessecurity.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFUpdatessecurity.ps1-019A81F7B90F6E6CFE4FA13EBFA3D81BF76107B5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "39aba17538104919cf7d95843183745fd194ba6cc39c49f9ae236bed2a3bc1d5"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "019a81f7b90f6e6cfe4fa13ebfa3d81bf76107b5"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFFixesWinget.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFFixesWinget.ps1-7AA8B59221B1D8B21FE31154B8CC63B175C389EB",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "fc9f58f6278c64ada1c2d7bd7f3e043a64b65f4702dfab67643fbf19f93b7a1d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "7aa8b59221b1d8b21fe31154b8cc63b175c389eb"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFPresets.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFPresets.ps1-4CE5C4DAC9FB1B79F75FA6E0BFA4E939B9B35099",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "fbae3f16da2b82f326c7260e7a0c911c0a27900e69304de86fed815f1c1dfff5"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "4ce5c4dac9fb1b79f75fa6e0bfa4e939b9b35099"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./tools/devdocs-generator.ps1",
+      "SPDXID": "SPDXRef-File--tools-devdocs-generator.ps1-612FE02A1340F53868AFEFEF8F2E6880B7FABD26",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3e686fc04ca51c5d01400d9fa5c7d65f2f9b729cb41148d08c561f031c3a51a8"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "612fe02a1340f53868afefef8f2e6880b7fabd26"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFtweaksbutton.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFtweaksbutton.ps1-E853C4C605B0D17831D54AFF29800A8E76EB21ED",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c8aa664c583caae480a7d223f4d3a3074590b893efddf2d9a15d8ef591ef82dc"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e853c4c605b0d17831d54aff29800a8e76eb21ed"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Show-CTTLogo.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Show-CTTLogo.ps1-C4A6520A7EE123C2FDA0262C20B4E408786D16F9",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "86297b8ccf5dba71af5530603cf19314c1d3ec5c0efa8a4ea9d422ac3cfc70d2"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "c4a6520a7ee123c2fda0262c20b4e408786d16f9"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Remove-WinUtilAPPX.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Remove-WinUtilAPPX.ps1-74CCB549F0477AE417B252A496A8E9979750A9AB",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ebb437a5cb6583de961be1d3080dcfe17d6907dc179b126b71ab7444b2949821"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "74ccb549f0477ae417b252a496a8e9979750a9ab"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./tools/Invoke-Preprocessing.ps1",
+      "SPDXID": "SPDXRef-File--tools-Invoke-Preprocessing.ps1-3B1C2F56FE1D4BF2EFBAA498A098CB4DC3B667A3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2a8d013dd8d882c7d547f21e84a529f30009c330da494e13e7cfa5c5c4497d71"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3b1c2f56fe1d4bf2efbaa498a098cb4dc3b667a3"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/private/Show-CustomDialog.ps1",
+      "SPDXID": "SPDXRef-File--functions-private-Show-CustomDialog.ps1-449C5209BAEFD47F933B6B8CD1B589DC2F594159",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4ec449fbe7b5641a7900ea824556cafc3f2bce7c2077d0ef47d2e110eec028ee"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "449c5209baefd47f933b6b8cd1b589dc2f594159"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFButton.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFButton.ps1-6E8F874FC04C3CD7EF3542D7A72F333D0B5AF9AF",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4b70c188b2efa570def91a67874fe53939d785a7d4f80e74e375d3f5a2d0fda4"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "6e8f874fc04c3cd7ef3542d7a72f333d0b5af9af"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFImpex.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFImpex.ps1-286D8159B2153DF37A4AC4C15246D855BEAA4C85",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "061ba3988849e0652f32414f2d609398613a1d449bc458df6971d58ad16f295f"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "286d8159b2153df37a4ac4c15246d855beaa4c85"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFRunspace.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFRunspace.ps1-C989391554938FD606D57640831400AB35EDF6F0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "01df1f93abf07bb1410469cdb5fe2e9f9fb1069f6e9f852b196c2eb5d1da75dd"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "c989391554938fd606d57640831400ab35edf6f0"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./functions/public/Invoke-WPFUltimatePerformance.ps1",
+      "SPDXID": "SPDXRef-File--functions-public-Invoke-WPFUltimatePerformance.ps1-11FDCA8C858AA8B92DE6A60145F36D03C845FCA2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d0adfdbebebb2a4a837aefa24896dd411346e166cb22898d0a9f677029263c4c"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "11fdca8c858aa8b92de6a60145f36d03c845fca2"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./pester/configs.Tests.ps1",
+      "SPDXID": "SPDXRef-File--pester-configs.Tests.ps1-17B2BDCB5A731E686FE4D2BA010D29DCCA1489DC",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "eab821acb6ec6740b4893985d7b933efd2c9b0f47843b891f412471438d84f7a"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "17b2bdcb5a731e686fe4d2ba010d29dcca1489dc"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    }
+  ],
+  "packages": [
+    {
+      "name": "WinUtils",
+      "SPDXID": "SPDXRef-RootPackage",
+      "downloadLocation": "NOASSERTION",
+      "packageVerificationCode": {
+        "packageVerificationCodeValue": "7d919f7941fc0c36e6757d7db0868a304e16f38e"
+      },
+      "filesAnalyzed": true,
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoFromFiles": [
+        "NOASSERTION"
+      ],
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "main",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:swid/SecurityReviewer/www.securityreviewer.net/WinUtils@main?tag_id=a90d772d-bff7-4926-9d3f-9879ebbeb7ce"
+        }
+      ],
+      "supplier": "Organization: SecurityReviewer",
+      "hasFiles": [
+        "SPDXRef-File--pester-configs.Tests.ps1-17B2BDCB5A731E686FE4D2BA010D29DCCA1489DC",
+        "SPDXRef-File--functions-public-Invoke-WPFRunspace.ps1-C989391554938FD606D57640831400AB35EDF6F0",
+        "SPDXRef-File--functions-public-Invoke-WPFButton.ps1-6E8F874FC04C3CD7EF3542D7A72F333D0B5AF9AF",
+        "SPDXRef-File--functions-private-Show-CustomDialog.ps1-449C5209BAEFD47F933B6B8CD1B589DC2F594159",
+        "SPDXRef-File--tools-Invoke-Preprocessing.ps1-3B1C2F56FE1D4BF2EFBAA498A098CB4DC3B667A3",
+        "SPDXRef-File--functions-public-Show-CTTLogo.ps1-C4A6520A7EE123C2FDA0262C20B4E408786D16F9",
+        "SPDXRef-File--tools-devdocs-generator.ps1-612FE02A1340F53868AFEFEF8F2E6880B7FABD26",
+        "SPDXRef-File--functions-public-Invoke-WPFUltimatePerformance.ps1-11FDCA8C858AA8B92DE6A60145F36D03C845FCA2",
+        "SPDXRef-File--functions-public-Invoke-WPFImpex.ps1-286D8159B2153DF37A4AC4C15246D855BEAA4C85",
+        "SPDXRef-File--functions-public-Invoke-WPFtweaksbutton.ps1-E853C4C605B0D17831D54AFF29800A8E76EB21ED",
+        "SPDXRef-File--functions-public-Invoke-WPFPresets.ps1-4CE5C4DAC9FB1B79F75FA6E0BFA4E939B9B35099",
+        "SPDXRef-File--functions-public-Invoke-WPFFixesWinget.ps1-7AA8B59221B1D8B21FE31154B8CC63B175C389EB",
+        "SPDXRef-File--functions-public-Invoke-WPFUpdatessecurity.ps1-019A81F7B90F6E6CFE4FA13EBFA3D81BF76107B5",
+        "SPDXRef-File--scripts-main.ps1-5D90A2D3BEF0B20F1BBD088FC4983B6C59EF468B",
+        "SPDXRef-File--scripts-start.ps1-6421C98962E1515071F7F30EFD4F44949CECFDE5",
+        "SPDXRef-File--pester-functions.Tests.ps1-372ECE23C0C904888823E0F72DA24E41E59717EA",
+        "SPDXRef-File--xaml-inputXML.xaml-360CD9B5EAA82517A99A73E8A6F103EB86FA5908",
+        "SPDXRef-File--functions-public-Invoke-AutoConfigDialog.ps1-06C74A889E719504A320521A92F6D37625B63951",
+        "SPDXRef-File--functions-public-Invoke-WPFUnInstall.ps1-3EDB480182494A6D1500E6B0ABC34CE74860A43D",
+        "SPDXRef-File--lint-PSScriptAnalyser.ps1-08F5CD6E15BC545B7A6469C8A73EF88EEA562EF5",
+        "SPDXRef-File--functions-private-Set-WinUtilService.ps1-129A192B1CED327DBABFE7973A463AAB244AD73B",
+        "SPDXRef-File--functions-public-Invoke-WPFPopup.ps1-63D247EA4EDF024F3A753C67079EF0548A6B558A",
+        "SPDXRef-File--functions-public-Invoke-WPFSSHServer.ps1-D9AF05D491EBE4F39D9390594D7FD099CFD945FA",
+        "SPDXRef-File--functions-public-Invoke-WPFSystemRepair.ps1-4FC71B28F0F7F66791E2DBACF96F394A5CECBE9A",
+        "SPDXRef-File--functions-public-Invoke-WPFTab.ps1-C62038B4D32FD7C2938042819B187A34E0F1A97D",
+        "SPDXRef-File--functions-public-Invoke-WPFSelectedAppsUpdate.ps1-B79A2E1E6B91F4EBDC25F7E2348D01434126AED1",
+        "SPDXRef-File--functions-public-Invoke-WPFUIElements.ps1-91BA1A712304C075C55BC08D1694CA14B78872E7",
+        "SPDXRef-File--functions-private-Invoke-WinUtilTweaks.ps1-6923D86206BA7E9B7BAF2C98686C6A94B87AAB5E",
+        "SPDXRef-File--functions-public-Invoke-WPFInstallUpgrade.ps1-35FDBBA1220AF585186C7CD217E6AF9DE645D2A1",
+        "SPDXRef-File--functions-public-Invoke-WPFFixesUpdate.ps1-8BA9AD206FFA3DA13AED03BB30DD0EDFFDE6E609",
+        "SPDXRef-File--functions-private-Invoke-WinUtilFeatureInstall.ps1-CDB5CCEEBE2EEB2B9B5333FE3A07BA07BA46C002",
+        "SPDXRef-File--functions-public-Invoke-WPFControlPanel.ps1-8D9137B1BF638D94C74B6A26A9B55C4FFC297F42",
+        "SPDXRef-File--functions-public-Invoke-WPFFeatureInstall.ps1-E360ED5371C4C04A8DAFB740D7EE381BE9E80104",
+        "SPDXRef-File--functions-public-Invoke-WPFGetInstalled.ps1-900A1B926FACFCE135D5AB66DF81A3A27F2EFD71",
+        "SPDXRef-File--functions-private-Initialize-InstallCategoryAppList.ps1-B5DC5B50A50321CD85972D715BA5568A08371A6F",
+        "SPDXRef-File--functions-private-Test-WinUtilInternetConnection.ps1-CA1265A76419949FE6F6EA1FD3FD35C4B880F88E",
+        "SPDXRef-File--functions-private-Test-WinUtilPackageManager.ps1-806F00AC92E067BF7572276414963C28DC114B87",
+        "SPDXRef-File--functions-private-Set-WinUtilScheduledTask.ps1-F8701B35D49FD10CBE88FC79D274F61A8097E7F3",
+        "SPDXRef-File--functions-private-Update-WinUtilProgramWinget.ps1-B489A77FA3A46604D8525D4866C8903FAEF01898",
+        "SPDXRef-File--functions-private-Get-WinUtilInstallerProcess.ps1-3325CF0B55BBC137D27D5287BAD237635386F0A4",
+        "SPDXRef-File--functions-private-Invoke-WinutilThemeChange.ps1-0DB5FE54BB9461844ECDA2E999D50005FE7132B0",
+        "SPDXRef-File--functions-private-Get-WinUtilToggleStatus.ps1-7EA253F4A74CE5B709F331AACBEF9AE018D72F64",
+        "SPDXRef-File--functions-private-Get-WinUtilSelectedPackages.ps1-19FC7E33ACCAF1B534673A2E88EB63301BF14AF2",
+        "SPDXRef-File--functions-microwin-Toggle-MicrowinPanel.ps1-24F7DD24634F2CAC8D483C621FBBB1DC8AB3E723",
+        "SPDXRef-File--functions-microwin-Microwin-NewCheckInstall.ps1-3079EA9C119C4762CBBC93E0AE8FC8E86B1326F2",
+        "SPDXRef-File--functions-microwin-Invoke-MicrowinBusyInfo.ps1-FF4A7E887287CBA4A967FB99F587915DB05DCB91",
+        "SPDXRef-File--config-appnavigation.json-FBF28018837BF2EFFDE86BD8CDB41BEF476ECC6C",
+        "SPDXRef-File--.github-workflows-close-old-issues.yaml-ED69FFF34D901866A1F8A6957C252290594AD601",
+        "SPDXRef-File--.github-FUNDING.yml-5D674C17EA34118BEBFDF7D47DBCDA8FEEE1520D",
+        "SPDXRef-File--functions-private-Get-WinUtilCheckBoxes.ps1-1760C0F9B7F7D97E6A1A60F03C298637ED257465",
+        "SPDXRef-File--functions-microwin-Microwin-RemoveProvisionedPackages.ps1-432B0E21804A2BE07F2B5ACEB1C151782D6DB98C",
+        "SPDXRef-File--functions-microwin-Microwin-GetLocalizedUsers.ps1-FFD61E5802D35D25AFB033FE7792D2C50B5A283B",
+        "SPDXRef-File--config-tweaks.json-947EBD0C3F1FF17F9A04A1FB9D5AEBCDD96F94EC",
+        "SPDXRef-File--.github-workflows-unittests.yaml-C036C4DBC1356821291F10AC63C895D341E3C75F",
+        "SPDXRef-File--.github-ISSUE-TEMPLATE-feature-request.yaml-83F5DEEDC571EDBF539127382FF041340C743605",
+        "SPDXRef-File--.github-CONTRIBUTING.md-2F3B9974FBD5649B61DF7188BCA43CB2D1FF9239",
+        "SPDXRef-File--Compile.ps1-5409ACD82790F6F01BCAD8DA68E59FFCE9D6FF03",
+        "SPDXRef-File--README.md-62A33154AA1D2CE538C5A50B64CBDCEF7C8D35A6",
+        "SPDXRef-File--functions-private-Invoke-WinUtilSSHServer.ps1-321C78A9C9187B6F3B1735722BE86116353C5E61",
+        "SPDXRef-File--functions-private-Invoke-WinUtilUninstallPSProfile.ps1-C6FB4275574FA73A86D0D07CF4FD71DE83784FC9",
+        "SPDXRef-File--functions-private-Invoke-WinUtilInstallPSProfile.ps1-99E8A427DE244541A3628FBD38746B5F40AD1A1A",
+        "SPDXRef-File--functions-microwin-Microwin-GetOscdimg.ps1-5D2CDB25E1C98471B8E0A2A2923088B047744B9E",
+        "SPDXRef-File--functions-private-Invoke-WinUtilAssets.ps1-01952C3690C7D64F508FF4762580F3E78DDB7DEF",
+        "SPDXRef-File--functions-private-Initialize-InstallAppEntry.ps1-73393A15901704E4F16635C9095B541D00F1E5EE",
+        "SPDXRef-File--functions-private-Hide-WPFInstallAppBusy.ps1-73B3669C62F210ABBEAF99213EBA0C962DDC088E",
+        "SPDXRef-File--functions-microwin-Invoke-Microwin.ps1-DE4339919F199BEC9579E5E38D04EF5613C2E32F",
+        "SPDXRef-File--config-applications.json-E5E5126A90CFE50142AD66FF6C28831D6C3BE1C1",
+        "SPDXRef-File--.github-workflows-close-discussion-on-pr.yaml-523275052CD45BA5667BF986C2EBF41CC498B61C",
+        "SPDXRef-File--.github-dependabot.yml-C2ABF52F19393EDA05B8109DBA3A364F110880D0",
+        "SPDXRef-File--functions-private-Find-TweaksByNameOrDescription.ps1-6DF2253B09946551A729AA28CC52E774A2A2A4D3",
+        "SPDXRef-File--functions-microwin-Microwin-RemoveFileOrDirectory.ps1-7B2F407B29B21BE8F61BA0FA2FCAE27D4E34D94C",
+        "SPDXRef-File--functions-microwin-Microwin-CopyVirtIO.ps1-1654C7A1CEBCEE36CC1D7FCCE706873E8BDB92FD",
+        "SPDXRef-File--config-preset.json-99302ECC097774024F3465E4CDFBA013E27BB5C2",
+        "SPDXRef-File--.github-workflows-remove-winutil.yaml-B168C7524C0734F4D5006EDD68B49E8EAA0AF935",
+        "SPDXRef-File--.github-ISSUE-TEMPLATE-bug-report.yaml-2F69733506C97125F409FA0340D0B14615F0D01B",
+        "SPDXRef-File--.github-CODEOWNERS-F7B266F3A883ED9CA358CD852DF94D3BAAD7902D",
+        "SPDXRef-File--.gitattributes-69A5DDF1FE201C12A7D4E7EA69C9225D21D24EC2",
+        "SPDXRef-File--Test-WingetInstall.ps1-EAD77E770579A2C2A607BCB93DB84C1D2EC0707D",
+        "SPDXRef-File--functions-public-Invoke-WPFCloseButton.ps1-C925376E3E60DDEBA9D8A688D25A011AE9EC43E4",
+        "SPDXRef-File--functions-private-Show-WPFInstallAppBusy.ps1-9E3C97CEFBA9C070D153DA786DEF14744BCA1FDC",
+        "SPDXRef-File--functions-private-Invoke-WinUtilGPU.ps1-B6C4EFACEEDD0F796A4200917F34530781F1A114",
+        "SPDXRef-File--functions-private-Set-WinUtilProgressbar.ps1-D4586759BA846E9235829511D858F7EA67E205FF",
+        "SPDXRef-File--functions-private-Set-WinUtilRegistry.ps1-2A51F22A89FC06A0F692E343554F5477234E43C4",
+        "SPDXRef-File--functions-microwin-Microwin-TestCompatibleImage.ps1-4D930B72D81A0DEF89454131F9FDE267CE0536B7",
+        "SPDXRef-File--functions-private-Install-WinUtilProgramChoco.ps1-CC0E51DBDD0F4999EE3E011566B0FBCA90425ACD",
+        "SPDXRef-File--functions-private-Invoke-WinUtilScript.ps1-25E3D6F1C571BAF17274CD5BCDC2F1459BF0F6AE",
+        "SPDXRef-File--functions-private-Invoke-WinUtilSponsors.ps1-3B2F8C1588B51A22626A160F25D96A5817C8F9C3",
+        "SPDXRef-File--functions-private-Get-WPFObjectName.ps1-3097129AA7D3526148BB2B0341D88139BBE2C875",
+        "SPDXRef-File--functions-private-Find-AppsByNameOrDescription.ps1-61343FCD6A44841D940CDD5D5344B5E69DAE9D67",
+        "SPDXRef-File--functions-microwin-Microwin-RemoveFeatures.ps1-776B7C147737086E50246748979405505894A90F",
+        "SPDXRef-File--functions-microwin-Microwin-CopyToUSB.ps1-5AB239FA1D336169E7DCC7A71A14C6D931A7C5BD",
+        "SPDXRef-File--config-feature.json-5167A94EADE0A1DD28F9292FC3FD334C3020246F",
+        "SPDXRef-File--.github-workflows-pre-release.yaml-4ECADB97984D3A65CC532CBD11A2DA2F7122A4F7",
+        "SPDXRef-File--.github-SECURITY.md-2FE0305C78A54BBF1FA8D2BF24463855C230FA57",
+        "SPDXRef-File--functions-private-Get-LocalizedYesNo.ps1-F4F16A70451F7F79D94B3BA259648E50B374C251",
+        "SPDXRef-File--functions-microwin-Microwin-RemovePackages.ps1-D644943172789995C7883BC1DC19EA4D4292926B",
+        "SPDXRef-File--functions-microwin-Microwin-GetLangFromCulture.ps1-E61D4AD2D6901CDD866DCF99E807B18B00559D93",
+        "SPDXRef-File--config-themes.json-EA81F07499B830A87BDA3248BF9CD2BB0C2A7C16",
+        "SPDXRef-File--.github-workflows-sponsors.yaml-E2E5FDAEBC75FBA0E9CF19FD6B7B645F15BD406F",
+        "SPDXRef-File--.github-ISSUE-TEMPLATE-config.yml-3906722787124E25F8A1C6EDDD9E83A7A8520CF1",
+        "SPDXRef-File--.github-CODE-OF-CONDUCT.md-8ADF6D4AA5D315CC9E08BCCC06DA1D203150354E",
+        "SPDXRef-File--.gitignore-0764854FEFDB4EDB8D1FDC9E10CDBA406912E9CB",
+        "SPDXRef-File--functions-private-Remove-WinUtilAPPX.ps1-74CCB549F0477AE417B252A496A8E9979750A9AB",
+        "SPDXRef-File--releases-oscdimg.exe-77DBC963A9BAC733DACDA2A47648492761CE4E5B",
+        "SPDXRef-File--functions-public-Invoke-WPFUpdatesdefault.ps1-B95F8B8D9B96E7F54206AAD64E2E595FC84696DC",
+        "SPDXRef-File--functions-public-Invoke-WPFUpdatesdisable.ps1-A7270EA9D6B6F69383C630F2E96503694C5B5CD3",
+        "SPDXRef-File--functions-public-Invoke-WPFundoall.ps1-17FCF33A88147BC08A3FD61583B7105267C79D61",
+        "SPDXRef-File--functions-public-Initialize-WPFUI.ps1-A4C31150CD086D30D8027F5E79CAAC036A487F93",
+        "SPDXRef-File--functions-public-Invoke-WPFFixesNetwork.ps1-63F753B7D078E7D61D3E662F10C4AF7E1308BB63",
+        "SPDXRef-File--functions-public-Invoke-ScratchDialog.ps1-3D2151FF9EB74CCA6F194969DA448B8294801938",
+        "SPDXRef-File--functions-private-Set-WinUtilDNS.ps1-84D711B7EBB07D73A997D06FC5AF2C7D3D4196C8",
+        "SPDXRef-File--functions-private-Set-WinUtilTaskbarItem.ps1-39DBAD09F973744D4091C990A8D82C32E035D177",
+        "SPDXRef-File--functions-private-Set-PackageManagerPreference.ps1-0C15CDCE73E633B8972CA70183425FAB2B5938F1",
+        "SPDXRef-File--functions-private-Invoke-WinUtilExplorerUpdate.ps1-26F8F4B018C44D3104B4827832FCB3B2546F7576",
+        "SPDXRef-File--functions-private-Invoke-WinUtilCurrentSystem.ps1-0D4B462FE7692ECE60D7F67091C8C166786B0CB0",
+        "SPDXRef-File--functions-private-Invoke-WinUtilFontScaling.ps1-339E06397F0582550243B3F2270EDB7A64967795",
+        "SPDXRef-File--functions-private-Install-WinUtilChoco.ps1-A71C3A639A5A32538EF7F07E83446AA1BD241E83",
+        "SPDXRef-File--functions-private-Get-WinUtilVariables.ps1-4F954373C7B6155D03BE8E2AFDCC7324654ABD3A",
+        "SPDXRef-File--functions-private-Copy-Files.ps1-97C999A430E419E5E811CDE5F065E9F3FB22F821",
+        "SPDXRef-File--functions-microwin-Microwin-NewUnattend.ps1-2989601A70B425EF36AB8750F36BF1CA325A7F00",
+        "SPDXRef-File--functions-microwin-Microwin-Classes.ps1-150A1FE0D3AB68020470F7A1BCB3FA96D86BF35B",
+        "SPDXRef-File--config-dns.json-29B3FA1D4E032B8109AB27960089E44D6A9F3BF0",
+        "SPDXRef-File--.github-workflows-issue-slash-commands.yaml-F0E80472C151F95C184BD84566773469C274036E",
+        "SPDXRef-File--.github-release-drafter.yml-36E86CE27644DA459CE2753482F4DCE1FD846BEA",
+        "SPDXRef-File--functions-private-Add-SelectedAppsMenuItem.ps1-B1EBE3C8DC1749556E9E27A62EDB7A89BB92BC79",
+        "SPDXRef-File--functions-microwin-Microwin-NewFirstRun.ps1-3FAF3511A925E7E47FC4413DC28E93F282D3318C",
+        "SPDXRef-File--functions-microwin-Invoke-MicrowinGetIso.ps1-97618EA53F99D3BF08F9C582842F5EBB532753ED",
+        "SPDXRef-File--config-autounattend.xml-6F875BD4A7E557234A2897D3AC70B0E1D7A3373C",
+        "SPDXRef-File--.github-workflows-compile-check.yaml-000EF481D2A13FC7D2276F7B911A4BFA82DF747B",
+        "SPDXRef-File--.github-PULL-REQUEST-TEMPLATE.md-FC4978B1EA24350573096975FDA4E7B98328269A",
+        "SPDXRef-File--sign.bat-D4849D92242C7F60D5436A80D78AFE1464E24752",
+        "SPDXRef-File--LICENSE-3DFE3BD7D9FA97C3D2B59AB61921C1231425807A",
+        "SPDXRef-File--functions-public-Invoke-WPFTweakPS7.ps1-ADFD29CF490D7428A1D9F10A143C2FF3EEF90B69",
+        "SPDXRef-File--functions-public-Invoke-WPFOOSU.ps1-B204741AD4CCF0669449110BCB2A751328A5C29D",
+        "SPDXRef-File--functions-public-Invoke-WPFPanelAutologin.ps1-DD8EBF17F3255F25AAFB4A875C855C238FB00427",
+        "SPDXRef-File--functions-public-Invoke-WPFInstall.ps1-FA0FEC73D02598CCEB379230303F6EC538D97D4E",
+        "SPDXRef-File--functions-public-Invoke-WPFRunAdobeCCCleanerTool.ps1-5DE37EBC196EFA52B55EA57DCE46EA6E0C2ACF20",
+        "SPDXRef-File--functions-private-Install-WinUtilWinget.ps1-DA3B447004C135CAEDB529DCEFC1DA12B4484A52",
+        "SPDXRef-File--functions-private-Install-WinUtilProgramWinget.ps1-9E9D41FA3CB5873BD96D3F2C78CA01A3B3D58D53",
+        "SPDXRef-File--functions-private-Initialize-InstallAppArea.ps1-CB9256591587F893C44FE142A9E892ABFA2058E8",
+        "SPDXRef-File--windev.ps1-CF40DC3D049C1370D0A102BB51BD2F085F71C185"
+      ]
+    }
+  ],
+  "externalDocumentRefs": [],
+  "relationships": [
+    {
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-RootPackage",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    }
+  ],
+  "spdxVersion": "SPDX-2.2",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "WinUtils main",
+  "documentNamespace": "https://www.securityreviewer.net/SBOM/WinUtils/main/QiSgUvuHm0yt6DgNSfKxPg",
+  "creationInfo": {
+    "created": "2026-02-15T16:38:58Z",
+    "creators": [
+      "Organization: SecurityReviewer",
+      "Tool: Microsoft.SBOMTool-4.1.5"
+    ]
+  },
+  "documentDescribes": [
+    "SPDXRef-RootPackage"
+  ]
+}

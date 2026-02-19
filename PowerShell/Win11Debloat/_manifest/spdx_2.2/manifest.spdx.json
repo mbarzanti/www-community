@@ -1,0 +1,3595 @@
+{
+  "files": [
+    {
+      "fileName": "./Appslist.txt",
+      "SPDXID": "SPDXRef-File--Appslist.txt-4475E401B8DC647C42311678E0B9405E4D65EA03",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "11b118f9a508514882cc508e2970684bdbde63125a46e78d463adf99a61731b6"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "4475e401b8dc647c42311678e0b9405e4d65ea03"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Win11Debloat.ps1",
+      "SPDXID": "SPDXRef-File--Win11Debloat.ps1-D8A07013840A77C4BE2C84A865A732803E16DD31",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e2ac2d9aa000ab83be5ed9c660a55930d79ab4075d4c92a9a494a4fa81d1f11b"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "d8a07013840a77c4be2c84a865a732803e16dd31"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Run.bat",
+      "SPDXID": "SPDXRef-File--Run.bat-14683D69811D8D6515871545CB39378FC42D875F",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "519c4254582045eaccc05a0cf5b349892c99a81ceb147dcee56bd2562f00db65"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "14683d69811d8d6515871545cb39378fc42d875f"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./LICENSE",
+      "SPDXID": "SPDXRef-File--LICENSE-27F5692A1146E2B1585F7580C27E7406FCA523EC",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "22e6feacbf3cf84858d5b4b7f3355ccfbe7be6a8c633a41407ab41d0f0a8b4b8"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "27f5692a1146e2b1585f7580c27e7406fca523ec"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./DefaultSettings.json",
+      "SPDXID": "SPDXRef-File--DefaultSettings.json-1625A1788F52FB6DB3B0C22A3E2B324534A03A96",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5f3c60bc57f25d54007f625b57517082c73d43049203b527ade876e92c05bea6"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "1625a1788f52fb6db3b0c22a3e2b324534a03a96"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Get.ps1",
+      "SPDXID": "SPDXRef-File--Get.ps1-B3EF2C7DDB35FDC9E31035891B3B96200BE91AD6",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "37078e03ad1315813b9bff9460d3c5e8ce24b52be99f2d0570868795feba81b5"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b3ef2c7ddb35fdc9e31035891b3b96200be91ad6"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/ISSUE_TEMPLATE/feature_request.yml",
+      "SPDXID": "SPDXRef-File--.github-ISSUE-TEMPLATE-feature-request.yml-5D8A8BE8F957318711189C7542FA71B1BDF68FF7",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b0c914f1b6e47c174320fb69dc142987eb6f6a1d891591908136c5a54f7db304"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5d8a8be8f957318711189c7542fa71b1bdf68ff7"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Combine_MMTaskbar_When_Full.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Combine-MMTaskbar-When-Full.reg-44CCD31A0FE0241C87C5EB5CACC1720E8C274D3A",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "42bbeb15cd093308e99af00b1492fd62a609c23a0ff83eae3e761e4d0641ce79"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "44ccd31a0fe0241c87c5eb5cacc1720e8c274d3a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Click_to_Do.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Click-to-Do.reg-35C99719D65FD5FD89F0EAA3DCEDC1746DB64180",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d36a020153bf1962f533c375b6964bcd788fa7e6f6d534ee6039bfc6d40f276d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "35c99719d65fd5fd89f0eaa3dcedc1746db64180"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Game_Bar_Integration.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Game-Bar-Integration.reg-B62FCFFC053DD3F437C429A5B262295B911FA1C8",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "67ef12f32b5ca49bc414750e511208035d8f952f7dd2b5f1b768444b77dd2bc5"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b62fcffc053dd3f437c429a5b262295b911fa1c8"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Settings_365_Ads.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Settings-365-Ads.reg-ED5A8A4B80AD9A2F259C31B747AC7A35E6B02508",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a78e09a2b5548736c18a370e9068bf560f4538406bd36b03a93cab71f6a70400"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ed5a8a4b80ad9a2f259c31b747ac7a35e6b02508"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Widgets_Service.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Widgets-Service.reg-0FC714DAB4FB2B708C05E71FB771755D54F49DF5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "85d6f1ac542008f7d014f138065cb78cd77eb9b975020e44b92a0b0f0177a2f4"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "0fc714dab4fb2b708c05e71fb771755d54f49df5"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Hide_Home_from_Explorer.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Hide-Home-from-Explorer.reg-C32D417B66ACADFDE16D3FEC70E6BD31E40C8721",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "45dd367267065f0c1f1bf1c4dac3798480ea77a3e971a0d6924653f0b3617d3d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "c32d417b66acadfde16d3fec70e6bd31e40c8721"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Launch_File_Explorer_To_This_PC.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Launch-File-Explorer-To-This-PC.reg-06F610796659F3B3660150FB97BDCC71AD6C89E5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "43d472b46637794e75ee3073583799b71ddd6c8816dfd5d8febc6b318987f7c3"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "06f610796659f3b3660150fb97bdcc71ad6c89e5"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Show_Search_Icon_And_Label.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Show-Search-Icon-And-Label.reg-22CEFC52F2D9BAEE797AD24CAA268CA4F0E71BBF",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a13829c10ecc9c47fd6b88759614b2952ac849bec413fc4ffa7a94336134cd8a"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "22cefc52f2d9baee797ad24caa268ca4f0e71bbf"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Chat_Taskbar.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Chat-Taskbar.reg-541EA2E04FE79807FFCDE4BFAAAC0E8419A68E16",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "be77c627b7634be566cedd3a7aa4c3691586d409bdda9d4bc9b3699edba30135"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "541ea2e04fe79807ffcde4bfaaac0e8419a68e16"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.gitignore",
+      "SPDXID": "SPDXRef-File--.gitignore-6C5255D55527A25F1F5B92E38FF149D10EB6F11C",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7449a6f92420cce2d71db64adce22ceaff1fe179558babdf2007b9db935f4a52"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "6c5255d55527a25f1f5b92e38ff149d10eb6f11c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/FUNDING.yml",
+      "SPDXID": "SPDXRef-File--.github-FUNDING.yml-A5AED6490014121C6422428D66695C702F45C216",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2230ea5712492396fe26c35023d05b560213b19c8247ae6289f3fe6663c088ce"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "a5aed6490014121c6422428d66695c702f45c216"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Align_Taskbar_Left.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Align-Taskbar-Left.reg-5C989DE8C76819D4FB6350ED25F70D14C2D37D80",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7e05ab7e0bbac2d8125ee866bd24b00042a6b00ab7f64f095a0a6908e1174896"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5c989de8c76819d4fb6350ed25f70d14c2d37d80"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Animations.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Animations.reg-463D4EE7360C33C3966C81693382C1396F8A16EC",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "049179fbc0f2032f6ca78ebdc8e070b50cef8accab887e7db394a504500f79df"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "463d4ee7360c33c3966c81693382c1396f8a16ec"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Edge_AI_Features.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Edge-AI-Features.reg-CEA909CC78E69B4F9650DFE967550A93CBDE945C",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "90e26b534762fc86da6d046516ba7cde3af144e687882760d614a805b18f6830"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "cea909cc78e69b4f9650dfe967550a93cbde945c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Notepad_AI_Features.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Notepad-AI-Features.reg-E19604F3C9AC9A144036EC18313898CE19FA3F44",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8dfd69af16162c3e916a6d4fe7c084d0baadb51fde13cd27477ec607c98e7156"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e19604f3c9ac9a144036ec18313898ce19fa3f44"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Sticky_Keys_Shortcut.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Sticky-Keys-Shortcut.reg-2407BDDBAEEDD025A6B28295274A8DEB361AE5F9",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "674725264fd8e9d7a76c9b2fa16e83058c14e9b3cef3fac4b27365d180264f85"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2407bddbaeedd025a6b28295274a8deb361ae5f9"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Hide_3D_Objects_Folder.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Hide-3D-Objects-Folder.reg-6052EC4D65142C4F99653F2E9C3097BF53326853",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "02e56131815b62921b9a891a3e3efc8573f657d514ec9c1d242653a0e565a552"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "6052ec4d65142c4f99653f2e9c3097bf53326853"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Launch_File_Explorer_To_Downloads.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Launch-File-Explorer-To-Downloads.reg-E38C0D501A69A25D332DDB15AD88ED24E284B250",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e99d9a73316c46e082f746ae5ad917a8f9f0a2c5c3b24aad1aacdde549f7710b"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e38c0d501a69a25d332ddb15ad88ed24e284b250"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Show_Hidden_Folders.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Show-Hidden-Folders.reg-362481ACB6408DC7A6108309380301C5F3A2E29A",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b0f1eaacd5984b3164254e17db95f0b6c4ec514b4d72627cd56168a6c7cfb621"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "362481acb6408dc7a6108309380301c5f3a2e29a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_AI_Recall.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-AI-Recall.reg-88BCE2B74489708ED6071B074F1FA34A25D2DAB9",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "35f89b873c291c15a9f01d585a0d216f3f9cf55591193a5ed47914a3371f95b2"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "88bce2b74489708ed6071b074f1fa34a25d2dab9"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./README.md",
+      "SPDXID": "SPDXRef-File--README.md-CD0224EEBD85F662C9B94081CABDD114D885A8E6",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "73662deb1407c07789033d9d739b0affb2262877da92960d947bf6e41f1ba98c"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "cd0224eebd85f662c9b94081cabdd114d885a8e6"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Assets/Menus/Info",
+      "SPDXID": "SPDXRef-File--Assets-Menus-Info-3E524CA62EBE438B96C5D87DFC26D83E86EDCA66",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1c6b14a5d1eaca13d59081337abdbbbb4289f0e119e420f76eca8fc71ee67061"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3e524ca62ebe438b96c5d87dfc26d83e86edca66"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Combine_Taskbar_Never.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Combine-Taskbar-Never.reg-69236F3EE18436245EE87EE72E6079416189C093",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "fa9ce419955600c156c14696a55f91d3c1c998b64d1d60df51d7ad8c16ec6012"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "69236f3ee18436245ee87ee72e6079416189c093"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Desktop_Spotlight.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Desktop-Spotlight.reg-D628E814E1B1F826BF4FFCACDB4056547F9DBA9B",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3b8f9584d7dadfae43d2e41fa7713604214a34c4039e632c21d5d30c5f1c71e8"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "d628e814e1b1f826bf4ffcacdb4056547f9dba9b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Include_in_library_from_context_menu.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Include-in-library-from-context-menu.reg-706A0E993E7BDB5FA5D49B1964E8BE07E23A6709",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0811583b84e46859e566630e49d718a6b8bca91f47259d94f78421d8e0d115f9"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "706a0e993e7bdb5fa5d49b1964e8be07e23a6709"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Share_from_context_menu.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Share-from-context-menu.reg-EF9F9CED72288DBC6FE7C8B60D43CD25F7C58356",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ab59333e7e5c51530174b19bba3a600df4ccd444efbc648bf9a154e9b91f45fc"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ef9f9ced72288dbc6fe7c8b60d43cd25f7c58356"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/ISSUE_TEMPLATE/config.yml",
+      "SPDXID": "SPDXRef-File--.github-ISSUE-TEMPLATE-config.yml-2E4E91A444C08B26EC414BD9805AD29E9B642D05",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "28fbe08c02b06809686a37cce1193b3022319b20193365711fc990f2dd80e90d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2e4e91a444c08b26ec414bd9805ad29e9b642d05"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Combine_MMTaskbar_Never.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Combine-MMTaskbar-Never.reg-6E1CA6FCBED3014606C540737A6298396550E487",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8da7b1f4d70929f7ca06640edcab9c95492311ef017533214cf16bd0d151d126"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "6e1ca6fcbed3014606c540737a6298396550e487"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Chat_Taskbar.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Chat-Taskbar.reg-616CCD2EFB429B376B55A19CBB029C4D07C4D9B6",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f7fcaa50d7719d298db2e7c06d5623924cfbb7e641ffbdac16b7c69486430ef8"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "616ccd2efb429b376b55a19cbb029c4d07c4d9b6"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Fast_Startup.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Fast-Startup.reg-AB78FF1332C773F184669CB49E26B58AEA3270CE",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9789502a3e25bf615284d0a3f3466cc32b9639726d4a1379f9a5cff7ebf19315"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ab78ff1332c773f184669cb49e26b58aea3270ce"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Phone_Link_In_Start.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Phone-Link-In-Start.reg-016A845BD4E9EFFADBA688595F16096381D3DAA4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "fa185b996e2060d5fc4dce73eb249b81f40bc44be2a1f2b65e728270d9162df1"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "016a845bd4e9effadba688595f16096381d3daa4"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Transparency.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Transparency.reg-B2680E539FAA1235C1DE7E73112B29B3FBD97A6E",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "aa334e9c011c08ea5c8d14fc6caf3a948d8e5b784738c3f20a361f01f0ef0902"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b2680e539faa1235c1de7e73112b29b3fbd97a6e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Enable_Dark_Mode.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Enable-Dark-Mode.reg-922FEE35DF1C9F8549D69E852569125D36DBFC80",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8e6977e7e3066ef374ba0dec1d48de4669e7dfbd5fca68263266bfb7bca13821"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "922fee35df1c9f8549d69e852569125d36dbfc80"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Hide_Gallery_from_Explorer.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Hide-Gallery-from-Explorer.reg-D96EF620624154AF1F03B5D7CA1F38A965F56D53",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4ed9fa7aa1d367ff24d691b5c22e0e973650f4c45a09bdcc05f4619e11fb41f2"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "d96ef620624154af1f03b5d7ca1f38a965f56d53"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Hide_Onedrive_Folder.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Hide-Onedrive-Folder.reg-9EB70611B1EFA6ACEF3A4D4E634D13D2AAE2B60D",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8b7c7c2241e33dad88f6fe8c0538dece1d920f9caf59ca8b6a772fb8d1b3b235"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "9eb70611b1efa6acef3a4d4e634d13d2aae2b60d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/MMTaskbarMode_All.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-MMTaskbarMode-All.reg-68232F112CB99DE8049FF8A853F7728C050543D9",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "bc2c8d85289ed180c8265bebbe71da6e7ba67b75aa39f3c23e01beb520e4c3d5"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "68232f112cb99de8049ff8a853f7728c050543d9"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Combine_Taskbar_Always.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Combine-Taskbar-Always.reg-3F57D2C7F99B9D61B3DA75FFCFB4EF65F0F2B6FF",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b646028e4b69198936ae018604d065673748622593638a95cbffeffbd60edb58"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3f57d2c7f99b9d61b3da75ffcfb4ef65f0f2b6ff"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Launch_File_Explorer_To_OneDrive.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Launch-File-Explorer-To-OneDrive.reg-5776E18132122909FCC8F1982BB87A83AE49F3D9",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "109c57f4ac1de352e73b39994167c42651fced164801f96c4fb329695a989517"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5776e18132122909fcc8f1982bb87a83ae49f3d9"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Copilot.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Copilot.reg-B0EB95A16707AD9A50B71CE6FD480741F2B29159",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b19bd812cbd46a7561216359740162bdebee136cb640dbe29d61ff45ceab41d4"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b0eb95a16707ad9a50b71ce6fd480741f2b29159"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Show_Search_Icon.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Show-Search-Icon.reg-7DF056478580A0F5B7C899D53990E04B29733958",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a1eb006aa1685feb8653ce9b39ee3105a751748c6e392862781314d724f21ecb"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "7df056478580a0f5b7c899d53990e04b29733958"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/ISSUE_TEMPLATE/bug_report.yml",
+      "SPDXID": "SPDXRef-File--.github-ISSUE-TEMPLATE-bug-report.yml-7A0B821AB50E812134FFE9B5DDA62FE6219554B8",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a64a683a038efa77aef166b4ef860c40bd10557d77d9320eb3f7ad45cfa8b2ea"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "7a0b821ab50e812134ffe9b5dda62fe6219554b8"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Assets/Start/What is this file.txt",
+      "SPDXID": "SPDXRef-File--Assets-Start-What-is-this-file.txt-FCA7CAE37B4BABFA2F7EF4EAB2FFA2F8972E1AFF",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7f86b1f1076e4edfd98c47d9c2a4631c75d85aa33124ead0c51033d2dd237cb4"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "fca7cae37b4babfa2f7ef4eab2ffa2f8972e1aff"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Assets/menu.png",
+      "SPDXID": "SPDXRef-File--Assets-menu.png-002083B7A7754DDE71030039FEE7F3C07E4328E3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4f9a0fe983598c62c62303ae178d1a91a1c2694ca5a01dc5485189ab026a7970"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "002083b7a7754dde71030039fee7f3c07e4328e3"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Combine_Taskbar_Always.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Combine-Taskbar-Always.reg-2890F923CCEC75ED906BAB806B9DD4505B295849",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d41ac9a29b1ead08d6f3ed814af188cafc03dacf3733917f85dced87532c48dd"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2890f923ccec75ed906bab806b9dd4505b295849"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_AI_Recall.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-AI-Recall.reg-45AE0B307E4EC7A2AF61CB0119D93107B4D172E8",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f00189025751ab47ff84d7a8b7a23733e7c7e7739eb1fe56fdda9a70a3fa26d8"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "45ae0b307e4ec7a2af61cb0119d93107b4d172e8"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Copilot.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Copilot.reg-2FC08B387A41962C26E6B1AA6FD9DC49BDA5DDFC",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "cfe45581e34d025b308a07a125551ba4b4eb41669bf7ead16cf73fb739104140"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2fc08b387a41962c26e6b1aa6fd9dc49bda5ddfc"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Edge_Ads_And_Suggestions.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Edge-Ads-And-Suggestions.reg-3CBEA115F0880818F6D3EEC7311428BDDC19F966",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a31b45783577cf9ea1e1f6d87d006e2b784c2d25e78ab9ed63912f8e50fbbeea"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3cbea115f0880818f6d3eec7311428bddc19f966"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Give_access_to_context_menu.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Give-access-to-context-menu.reg-5A8CFB481DCDD553973A04E6CD57299486AC3731",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3c3920aa0d98d39d977bfc5ef5fc82725b25370dc495841e883310c3796d41aa"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5a8cfb481dcdd553973a04e6cd57299486ac3731"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Modern_Standby_Networking.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Modern-Standby-Networking.reg-03720451A3176010BDF862B4FED794FBF83AD113",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "931555eda4b96b00f44b7345aca0ec21e73746482846c332a4df87da6e5a58c8"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "03720451a3176010bdf862b4fed794fbf83ad113"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Settings_Home.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Settings-Home.reg-E572F29EEA6C741029A27C7A237323076A660C59",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "75fe817a1751ae1301636da1f1e2672653a2deaf3be6dcbdd04cd6421babed16"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e572f29eea6c741029a27c7a237323076a660c59"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Start_Recommended.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Start-Recommended.reg-2823D7CA7BF205C3BE1CEB044CD89163587A35D1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c50f6f17160c0c112804b0d507570084d5f968edbf83c7d878b48aa8b461dd3f"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2823d7ca7bf205c3be1ceb044cd89163587a35d1"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Windows_Suggestions.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Windows-Suggestions.reg-4144A47A63FDF5A64D6C5EA415660D84E173A5E1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7f33919f7884371c6ec751dd1b4a7f368a3a5634d1f36b5dadb6177f8a3b1156"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "4144a47a63fdf5a64d6c5ea415660d84e173a5e1"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Enable_Last_Active_Click.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Enable-Last-Active-Click.reg-BFFCC236C58B8B07D53BCF00182878C34D74953B",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f6d90678315965807c000ba030cf9f7e6d5533edcbd1f30c38ed88d86d5ef2b1"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "bffcc236c58b8b07d53bcf00182878c34d74953b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Hide_Music_Folder.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Hide-Music-Folder.reg-3080007A3A29657316D761ECD8BD629FE098338F",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "36f1eb1a677f755ab890977fe04c648442f6b318fbc3730f2e0863b2f88d1d1b"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3080007a3a29657316d761ecd8bd629fe098338f"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Combine_MMTaskbar_Always.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Combine-MMTaskbar-Always.reg-778A3F60C99B6C9D86D4F711FEB93B1B2AF90D00",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f82d030a60c947eae85b9c0a16fddf54912fe2860f417f07e1238e5282cbed00"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "778a3f60c99b6c9d86d4f711feb93b1b2af90d00"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/MMTaskbarMode_Active.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-MMTaskbarMode-Active.reg-4825052E44182290AD42C87554B05D0634F40B1D",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6fcbe9051064555686aeba8537e85431a35841b6d6def57a5a0db2a72d980c34"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "4825052e44182290ad42c87554b05d0634f40b1d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Hide_Taskview_Taskbar.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Hide-Taskview-Taskbar.reg-26C56239E9CCE4DF8CB37EDBB28338DAFBEE4589",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "dad7f2def8a242322098709378013f945f6d2739ac22fe832f7434ef85bfe530"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "26c56239e9cce4df8cb37edbb28338dafbee4589"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Bing_Cortana_In_Search.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Bing-Cortana-In-Search.reg-B7EB898C4CA2D9937943161205937B86230255DE",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "38bac32ae2ed02b8e51efd4b3261643d805b5cc0a4f8286bc8bbfb629ae23214"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b7eb898c4ca2d9937943161205937b86230255de"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Align_Taskbar_Left.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Align-Taskbar-Left.reg-0C8ED3380CE7BA3444311709AEA9563A8D3789F2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "950538cc55f9648741eb222b8d0e2f77515369fdeb2d08480485f3d6e9fdd482"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "0c8ed3380ce7ba3444311709aea9563a8d3789f2"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Show_Extensions_For_Known_File_Types.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Show-Extensions-For-Known-File-Types.reg-7400079467BA1B0A5636F2AF4B2C2AE844AEFA55",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f2e6fa539aedc398cc67b49b1e6d08f476b6f624bf5dbffbd44da001d8be7e8a"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "7400079467ba1b0a5636f2af4b2c2ae844aefa55"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Enhance_Pointer_Precision.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Enhance-Pointer-Precision.reg-23F12886C0A3903C64496480D7E74089FF9A2950",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "03989e125107b98c0ff1cc91108dfefb4fb5c857d596e99f0d2625e7ad9feb70"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "23f12886c0a3903c64496480d7e74089ff9a2950"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Combine_Taskbar_When_Full.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Combine-Taskbar-When-Full.reg-CBAC73079AB35157AB2D65B7FFE69A90CC0B6917",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ed8a24ecbe64fa7b640661faf70530bb192e41bb7a15aae3a9f76e15ad9ad5b3"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "cbac73079ab35157ab2d65b7ffe69a90cc0b6917"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Paint_AI_Features.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Paint-AI-Features.reg-11DE850B1B9859AE7F349371F025E7CCB1A648A2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c56fdae6c2ee06a4a9e5a287d44d953b082c81366357427fd0c2361154c98af6"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "11de850b1b9859ae7f349371f025e7ccb1a648a2"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Assets/Start/start2.bin",
+      "SPDXID": "SPDXRef-File--Assets-Start-start2.bin-0A2FCD08E425A9F1B390D4E10C8CB9B597591A60",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2378a237691508b6bfe78aae3b8c54d626f230d00bfc888213868c02ec81ee65"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "0a2fcd08e425a9f1b390d4e10c8cb9b597591a60"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Telemetry.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Telemetry.reg-C7159FC3ADD4FD7CE6FC3820FE6E318112329E9E",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6262e6688aaaa8f09811b2075c3d88be1e8484c36209fcd4060ce891086a5f2d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "c7159fc3add4fd7ce6fc3820fe6e318112329e9e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_DVR.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-DVR.reg-E4E07C5FE7A31E9BC13B1245AD1A2BCFEA4CDC49",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c66c2d0c0923a4663d71dbc87dd1dd7bd1e9344d8b3d7de20c17d9bcead175e6"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e4e07c5fe7a31e9bc13b1245ad1a2bcfea4cdc49"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Hide_duplicate_removable_drives_from_navigation_pane_of_File_Explorer.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Hide-duplicate-removable-drives-from-navigation-pane-of-File-Explorer.reg-35AA53362DE27622B41BB3D4750D699A0A85F413",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "af357eea2fd4ef79697285bd1538deb4de46d49edec85c00981c5ff944a93497"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "35aa53362de27622b41bb3d4750d699a0a85f413"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Launch_File_Explorer_To_Home.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Launch-File-Explorer-To-Home.reg-02824DBD022AA4DC71F0494C1E77BC5A5E1C90E5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "73deccf97910c244e51aec79dbabc631e1a63cad0a4e274e03a5d7383e0aaddb"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "02824dbd022aa4dc71f0494c1e77bc5a5e1c90e5"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Show_Search_Box.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Show-Search-Box.reg-3A58E999BE71761AF2889EF6DC9979328B315274",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "df5777625c9761562f86fe76714be1a0324959e4bd3a8d09af04ca38a9957514"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3a58e999be71761af2889ef6dc9979328b315274"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Combine_Taskbar_When_Full.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Combine-Taskbar-When-Full.reg-EB4623DB999AD5C8B571D38D6C1B306E8F6AEA00",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a965b31509ceec5ab4a2fb0fcd924ae910ac5dfab94f841da5b01001452177bf"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "eb4623db999ad5c8b571d38d6c1b306e8f6aea00"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_DVR.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-DVR.reg-49912114850BFC30A7E0A4833ADBB3C60575B033",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5d8c2afc6e7536f82de66e8132409e494037165e59e2ad15e5f94d56d5e808a2"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "49912114850bfc30a7e0a4833adbb3c60575b033"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Lockscreen_Tips.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Lockscreen-Tips.reg-C1A3E20E801EB11A46B2FBC42DE19ACCF396883A",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5b4a831881c69b8310bc53a3d913847ded25e3dea2d13fdd468b8dbc39f57a4c"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "c1a3e20e801eb11a46b2fbc42de19accf396883a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Disable_Show_More_Options_Context_Menu.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Disable-Show-More-Options-Context-Menu.reg-EED0396F6C531131D70156ACC6CB881BBCF85D3A",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "740288f61d13193dbf262b8e60ca9c4a7ad3434b030bb5eaba5a90c0e4f53be6"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "eed0396f6c531131d70156acc6cb881bbcf85d3a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Enable_End_Task.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Enable-End-Task.reg-6EA6F923B68A24A3765742975BF040BC0A8D6A7E",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7b530b834a5616487a9cbda8c107794bcdea1470f427ce610a6796fb66f40f45"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "6ea6f923b68a24a3765742975bf040bc0a8d6a7e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Hide_Search_Taskbar.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Hide-Search-Taskbar.reg-35D85C2A6FF699BD5253A249BB655C698DDAB56D",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "261aae32a92ecf99ed952b5b2cf9b45271b95ea6840d6b7f8e339cd7e949a6e3"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "35d85c2a6ff699bd5253a249bb655c698ddab56d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/MMTaskbarMode_Main_Active.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-MMTaskbarMode-Main-Active.reg-3BF1A1A31B04B827596FAE871C71AA6B5A2F6B1C",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1d597c148d555ccaf4de218882386f2f0003dafed063b06b40148a1b96985905"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3bf1a1a31b04b827596fae871c71aa6b5a2f6b1c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Combine_Taskbar_Never.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Combine-Taskbar-Never.reg-92862F8CE625E7CC45D77707B415E8CB96E149D3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5818bf18ccdeb353a9d25c3ba385e84ecd978c0a98f50ae62993505c3847f4bb"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "92862f8ce625e7cc45d77707b415e8cb96e149d3"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Desktop_Spotlight.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Desktop-Spotlight.reg-E3F054ADF9E739D02F8EFD5DFE1ADBA6C6AF1F92",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e4ba4e8deed9beac1a4f05237d0bee91dab97859bf865dae5f77ba6d18553f07"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e3f054adf9e739d02f8efd5dfe1adba6c6af1f92"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Fast_Startup.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Fast-Startup.reg-AB78FF1332C773F184669CB49E26B58AEA3270CE",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9789502a3e25bf615284d0a3f3466cc32b9639726d4a1379f9a5cff7ebf19315"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ab78ff1332c773f184669cb49e26b58aea3270ce"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Animations.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Animations.reg-BD7C7B78C5AF883BFA70682035C1E9D0AD74732B",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "efd724997cf035897da724b09a73a8f1c72f44ac9364323d06478c0807980d4e"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "bd7c7b78c5af883bfa70682035c1e9d0ad74732b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Bing_Cortana_In_Search.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Bing-Cortana-In-Search.reg-DCDECF910F9D7DCEB29D8D65293022930A3C9EFE",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e71f7ae8fe32c6b62b4b4a27657d060d2c36adb1b65e93f276d0c11299b37c0c"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "dcdecf910f9d7dceb29d8d65293022930a3c9efe"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Edge_Ads_And_Suggestions.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Edge-Ads-And-Suggestions.reg-3CBEA115F0880818F6D3EEC7311428BDDC19F966",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a31b45783577cf9ea1e1f6d87d006e2b784c2d25e78ab9ed63912f8e50fbbeea"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3cbea115f0880818f6d3eec7311428bddc19f966"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Phone_Link_In_Start.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Phone-Link-In-Start.reg-CB42B7E397A317835445B7578900DA172329CA26",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "aab46f8ff78bcc6165ac476432674fa7fdd661d72e226500725047624e6dfd1d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "cb42b7e397a317835445b7578900da172329ca26"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Give_access_to_context_menu.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Give-access-to-context-menu.reg-5A8CFB481DCDD553973A04E6CD57299486AC3731",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3c3920aa0d98d39d977bfc5ef5fc82725b25370dc495841e883310c3796d41aa"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5a8cfb481dcdd553973a04e6cd57299486ac3731"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Enhance_Pointer_Precision.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Enhance-Pointer-Precision.reg-55478BB0514FD4FC13D24449CF17FC2FEB754BF1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "60f587bc31779221c6020107f9bd26d538aa2f4253f1194d8d5fc5cc44df24b6"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "55478bb0514fd4fc13d24449cf17fc2feb754bf1"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Click_to_Do.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Click-to-Do.reg-10A6E869B56F23A429A24C512FDD28EBFCEC48A1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "564a8c49b828a4ea69e305acc7df876e2d467e54a2cffca993c66babbf197922"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "10a6e869b56f23a429a24c512fdd28ebfcec48a1"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Settings_Home.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Settings-Home.reg-E572F29EEA6C741029A27C7A237323076A660C59",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "75fe817a1751ae1301636da1f1e2672653a2deaf3be6dcbdd04cd6421babed16"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e572f29eea6c741029a27c7a237323076a660c59"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Transparency.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Transparency.reg-0FD12466DEC4F03E07E2F26C34246D38C2B9C4B5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b6099099a5af4a991e0c4960d8813907025fa5e7596338161e015bc93876555d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "0fd12466dec4f03e07e2f26c34246d38c2b9c4b5"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Edge_AI_Features.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Edge-AI-Features.reg-CEA909CC78E69B4F9650DFE967550A93CBDE945C",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "90e26b534762fc86da6d046516ba7cde3af144e687882760d614a805b18f6830"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "cea909cc78e69b4f9650dfe967550a93cbde945c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Include_in_library_from_context_menu.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Include-in-library-from-context-menu.reg-706A0E993E7BDB5FA5D49B1964E8BE07E23A6709",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0811583b84e46859e566630e49d718a6b8bca91f47259d94f78421d8e0d115f9"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "706a0e993e7bdb5fa5d49b1964e8be07e23a6709"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Lockscreen_Tips.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Lockscreen-Tips.reg-E661D85475090C9D1FB3A71B23861592EB905470",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "60341888c37a9f7f15ccca36eca1b3515d1cb545a77dfea1d1613b9ea27d0157"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e661d85475090c9d1fb3a71b23861592eb905470"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Modern_Standby_Networking.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Modern-Standby-Networking.reg-03720451A3176010BDF862B4FED794FBF83AD113",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "931555eda4b96b00f44b7345aca0ec21e73746482846c332a4df87da6e5a58c8"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "03720451a3176010bdf862b4fed794fbf83ad113"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Paint_AI_Features.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Paint-AI-Features.reg-11DE850B1B9859AE7F349371F025E7CCB1A648A2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c56fdae6c2ee06a4a9e5a287d44d953b082c81366357427fd0c2361154c98af6"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "11de850b1b9859ae7f349371f025e7ccb1a648a2"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Game_Bar_Integration.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Game-Bar-Integration.reg-2EABF7F29F896A6C0F942BADDF1E5F0C022772E0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "eb8259685b288a08027d08aea38d85dbd243a32b35abcbc85fd9a6c258b6ba4b"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2eabf7f29f896a6c0f942baddf1e5f0c022772e0"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Hide_Gallery_from_Explorer.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Hide-Gallery-from-Explorer.reg-0A8B648DC043D65D86A82C2FEA93193989E98965",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1a4a7d2210df479eb9bba1a06890cf992eba00931a02a775508496e66118ed79"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "0a8b648dc043d65d86a82c2fea93193989e98965"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Notepad_AI_Features.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Notepad-AI-Features.reg-E19604F3C9AC9A144036EC18313898CE19FA3F44",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8dfd69af16162c3e916a6d4fe7c084d0baadb51fde13cd27477ec607c98e7156"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "e19604f3c9ac9a144036ec18313898ce19fa3f44"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Share_from_context_menu.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Share-from-context-menu.reg-EF9F9CED72288DBC6FE7C8B60D43CD25F7C58356",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ab59333e7e5c51530174b19bba3a600df4ccd444efbc648bf9a154e9b91f45fc"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ef9f9ced72288dbc6fe7c8b60d43cd25f7c58356"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Start_Recommended.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Start-Recommended.reg-3D404CBF2FC4679190059E43AD3E50C76056BCA2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9c140a9f1d0583de691c06c104baf41b09edb9f1287ffb1b223c3e1d8569dd17"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3d404cbf2fc4679190059e43ad3e50c76056bca2"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Windows_Suggestions.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Windows-Suggestions.reg-B559B1B184865099691EBAA0BCB7D2BD8D84851C",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8c2ed263ecf5904dbaaaae3702c9fa00a4bce450fc7ec90eac5cd6fe6fa21252"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b559b1b184865099691ebaa0bcb7d2bd8d84851c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Settings_365_Ads.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Settings-365-Ads.reg-ED5A8A4B80AD9A2F259C31B747AC7A35E6B02508",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a78e09a2b5548736c18a370e9068bf560f4538406bd36b03a93cab71f6a70400"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ed5a8a4b80ad9a2f259c31b747ac7a35e6b02508"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Telemetry.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Telemetry.reg-F0FE92B79F0B178001E86DBC96917505380F1D9C",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2504aa0f78f51e954ea0987a18d24eac054a5a3a78449c6061455e2b59050905"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "f0fe92b79f0b178001e86dbc96917505380f1d9c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Show_More_Options_Context_Menu.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Show-More-Options-Context-Menu.reg-6EC64271856531D0797A8AFB0F9404B8E69F0F20",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ae6e7392522ea994a90cd0c0f03f6925a59007d1ed1512152ce76c844c26b27a"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "6ec64271856531d0797a8afb0f9404b8e69f0f20"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Launch_File_Explorer_To_OneDrive.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Launch-File-Explorer-To-OneDrive.reg-3EE8CEE773EC4C680846C6C01C145722730766F7",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a260fc6e933699665f251fbbbc2c832e3115b1010c0025dfe48e6cdaebe72393"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3ee8cee773ec4c680846c6c01c145722730766f7"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Sticky_Keys_Shortcut.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Sticky-Keys-Shortcut.reg-69A9AAF96E0E5C435BD226B50EC25FD0CF36ECCC",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "28ec96d89c01a3c10dbb9f683375eda0485e117bc158c2d21e85cca2c664f3a0"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "69a9aaf96e0e5c435bd226b50ec25fd0cf36eccc"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Enable_Last_Active_Click.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Enable-Last-Active-Click.reg-5F072A75C92A0C1B366DBDDF2427D3DE0EFC221B",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c8461f4c44170a2daa4371cded1eec7b7412dae4d22863ea5c0f4a6f923a4ea5"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5f072a75c92a0c1b366dbddf2427d3de0efc221b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Enable_Dark_Mode.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Enable-Dark-Mode.reg-CE39122F00E186D8C8EC13DC2360C400EF211FB0",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "41fcf6ad14891e7cfb86ed1a57604455c40eeb4ea4c6f78473eae8fa6b7de2e0"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ce39122f00e186d8c8ec13dc2360c400ef211fb0"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Hide_Music_Folder.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Hide-Music-Folder.reg-3080007A3A29657316D761ECD8BD629FE098338F",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "36f1eb1a677f755ab890977fe04c648442f6b318fbc3730f2e0863b2f88d1d1b"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3080007a3a29657316d761ecd8bd629fe098338f"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Disable_Widgets_Service.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Disable-Widgets-Service.reg-0FC714DAB4FB2B708C05E71FB771755D54F49DF5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "85d6f1ac542008f7d014f138065cb78cd77eb9b975020e44b92a0b0f0177a2f4"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "0fc714dab4fb2b708c05e71fb771755d54f49df5"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Enable_End_Task.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Enable-End-Task.reg-33615324E116D798FF59F8DC9483C813F98A20AD",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0b61831f8a5dfa984abf55440940dee3c7bc315ca7643161cfab01626199b88e"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "33615324e116d798ff59f8dc9483c813f98a20ad"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Hide_duplicate_removable_drives_from_navigation_pane_of_File_Explorer.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Hide-duplicate-removable-drives-from-navigation-pane-of-File-Explorer.reg-35AA53362DE27622B41BB3D4750D699A0A85F413",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "af357eea2fd4ef79697285bd1538deb4de46d49edec85c00981c5ff944a93497"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "35aa53362de27622b41bb3d4750d699a0a85f413"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Hide_3D_Objects_Folder.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Hide-3D-Objects-Folder.reg-6052EC4D65142C4F99653F2E9C3097BF53326853",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "02e56131815b62921b9a891a3e3efc8573f657d514ec9c1d242653a0e565a552"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "6052ec4d65142c4f99653f2e9c3097bf53326853"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Uninstall_Microsoft_OneDrive.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Uninstall-Microsoft-OneDrive.reg-442B60ADC35FA6031EC900C313A1AB22C56BCB39",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "56a612377992fde024139438b0dd46299d76eafb5574fc8eba8b66ff35db49d6"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "442b60adc35fa6031ec900c313a1ab22c56bcb39"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Hide_Taskview_Taskbar.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Hide-Taskview-Taskbar.reg-C01EBFB622566B6D003097DF87A060290156B770",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "cddec11f981594027ccc582dce8904a3cb329568da906ba6916074cd26e93de9"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "c01ebfb622566b6d003097df87a060290156b770"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Hide_Onedrive_Folder.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Hide-Onedrive-Folder.reg-9EB70611B1EFA6ACEF3A4D4E634D13D2AAE2B60D",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8b7c7c2241e33dad88f6fe8c0538dece1d920f9caf59ca8b6a772fb8d1b3b235"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "9eb70611b1efa6acef3a4d4e634d13d2aae2b60d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Show_Extensions_For_Known_File_Types.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Show-Extensions-For-Known-File-Types.reg-7D3DC4755B4C50F39D4C866797462FD9D83006D7",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "73dd62efe242ff9eaa7483f999e0bebc7ff1797241426fc813dc2203cddcaffb"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "7d3dc4755b4c50f39d4c866797462fd9d83006d7"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Hide_Home_from_Explorer.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Hide-Home-from-Explorer.reg-D961D27D3DD3BD213DF00E9E0269C43707AE8C85",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a9c5a0f3cb1d488957d0e96a7efbc42fbd89710c57cf0464189c5dd87f5078c3"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "d961d27d3dd3bd213df00e9e0269c43707ae8c85"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Hide_Search_Taskbar.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Hide-Search-Taskbar.reg-65628DAB28D362D488A88768C453A4C229FEED23",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b228a8a791ad11cf97b1c0e2b6e521fc7bc9ffdb9b82d292b08cb854f3a195e7"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "65628dab28d362d488a88768c453a4c229feed23"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Launch_File_Explorer_To_Home.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Launch-File-Explorer-To-Home.reg-45208C82752FE401682371F5AE37165125FC1815",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c1f9bf5bdf30a975eff47cd61f91d8ebcbd42bb56996519aa335977b5a426a0b"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "45208c82752fe401682371f5ae37165125fc1815"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Bing_Cortana_In_Search.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Bing-Cortana-In-Search.reg-3795782F95A23B3F69FE1220AC20E0C3B90DF47B",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "759f6b7e3f21e3cb35f975129937781b7f51f161e7ca4006ca90635a990db9b5"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3795782f95a23b3f69fe1220ac20e0c3b90df47b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Show_Search_Icon.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Show-Search-Icon.reg-6FF0E3643DD5FA126A299ED62C26E15EF1F553E4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a9226f73def4e1c76393a5a7bc2542bb02bae5c486f3db929647608f92d9a118"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "6ff0e3643dd5fa126a299ed62c26e15ef1f553e4"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Launch_File_Explorer_To_Downloads.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Launch-File-Explorer-To-Downloads.reg-B6ED497041C7F62267C63FFB015174DBF51925DD",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "92720753135a9f5385d105613b3e8ddc54892bd1b72898cd784ab75a4a384a84"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b6ed497041c7f62267c63ffb015174dbf51925dd"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Show_Hidden_Folders.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Show-Hidden-Folders.reg-4792DEBDCE0B64A6954D14ACAC5061E629CA97DB",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d2051c5a6947d5a736cb90b7472875f281471268f39f3d44bd4c4c13082e0b2e"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "4792debdce0b64a6954d14acac5061e629ca97db"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Allow_Edge_Telemetry.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Allow-Edge-Telemetry.reg-55AA97D541D60CCCB249A84649743CBAABC42A3A",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e44e3d8b1ae16a735599d836de01628ef7d081948cfa83317a1f5912d8a2cfe4"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "55aa97d541d60cccb249a84649743cbaabc42a3a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Launch_File_Explorer_To_This_PC.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Launch-File-Explorer-To-This-PC.reg-2ADB78BEA0C1074021E4108A41FCA5C52274FBFB",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "97c4246645168850898d79c2a6b3e6ad4de66cbf21088f7475aa0e7258c823f4"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "2adb78bea0c1074021e4108a41fca5c52274fbfb"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Uninstall_Microsoft_Edge.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Uninstall-Microsoft-Edge.reg-0BBDA7F8AE3FC6504985BA3846C37761E20AAE31",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5fcd7cdce8a402e0b034c26d3f95630dee0cf3c0e30909102de286bbc5e4b518"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "0bbda7f8ae3fc6504985ba3846c37761e20aae31"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Show_Search_Box.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Show-Search-Box.reg-6F78366645FCD114AE50ACC4A154E47EBA3F9997",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3ef22d82a950462aa581efce39cc4e526cab881ee8c5a8241b65972f17664564"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "6f78366645fcd114ae50acc4a154e47eba3f9997"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Enhance_Pointer_Precision.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Enhance-Pointer-Precision.reg-F81AE1B0454DD6E6753FB023B597588AD8338B53",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4beedf4d45cd55018c2064f78da9c611828bbc6bb4ac85a5c3ffbd0152549954"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "f81ae1b0454dd6e6753fb023b597588ad8338b53"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Activity_History.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Activity-History.reg-0BE40CE8EF7C19B727A2C9334646A341A7674761",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "ad95ab5af0a1e2ef9b5106fe3c2768d7785554a518d25aec35224c2367c3d845"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "0be40ce8ef7c19b727a2c9334646a341a7674761"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Sysprep/Show_Search_Icon_And_Label.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Sysprep-Show-Search-Icon-And-Label.reg-A77E1D0367D96DF8081518D498669B9FC7845866",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "4265f206d8f451edeb46510c054722ff1763d6ca4cfb7e875ea23a0a6e02758c"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "a77e1d0367d96df8081518d498669b9fc7845866"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Disable_End_Task.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Disable-End-Task.reg-389410965D5DC60FD4BDF7DEF52268BAEA0CD8FD",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "46febd33eb518c17d699cf1a2932be366eefc595b544d687c132a6b8f5089a66"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "389410965d5dc60fd4bdf7def52268baea0cd8fd"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Click_to_Do.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Click-to-Do.reg-B6FD9D877F14420ECFE135B75E0D78CA961D6315",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1c1d660a11a5ca578c68628329b3a4bf1014924574ec839b4c29951aba661c08"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b6fd9d877f14420ecfe135b75e0d78ca961d6315"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Align_Taskbar_Center.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Align-Taskbar-Center.reg-962E85878A794B2BE371CC9B214106BFA5A68131",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c0a31e704634193a6ed7639643826d6d0bce3dfa80c315e943416c7b5cf4acf6"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "962e85878a794b2be371cc9b214106bfa5a68131"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Notepad_AI_Features.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Notepad-AI-Features.reg-072E9D629E820EF1AF2732B14F6C0536D3E0991C",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "abfb935d16604a7f6ec3c040233732235af45e02db3a8deafd9320cd2749fb80"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "072e9d629e820ef1af2732b14f6c0536d3e0991c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Animations.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Animations.reg-A4C910726CC715A770D53688E47A2164F267B600",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "df042de0d42b58dddbb6096fff909fdf80633b013b8c8c91be34d18eee43bee5"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "a4c910726cc715a770d53688e47a2164f267b600"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Disable_Last_Active_Click.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Disable-Last-Active-Click.reg-5383058C5E64C41BF3B186CC78FE50294C22FDDD",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "82815c3ae99772258bd525129b7555d735e281fcd0ea24082f32dd163d17111b"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5383058c5e64c41bf3b186cc78fe50294c22fddd"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_DVR.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-DVR.reg-A38A0790A5DE29589008B1EB06C2721DB0269660",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "0343757b27c0737b8fb8e02124d32c1416a084020652ec0eb5036e40d56e2a17"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "a38a0790a5de29589008b1eb06c2721db0269660"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_AI_Recall.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-AI-Recall.reg-C3AAC448731CE7A26344C5DBDE45C536CF525A4E",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "111b364dc3660fb500bef4b95fcca22324fc23c587033641696632774ca74f90"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "c3aac448731ce7a26344c5dbde45c536cf525a4e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Copilot.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Copilot.reg-5D905D83B275C1951C146BC631BBCB70EC71FE1D",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "7188fee48c288d39dfcfd64cf2b23e84f600012c32cfff80b87456f58c3fbf80"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5d905d83b275c1951c146bc631bbcb70ec71fe1d"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Game_Bar_Integration.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Game-Bar-Integration.reg-9A1098EF9B1ECFCB94949235D325486B52A10C20",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d507b988ccbd26ac2f089084f0171b747921c1563141b3fb96f085625db184d4"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "9a1098ef9b1ecfcb94949235d325486b52a10c20"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Chat_Taskbar.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Chat-Taskbar.reg-8C06320E63D6F44B90699209F98FCE976AAF096E",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b19daa453cd42c0b8fb9479deab56aeeec2a5a208eb6705ce03c90bc5f76965f"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "8c06320e63d6f44b90699209f98fce976aaf096e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Telemetry.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Telemetry.reg-F3594D05AB5E066E79C903F86C27FC286D4E42DA",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "90e03070742ab6848273303bcbf4210f56e8e7c83236b7c7bb9b5837a806002d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "f3594d05ab5e066e79c903f86c27fc286d4e42da"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Edge_AI_Features.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Edge-AI-Features.reg-FEA905DACA0F8113F83EAE9B8C418B6420555FC4",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "d90b8ec13dc7fe503190f823707a4c9598270423673a7e928f93ff267b86fd66"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "fea905daca0f8113f83eae9b8c418b6420555fc4"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Desktop_Spotlight.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Desktop-Spotlight.reg-780A0862FC52431FC08B83302FF701AFED9E31E7",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a2f911f8c94c21ebf9e9210980108c14e08804cb96485d2aa628d55c9acc4e73"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "780a0862fc52431fc08b83302ff701afed9e31e7"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Light_Mode.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Light-Mode.reg-7C085B9CE57753CB2C98F87901E825DDC8387D78",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "fb945e2c7b01e4983dd2ae5484ba75d556b13ed98e60499436dc4704570cb43c"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "7c085b9ce57753cb2c98f87901e825ddc8387d78"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Edge_Ads_And_Suggestions.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Edge-Ads-And-Suggestions.reg-924BD2EE27F0C579909C60FE6179CD6FE606D0FB",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "40b24cdaab58e9c2dbb7ff7c46d7be923bcb1c34684c81f90f8acfd2b99f9573"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "924bd2ee27f0c579909c60fe6179cd6fe606d0fb"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Give_access_to_context_menu.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Give-access-to-context-menu.reg-61355262D64E12A2B6FAA4A62FEA84477757B79F",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "81cf2068bf2df804725665c14025999e4a6dca9d414ea1a8972037c247781954"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "61355262d64e12a2b6faa4a62fea84477757b79f"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Phone_Link_In_Start.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Phone-Link-In-Start.reg-C7EA17DC6E8E4E748CB2242F1432A8E60661306A",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "5e7c076742de253a168e9448b9f861b571143816ccc1f86789bee4fef6f59ac5"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "c7ea17dc6e8e4e748cb2242f1432a8e60661306a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Show_duplicate_removable_drives_from_navigation_pane_of_File_Explorer.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Show-duplicate-removable-drives-from-navigation-pane-of-File-Explorer.reg-03629A2E915D49AE917F493546EA207E87934D41",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "29f97a28b5e251c86cc962458fe62f973ce6c7909767fe717cf4d154ad4bc93d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "03629a2e915d49ae917f493546ea207e87934d41"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Include_in_library_to_context_menu.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Include-in-library-to-context-menu.reg-B5E5AB99C99F7F2062CF25CDF52B0B307B863A94",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f5bf6c8141748497c6d9a16ec6c108b1a3a988a303314048585b966ef9a492c6"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b5e5ab99c99f7f2062cf25cdf52b0b307b863a94"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_W11_Style_Context_Menu.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-W11-Style-Context-Menu.reg-3CB431EC25E873E54BA81992CEED0828CE8ACC52",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2b3b5c41cccd20e3078d009b6f0c82c4e5b56b24f50c0b56c7778e2c29dd8196"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3cb431ec25e873e54ba81992ceed0828ce8acc52"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Lockscreen_Tips.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Lockscreen-Tips.reg-B70197166F9E1A1BB682382FB02DEED5018F4854",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3974825a0ed30348cddb88efe1c1939a4d0c558e4b684e354e64a628bf2c86bc"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b70197166f9e1a1bb682382fb02deed5018f4854"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Fast_Startup.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Fast-Startup.reg-D1DF973BCAC5AD89D2EB5F8FFA713FD2D2BFB9FF",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "84bff6e029ee9af1f0e0afc62d85966e457045e82797ca5dcc98b54b2218cee1"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "d1df973bcac5ad89d2eb5f8ffa713fd2d2bfb9ff"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Settings_365_Ads.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Settings-365-Ads.reg-F7DAE1766F2178C317FB77DB056B415AD4454AC3",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9b5ccc49ee589c3f1c2fa0dcf13595c9a72aa092c8d702f594c0e06856440cfe"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "f7dae1766f2178c317fb77db056b415ad4454ac3"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Share_to_context_menu.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Share-to-context-menu.reg-34226B43A69E3DC8FB61B3BB4822ECAE89C96B4E",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "474cdca87f79a4cd6ad499e2f35568d5c848b1d541507e26cd5099c3f51c3d69"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "34226b43a69e3dc8fb61b3bb4822ecae89c96b4e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Modern_Standby_Networking.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Modern-Standby-Networking.reg-7C701C4A6311247ADF800BFD2588F6351AFD461C",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6c36e3e5a76c079f0ffa2d589e219c12c73528d4a92724950deb68fc07eb4290"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "7c701c4a6311247adf800bfd2588f6351afd461c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Settings_Home.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Settings-Home.reg-4B70FFDB6195CE972A72E8F16962633890EFF894",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f680b9db0264fa1a80b5d340839476f07b4cf889550c9a468a870f5b7a06a47d"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "4b70ffdb6195ce972a72e8f16962633890eff894"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Show_Home_from_Explorer.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Show-Home-from-Explorer.reg-3FC7314D24CB6DEEF684C349C526CFA71555527A",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "dd6fb8f75afdd628b8c1e8a0a69c4a20b13bd8260e4241da9dc9ef3dabb2450b"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3fc7314d24cb6deef684c349c526cfa71555527a"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Paint_AI_Features.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Paint-AI-Features.reg-9AFD25FA8EF63A3FF68B061BA2C9038ACA5727B6",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "cadc7370b9861b34d3877db396c8c157069345724c284ae8ede2cd36bcd3d652"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "9afd25fa8ef63a3ff68b061ba2c9038aca5727b6"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Start_Recommended.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Start-Recommended.reg-987E3FCE28AFE8A0A3B9963FD66DFD914956B9FC",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "2a038fee6fca734b3d7ec01975ef5ec5ecd3726aaf0050f02dab77d9d6a4dd9b"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "987e3fce28afe8a0a3b9963fd66dfd914956b9fc"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Widgets_Service.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Widgets-Service.reg-DABD49FCDAA3CF423EB183615BCACB98C1F03185",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "013d8a9583474965e2e472ee4a31ba1480a3ad1dfabb2312d2feebb349896319"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "dabd49fcdaa3cf423eb183615bcacb98c1f03185"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Sticky_Keys_Shortcut.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Sticky-Keys-Shortcut.reg-B5DA407984B16F07CE832E37B4643D751BB9FFB6",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f3b04bde6094b1803614870747c2dffefc12f5ce112bf92d8c25b6727b181d51"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "b5da407984b16f07ce832e37b4643d751bb9ffb6"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Hide_Extensions_For_Known_File_Types.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Hide-Extensions-For-Known-File-Types.reg-79FF0B1AC899AA83CD02312C7980FDAE3659AE56",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e907733162e6cf1e725b425d5ae7411e6c6cd38cac64e03ed3de86a0ee7b201c"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "79ff0b1ac899aa83cd02312c7980fdae3659ae56"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Windows_Suggestions.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Windows-Suggestions.reg-DB3066A557113F17F457FF3EA09A179B67EFDCDA",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "cbd9f6057f49e394b7a6c9252900883d96311f61a172f31231fbfd5ce534d969"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "db3066a557113f17f457ff3ea09a179b67efdcda"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Enable_Transparency.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Enable-Transparency.reg-3189D75B7723F83D0CE4C0BA7F4E6DDBFD771080",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "91d77db0450015ad54e61f92c07e06b81cbff79f16972132211b2d2af8fbda83"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3189d75b7723f83d0ce4c0ba7f4e6ddbfd771080"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Hide_Hidden_Folders.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Hide-Hidden-Folders.reg-BEEE473594530BD2B45575933467B63E1A333FF2",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3b916e87c07c067b7af25bd4fcf5c83a92560f7e9d456c690e3f0220efef7040"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "beee473594530bd2b45575933467b63e1a333ff2"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Show_Music_Folder.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Show-Music-Folder.reg-9423EA665A0B3D8DD7CE3DA690A48C3AD251AE1C",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3f99260084e2ab1a59face49378b166875b3a9c905612e8daf86aa61851e1613"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "9423ea665a0b3d8dd7ce3da690a48c3ad251ae1c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Show_3D_Objects_Folder.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Show-3D-Objects-Folder.reg-03B8505CF3DD0D30CD3768F2E3ECD4032825CA23",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "f95752e5b8220215ed19889dfc45cde937ca7d6ddf4b16af4a1319376c65759f"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "03b8505cf3dd0d30cd3768f2e3ecd4032825ca23"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Show_Taskview_Taskbar.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Show-Taskview-Taskbar.reg-0DC26DBF350C16ED3D06686FEA916314A041C47E",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "57656d49ca70b67039e4fd2771b61d73c274df05a7f1dfbcd7a2754fa4a1d917"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "0dc26dbf350c16ed3d06686fea916314a041c47e"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Show_Onedrive_folder.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Show-Onedrive-folder.reg-5DDB7A84A0864FB397903DD2D44669EFF9E176CD",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "3f24e4a39a5a4a6f97f3b2bfa094e1fa8576caa383cc00384f432b87d41c590e"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "5ddb7a84a0864fb397903dd2d44669eff9e176cd"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Regfiles/Undo/Show_Gallery_in_Explorer.reg",
+      "SPDXID": "SPDXRef-File--Regfiles-Undo-Show-Gallery-in-Explorer.reg-29732C8BE342BA36CC3E98ADE51DA70FBDD1734F",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "b352d2f1622d8cc393f1096681e746fcc7d96ef49a38c69eabd16e37bdc80539"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "29732c8be342ba36cc3e98ade51da70fbdd1734f"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    }
+  ],
+  "packages": [
+    {
+      "name": "PSTest",
+      "SPDXID": "SPDXRef-RootPackage",
+      "downloadLocation": "NOASSERTION",
+      "packageVerificationCode": {
+        "packageVerificationCodeValue": "c916727f754389d54306b262f58ab6c4f1782b37"
+      },
+      "filesAnalyzed": true,
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoFromFiles": [
+        "NOASSERTION"
+      ],
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "7",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:swid/SecurityReviewer/www.securityreviewer.net/PSTest@7?tag_id=fc0ea40f-3c37-44d5-949c-d131a485b61e"
+        }
+      ],
+      "supplier": "Organization: SecurityReviewer",
+      "hasFiles": [
+        "SPDXRef-File--Regfiles-Undo-Show-Onedrive-folder.reg-5DDB7A84A0864FB397903DD2D44669EFF9E176CD",
+        "SPDXRef-File--Regfiles-Undo-Show-Taskview-Taskbar.reg-0DC26DBF350C16ED3D06686FEA916314A041C47E",
+        "SPDXRef-File--Regfiles-Undo-Show-Music-Folder.reg-9423EA665A0B3D8DD7CE3DA690A48C3AD251AE1C",
+        "SPDXRef-File--Regfiles-Undo-Hide-Hidden-Folders.reg-BEEE473594530BD2B45575933467B63E1A333FF2",
+        "SPDXRef-File--Regfiles-Undo-Show-Gallery-in-Explorer.reg-29732C8BE342BA36CC3E98ADE51DA70FBDD1734F",
+        "SPDXRef-File--Regfiles-Undo-Show-3D-Objects-Folder.reg-03B8505CF3DD0D30CD3768F2E3ECD4032825CA23",
+        "SPDXRef-File--Regfiles-Undo-Enable-Transparency.reg-3189D75B7723F83D0CE4C0BA7F4E6DDBFD771080",
+        "SPDXRef-File--Regfiles-Undo-Enable-Settings-Home.reg-4B70FFDB6195CE972A72E8F16962633890EFF894",
+        "SPDXRef-File--Regfiles-Undo-Enable-Share-to-context-menu.reg-34226B43A69E3DC8FB61B3BB4822ECAE89C96B4E",
+        "SPDXRef-File--Regfiles-Undo-Enable-Include-in-library-to-context-menu.reg-B5E5AB99C99F7F2062CF25CDF52B0B307B863A94",
+        "SPDXRef-File--Regfiles-Undo-Enable-W11-Style-Context-Menu.reg-3CB431EC25E873E54BA81992CEED0828CE8ACC52",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Transparency.reg-0FD12466DEC4F03E07E2F26C34246D38C2B9C4B5",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Phone-Link-In-Start.reg-CB42B7E397A317835445B7578900DA172329CA26",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Fast-Startup.reg-AB78FF1332C773F184669CB49E26B58AEA3270CE",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-DVR.reg-E4E07C5FE7A31E9BC13B1245AD1A2BCFEA4CDC49",
+        "SPDXRef-File--Regfiles-Sysprep-Combine-Taskbar-When-Full.reg-CBAC73079AB35157AB2D65B7FFE69A90CC0B6917",
+        "SPDXRef-File--Regfiles-Show-Extensions-For-Known-File-Types.reg-7400079467BA1B0A5636F2AF4B2C2AE844AEFA55",
+        "SPDXRef-File--Regfiles-Hide-Taskview-Taskbar.reg-26C56239E9CCE4DF8CB37EDBB28338DAFBEE4589",
+        "SPDXRef-File--Regfiles-Enable-Last-Active-Click.reg-BFFCC236C58B8B07D53BCF00182878C34D74953B",
+        "SPDXRef-File--Regfiles-Disable-Start-Recommended.reg-2823D7CA7BF205C3BE1CEB044CD89163587A35D1",
+        "SPDXRef-File--Regfiles-Disable-Modern-Standby-Networking.reg-03720451A3176010BDF862B4FED794FBF83AD113",
+        "SPDXRef-File--Regfiles-Disable-Edge-Ads-And-Suggestions.reg-3CBEA115F0880818F6D3EEC7311428BDDC19F966",
+        "SPDXRef-File--Regfiles-Disable-AI-Recall.reg-45AE0B307E4EC7A2AF61CB0119D93107B4D172E8",
+        "SPDXRef-File--Assets-Start-What-is-this-file.txt-FCA7CAE37B4BABFA2F7EF4EAB2FFA2F8972E1AFF",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-AI-Recall.reg-88BCE2B74489708ED6071B074F1FA34A25D2DAB9",
+        "SPDXRef-File--Regfiles-Show-Hidden-Folders.reg-362481ACB6408DC7A6108309380301C5F3A2E29A",
+        "SPDXRef-File--Regfiles-Launch-File-Explorer-To-Downloads.reg-E38C0D501A69A25D332DDB15AD88ED24E284B250",
+        "SPDXRef-File--Regfiles-Hide-3D-Objects-Folder.reg-6052EC4D65142C4F99653F2E9C3097BF53326853",
+        "SPDXRef-File--Regfiles-Disable-Sticky-Keys-Shortcut.reg-2407BDDBAEEDD025A6B28295274A8DEB361AE5F9",
+        "SPDXRef-File--Regfiles-Disable-Notepad-AI-Features.reg-E19604F3C9AC9A144036EC18313898CE19FA3F44",
+        "SPDXRef-File--Regfiles-Disable-Edge-AI-Features.reg-CEA909CC78E69B4F9650DFE967550A93CBDE945C",
+        "SPDXRef-File--Regfiles-Disable-Animations.reg-463D4EE7360C33C3966C81693382C1396F8A16EC",
+        "SPDXRef-File--Regfiles-Align-Taskbar-Left.reg-5C989DE8C76819D4FB6350ED25F70D14C2D37D80",
+        "SPDXRef-File--.github-FUNDING.yml-A5AED6490014121C6422428D66695C702F45C216",
+        "SPDXRef-File--.gitignore-6C5255D55527A25F1F5B92E38FF149D10EB6F11C",
+        "SPDXRef-File--Run.bat-14683D69811D8D6515871545CB39378FC42D875F",
+        "SPDXRef-File--Regfiles-Undo-Show-duplicate-removable-drives-from-navigation-pane-of-File-Explorer.reg-03629A2E915D49AE917F493546EA207E87934D41",
+        "SPDXRef-File--Regfiles-Undo-Enable-Enhance-Pointer-Precision.reg-F81AE1B0454DD6E6753FB023B597588AD8338B53",
+        "SPDXRef-File--Regfiles-Sysprep-Show-Search-Box.reg-6F78366645FCD114AE50ACC4A154E47EBA3F9997",
+        "SPDXRef-File--Regfiles-Undo-Allow-Edge-Telemetry.reg-55AA97D541D60CCCB249A84649743CBAABC42A3A",
+        "SPDXRef-File--Regfiles-Sysprep-Show-Hidden-Folders.reg-4792DEBDCE0B64A6954D14ACAC5061E629CA97DB",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Settings-365-Ads.reg-ED5A8A4B80AD9A2F259C31B747AC7A35E6B02508",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Click-to-Do.reg-10A6E869B56F23A429A24C512FDD28EBFCEC48A1",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Edge-Ads-And-Suggestions.reg-3CBEA115F0880818F6D3EEC7311428BDDC19F966",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Desktop-Spotlight.reg-E3F054ADF9E739D02F8EFD5DFE1ADBA6C6AF1F92",
+        "SPDXRef-File--Regfiles-Sysprep-Combine-Taskbar-Never.reg-92862F8CE625E7CC45D77707B415E8CB96E149D3",
+        "SPDXRef-File--Regfiles-MMTaskbarMode-Main-Active.reg-3BF1A1A31B04B827596FAE871C71AA6B5A2F6B1C",
+        "SPDXRef-File--Regfiles-Hide-Search-Taskbar.reg-35D85C2A6FF699BD5253A249BB655C698DDAB56D",
+        "SPDXRef-File--Regfiles-Enable-End-Task.reg-6EA6F923B68A24A3765742975BF040BC0A8D6A7E",
+        "SPDXRef-File--Regfiles-Disable-Show-More-Options-Context-Menu.reg-EED0396F6C531131D70156ACC6CB881BBCF85D3A",
+        "SPDXRef-File--Regfiles-Disable-Lockscreen-Tips.reg-C1A3E20E801EB11A46B2FBC42DE19ACCF396883A",
+        "SPDXRef-File--Regfiles-Disable-DVR.reg-49912114850BFC30A7E0A4833ADBB3C60575B033",
+        "SPDXRef-File--Regfiles-Combine-Taskbar-When-Full.reg-EB4623DB999AD5C8B571D38D6C1B306E8F6AEA00",
+        "SPDXRef-File--Assets-Start-start2.bin-0A2FCD08E425A9F1B390D4E10C8CB9B597591A60",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Chat-Taskbar.reg-541EA2E04FE79807FFCDE4BFAAAC0E8419A68E16",
+        "SPDXRef-File--Regfiles-Show-Search-Icon-And-Label.reg-22CEFC52F2D9BAEE797AD24CAA268CA4F0E71BBF",
+        "SPDXRef-File--Regfiles-Launch-File-Explorer-To-This-PC.reg-06F610796659F3B3660150FB97BDCC71AD6C89E5",
+        "SPDXRef-File--Regfiles-Hide-Home-from-Explorer.reg-C32D417B66ACADFDE16D3FEC70E6BD31E40C8721",
+        "SPDXRef-File--Regfiles-Disable-Widgets-Service.reg-0FC714DAB4FB2B708C05E71FB771755D54F49DF5",
+        "SPDXRef-File--Regfiles-Disable-Settings-365-Ads.reg-ED5A8A4B80AD9A2F259C31B747AC7A35E6B02508",
+        "SPDXRef-File--Regfiles-Disable-Game-Bar-Integration.reg-B62FCFFC053DD3F437C429A5B262295B911FA1C8",
+        "SPDXRef-File--Regfiles-Disable-Click-to-Do.reg-35C99719D65FD5FD89F0EAA3DCEDC1746DB64180",
+        "SPDXRef-File--Regfiles-Combine-MMTaskbar-When-Full.reg-44CCD31A0FE0241C87C5EB5CACC1720E8C274D3A",
+        "SPDXRef-File--.github-ISSUE-TEMPLATE-feature-request.yml-5D8A8BE8F957318711189C7542FA71B1BDF68FF7",
+        "SPDXRef-File--Get.ps1-B3EF2C7DDB35FDC9E31035891B3B96200BE91AD6",
+        "SPDXRef-File--Win11Debloat.ps1-D8A07013840A77C4BE2C84A865A732803E16DD31",
+        "SPDXRef-File--Regfiles-Undo-Enable-Sticky-Keys-Shortcut.reg-B5DA407984B16F07CE832E37B4643D751BB9FFB6",
+        "SPDXRef-File--Regfiles-Undo-Enable-Settings-365-Ads.reg-F7DAE1766F2178C317FB77DB056B415AD4454AC3",
+        "SPDXRef-File--Regfiles-Undo-Enable-Chat-Taskbar.reg-8C06320E63D6F44B90699209F98FCE976AAF096E",
+        "SPDXRef-File--Regfiles-Undo-Enable-Game-Bar-Integration.reg-9A1098EF9B1ECFCB94949235D325486B52A10C20",
+        "SPDXRef-File--Regfiles-Undo-Enable-Copilot.reg-5D905D83B275C1951C146BC631BBCB70EC71FE1D",
+        "SPDXRef-File--Regfiles-Undo-Enable-DVR.reg-A38A0790A5DE29589008B1EB06C2721DB0269660",
+        "SPDXRef-File--Regfiles-Undo-Disable-Last-Active-Click.reg-5383058C5E64C41BF3B186CC78FE50294C22FDDD",
+        "SPDXRef-File--Regfiles-Undo-Enable-Animations.reg-A4C910726CC715A770D53688E47A2164F267B600",
+        "SPDXRef-File--Regfiles-Undo-Align-Taskbar-Center.reg-962E85878A794B2BE371CC9B214106BFA5A68131",
+        "SPDXRef-File--Regfiles-Undo-Enable-Click-to-Do.reg-B6FD9D877F14420ECFE135B75E0D78CA961D6315",
+        "SPDXRef-File--Regfiles-Undo-Enable-Bing-Cortana-In-Search.reg-3795782F95A23B3F69FE1220AC20E0C3B90DF47B",
+        "SPDXRef-File--Regfiles-Sysprep-Launch-File-Explorer-To-Home.reg-45208C82752FE401682371F5AE37165125FC1815",
+        "SPDXRef-File--Regfiles-Sysprep-Hide-Search-Taskbar.reg-65628DAB28D362D488A88768C453A4C229FEED23",
+        "SPDXRef-File--Regfiles-Sysprep-Hide-Home-from-Explorer.reg-D961D27D3DD3BD213DF00E9E0269C43707AE8C85",
+        "SPDXRef-File--Regfiles-Sysprep-Show-Extensions-For-Known-File-Types.reg-7D3DC4755B4C50F39D4C866797462FD9D83006D7",
+        "SPDXRef-File--Regfiles-Sysprep-Hide-Onedrive-Folder.reg-9EB70611B1EFA6ACEF3A4D4E634D13D2AAE2B60D",
+        "SPDXRef-File--Regfiles-Sysprep-Hide-Taskview-Taskbar.reg-C01EBFB622566B6D003097DF87A060290156B770",
+        "SPDXRef-File--Regfiles-Sysprep-Hide-3D-Objects-Folder.reg-6052EC4D65142C4F99653F2E9C3097BF53326853",
+        "SPDXRef-File--Regfiles-Sysprep-Launch-File-Explorer-To-OneDrive.reg-3EE8CEE773EC4C680846C6C01C145722730766F7",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Windows-Suggestions.reg-B559B1B184865099691EBAA0BCB7D2BD8D84851C",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Start-Recommended.reg-3D404CBF2FC4679190059E43AD3E50C76056BCA2",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Share-from-context-menu.reg-EF9F9CED72288DBC6FE7C8B60D43CD25F7C58356",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Game-Bar-Integration.reg-2EABF7F29F896A6C0F942BADDF1E5F0C022772E0",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Modern-Standby-Networking.reg-03720451A3176010BDF862B4FED794FBF83AD113",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Include-in-library-from-context-menu.reg-706A0E993E7BDB5FA5D49B1964E8BE07E23A6709",
+        "SPDXRef-File--Regfiles-Show-Search-Icon.reg-7DF056478580A0F5B7C899D53990E04B29733958",
+        "SPDXRef-File--Regfiles-Launch-File-Explorer-To-OneDrive.reg-5776E18132122909FCC8F1982BB87A83AE49F3D9",
+        "SPDXRef-File--Regfiles-Hide-Gallery-from-Explorer.reg-D96EF620624154AF1F03B5D7CA1F38A965F56D53",
+        "SPDXRef-File--Regfiles-Disable-Transparency.reg-B2680E539FAA1235C1DE7E73112B29B3FBD97A6E",
+        "SPDXRef-File--Regfiles-Disable-Phone-Link-In-Start.reg-016A845BD4E9EFFADBA688595F16096381D3DAA4",
+        "SPDXRef-File--Regfiles-Disable-Fast-Startup.reg-AB78FF1332C773F184669CB49E26B58AEA3270CE",
+        "SPDXRef-File--Regfiles-Disable-Chat-Taskbar.reg-616CCD2EFB429B376B55A19CBB029C4D07C4D9B6",
+        "SPDXRef-File--Regfiles-Combine-MMTaskbar-Never.reg-6E1CA6FCBED3014606C540737A6298396550E487",
+        "SPDXRef-File--.github-ISSUE-TEMPLATE-config.yml-2E4E91A444C08B26EC414BD9805AD29E9B642D05",
+        "SPDXRef-File--DefaultSettings.json-1625A1788F52FB6DB3B0C22A3E2B324534A03A96",
+        "SPDXRef-File--Regfiles-Undo-Enable-Lockscreen-Tips.reg-B70197166F9E1A1BB682382FB02DEED5018F4854",
+        "SPDXRef-File--Regfiles-Undo-Enable-Phone-Link-In-Start.reg-C7EA17DC6E8E4E748CB2242F1432A8E60661306A",
+        "SPDXRef-File--Regfiles-Undo-Enable-Give-access-to-context-menu.reg-61355262D64E12A2B6FAA4A62FEA84477757B79F",
+        "SPDXRef-File--Regfiles-Undo-Enable-Telemetry.reg-F3594D05AB5E066E79C903F86C27FC286D4E42DA",
+        "SPDXRef-File--Regfiles-Undo-Enable-Notepad-AI-Features.reg-072E9D629E820EF1AF2732B14F6C0536D3E0991C",
+        "SPDXRef-File--Regfiles-Undo-Disable-End-Task.reg-389410965D5DC60FD4BDF7DEF52268BAEA0CD8FD",
+        "SPDXRef-File--Regfiles-Sysprep-Show-Search-Icon-And-Label.reg-A77E1D0367D96DF8081518D498669B9FC7845866",
+        "SPDXRef-File--Regfiles-Sysprep-Launch-File-Explorer-To-This-PC.reg-2ADB78BEA0C1074021E4108A41FCA5C52274FBFB",
+        "SPDXRef-File--Regfiles-Sysprep-Launch-File-Explorer-To-Downloads.reg-B6ED497041C7F62267C63FFB015174DBF51925DD",
+        "SPDXRef-File--Regfiles-Sysprep-Show-Search-Icon.reg-6FF0E3643DD5FA126A299ED62C26E15EF1F553E4",
+        "SPDXRef-File--Regfiles-Sysprep-Enable-End-Task.reg-33615324E116D798FF59F8DC9483C813F98A20AD",
+        "SPDXRef-File--Regfiles-Sysprep-Hide-Music-Folder.reg-3080007A3A29657316D761ECD8BD629FE098338F",
+        "SPDXRef-File--Regfiles-Sysprep-Enable-Dark-Mode.reg-CE39122F00E186D8C8EC13DC2360C400EF211FB0",
+        "SPDXRef-File--Regfiles-Sysprep-Enable-Last-Active-Click.reg-5F072A75C92A0C1B366DBDDF2427D3DE0EFC221B",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Show-More-Options-Context-Menu.reg-6EC64271856531D0797A8AFB0F9404B8E69F0F20",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Notepad-AI-Features.reg-E19604F3C9AC9A144036EC18313898CE19FA3F44",
+        "SPDXRef-File--Regfiles-Sysprep-Hide-Gallery-from-Explorer.reg-0A8B648DC043D65D86A82C2FEA93193989E98965",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Paint-AI-Features.reg-11DE850B1B9859AE7F349371F025E7CCB1A648A2",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Lockscreen-Tips.reg-E661D85475090C9D1FB3A71B23861592EB905470",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Edge-AI-Features.reg-CEA909CC78E69B4F9650DFE967550A93CBDE945C",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Enhance-Pointer-Precision.reg-55478BB0514FD4FC13D24449CF17FC2FEB754BF1",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Bing-Cortana-In-Search.reg-DCDECF910F9D7DCEB29D8D65293022930A3C9EFE",
+        "SPDXRef-File--Regfiles-Show-Search-Box.reg-3A58E999BE71761AF2889EF6DC9979328B315274",
+        "SPDXRef-File--Regfiles-Launch-File-Explorer-To-Home.reg-02824DBD022AA4DC71F0494C1E77BC5A5E1C90E5",
+        "SPDXRef-File--Regfiles-Hide-duplicate-removable-drives-from-navigation-pane-of-File-Explorer.reg-35AA53362DE27622B41BB3D4750D699A0A85F413",
+        "SPDXRef-File--Regfiles-Disable-Telemetry.reg-C7159FC3ADD4FD7CE6FC3820FE6E318112329E9E",
+        "SPDXRef-File--Regfiles-Disable-Paint-AI-Features.reg-11DE850B1B9859AE7F349371F025E7CCB1A648A2",
+        "SPDXRef-File--Regfiles-Disable-Enhance-Pointer-Precision.reg-23F12886C0A3903C64496480D7E74089FF9A2950",
+        "SPDXRef-File--Regfiles-Disable-Bing-Cortana-In-Search.reg-B7EB898C4CA2D9937943161205937B86230255DE",
+        "SPDXRef-File--Regfiles-Combine-MMTaskbar-Always.reg-778A3F60C99B6C9D86D4F711FEB93B1B2AF90D00",
+        "SPDXRef-File--.github-ISSUE-TEMPLATE-bug-report.yml-7A0B821AB50E812134FFE9B5DDA62FE6219554B8",
+        "SPDXRef-File--LICENSE-27F5692A1146E2B1585F7580C27E7406FCA523EC",
+        "SPDXRef-File--Regfiles-Undo-Enable-Windows-Suggestions.reg-DB3066A557113F17F457FF3EA09A179B67EFDCDA",
+        "SPDXRef-File--Regfiles-Undo-Hide-Extensions-For-Known-File-Types.reg-79FF0B1AC899AA83CD02312C7980FDAE3659AE56",
+        "SPDXRef-File--Regfiles-Undo-Enable-Widgets-Service.reg-DABD49FCDAA3CF423EB183615BCACB98C1F03185",
+        "SPDXRef-File--Regfiles-Undo-Enable-Start-Recommended.reg-987E3FCE28AFE8A0A3B9963FD66DFD914956B9FC",
+        "SPDXRef-File--Regfiles-Undo-Enable-Paint-AI-Features.reg-9AFD25FA8EF63A3FF68B061BA2C9038ACA5727B6",
+        "SPDXRef-File--Regfiles-Undo-Show-Home-from-Explorer.reg-3FC7314D24CB6DEEF684C349C526CFA71555527A",
+        "SPDXRef-File--Regfiles-Undo-Enable-Modern-Standby-Networking.reg-7C701C4A6311247ADF800BFD2588F6351AFD461C",
+        "SPDXRef-File--Regfiles-Undo-Enable-Fast-Startup.reg-D1DF973BCAC5AD89D2EB5F8FFA713FD2D2BFB9FF",
+        "SPDXRef-File--Regfiles-Undo-Enable-Edge-Ads-And-Suggestions.reg-924BD2EE27F0C579909C60FE6179CD6FE606D0FB",
+        "SPDXRef-File--Regfiles-Undo-Enable-Light-Mode.reg-7C085B9CE57753CB2C98F87901E825DDC8387D78",
+        "SPDXRef-File--Regfiles-Undo-Enable-Desktop-Spotlight.reg-780A0862FC52431FC08B83302FF701AFED9E31E7",
+        "SPDXRef-File--Regfiles-Undo-Enable-Edge-AI-Features.reg-FEA905DACA0F8113F83EAE9B8C418B6420555FC4",
+        "SPDXRef-File--Regfiles-Undo-Enable-AI-Recall.reg-C3AAC448731CE7A26344C5DBDE45C536CF525A4E",
+        "SPDXRef-File--Regfiles-Undo-Enable-Activity-History.reg-0BE40CE8EF7C19B727A2C9334646A341A7674761",
+        "SPDXRef-File--Regfiles-Sysprep-Uninstall-Microsoft-Edge.reg-0BBDA7F8AE3FC6504985BA3846C37761E20AAE31",
+        "SPDXRef-File--Regfiles-Sysprep-Uninstall-Microsoft-OneDrive.reg-442B60ADC35FA6031EC900C313A1AB22C56BCB39",
+        "SPDXRef-File--Regfiles-Sysprep-Hide-duplicate-removable-drives-from-navigation-pane-of-File-Explorer.reg-35AA53362DE27622B41BB3D4750D699A0A85F413",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Widgets-Service.reg-0FC714DAB4FB2B708C05E71FB771755D54F49DF5",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Sticky-Keys-Shortcut.reg-69A9AAF96E0E5C435BD226B50EC25FD0CF36ECCC",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Telemetry.reg-F0FE92B79F0B178001E86DBC96917505380F1D9C",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Settings-Home.reg-E572F29EEA6C741029A27C7A237323076A660C59",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Give-access-to-context-menu.reg-5A8CFB481DCDD553973A04E6CD57299486AC3731",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Animations.reg-BD7C7B78C5AF883BFA70682035C1E9D0AD74732B",
+        "SPDXRef-File--Regfiles-Sysprep-Align-Taskbar-Left.reg-0C8ED3380CE7BA3444311709AEA9563A8D3789F2",
+        "SPDXRef-File--Regfiles-MMTaskbarMode-Active.reg-4825052E44182290AD42C87554B05D0634F40B1D",
+        "SPDXRef-File--Regfiles-Hide-Music-Folder.reg-3080007A3A29657316D761ECD8BD629FE098338F",
+        "SPDXRef-File--Regfiles-Disable-Windows-Suggestions.reg-4144A47A63FDF5A64D6C5EA415660D84E173A5E1",
+        "SPDXRef-File--Regfiles-Disable-Settings-Home.reg-E572F29EEA6C741029A27C7A237323076A660C59",
+        "SPDXRef-File--Regfiles-Disable-Give-access-to-context-menu.reg-5A8CFB481DCDD553973A04E6CD57299486AC3731",
+        "SPDXRef-File--Regfiles-Disable-Copilot.reg-2FC08B387A41962C26E6B1AA6FD9DC49BDA5DDFC",
+        "SPDXRef-File--Regfiles-Combine-Taskbar-Always.reg-2890F923CCEC75ED906BAB806B9DD4505B295849",
+        "SPDXRef-File--Assets-menu.png-002083B7A7754DDE71030039FEE7F3C07E4328E3",
+        "SPDXRef-File--Regfiles-Sysprep-Disable-Copilot.reg-B0EB95A16707AD9A50B71CE6FD480741F2B29159",
+        "SPDXRef-File--Regfiles-Sysprep-Combine-Taskbar-Always.reg-3F57D2C7F99B9D61B3DA75FFCFB4EF65F0F2B6FF",
+        "SPDXRef-File--Regfiles-MMTaskbarMode-All.reg-68232F112CB99DE8049FF8A853F7728C050543D9",
+        "SPDXRef-File--Regfiles-Hide-Onedrive-Folder.reg-9EB70611B1EFA6ACEF3A4D4E634D13D2AAE2B60D",
+        "SPDXRef-File--Regfiles-Enable-Dark-Mode.reg-922FEE35DF1C9F8549D69E852569125D36DBFC80",
+        "SPDXRef-File--Regfiles-Disable-Share-from-context-menu.reg-EF9F9CED72288DBC6FE7C8B60D43CD25F7C58356",
+        "SPDXRef-File--Regfiles-Disable-Include-in-library-from-context-menu.reg-706A0E993E7BDB5FA5D49B1964E8BE07E23A6709",
+        "SPDXRef-File--Regfiles-Disable-Desktop-Spotlight.reg-D628E814E1B1F826BF4FFCACDB4056547F9DBA9B",
+        "SPDXRef-File--Regfiles-Combine-Taskbar-Never.reg-69236F3EE18436245EE87EE72E6079416189C093",
+        "SPDXRef-File--Assets-Menus-Info-3E524CA62EBE438B96C5D87DFC26D83E86EDCA66",
+        "SPDXRef-File--README.md-CD0224EEBD85F662C9B94081CABDD114D885A8E6",
+        "SPDXRef-File--Appslist.txt-4475E401B8DC647C42311678E0B9405E4D65EA03"
+      ]
+    }
+  ],
+  "externalDocumentRefs": [],
+  "relationships": [
+    {
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-RootPackage",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    }
+  ],
+  "spdxVersion": "SPDX-2.2",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "PSTest 7",
+  "documentNamespace": "https://www.securityreviewer.net/SBOM/PSTest/7/1ISw1X24Rk--Ss-SySxi6Q",
+  "creationInfo": {
+    "created": "2026-02-15T16:35:37Z",
+    "creators": [
+      "Organization: SecurityReviewer",
+      "Tool: Microsoft.SBOMTool-4.1.5"
+    ]
+  },
+  "documentDescribes": [
+    "SPDXRef-RootPackage"
+  ]
+}

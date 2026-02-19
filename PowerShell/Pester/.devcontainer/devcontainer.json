@@ -1,0 +1,25 @@
+// For format details, see https://aka.ms/vscode-remote/devcontainer.json
+{
+	"name": "Pester",
+	"image": "mcr.microsoft.com/devcontainers/dotnet:1-8.0-jammy",
+	"remoteUser": "vscode",
+	"customizations": {
+		"codespaces": {
+			"openFiles": [
+				"CONTRIBUTING.md"
+			]
+		},
+		"vscode": {
+			"settings": {},
+			"extensions": [
+				"ms-vscode.powershell",
+				"ms-dotnettools.csharp",
+				"redhat.vscode-xml",
+				"ms-azure-devops.azure-pipelines",
+				"GitHub.vscode-github-actions"
+			]
+		}
+	},
+	// Restoring the c# projects
+	"postCreateCommand": "dotnet restore src/csharp"
+}

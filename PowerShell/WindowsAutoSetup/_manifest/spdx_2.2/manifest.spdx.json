@@ -1,0 +1,195 @@
+{
+  "files": [
+    {
+      "fileName": "./Wifi2G.xml",
+      "SPDXID": "SPDXRef-File--Wifi2G.xml-EE219CD1CD35BB5E3A587AC4CC46B6844F6D3C1C",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1dbb34c462f7d2ae52b0f0d427055dfbb70b4657d2169b25fc0e2c022c622102"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ee219cd1cd35bb5e3a587ac4cc46b6844f6d3c1c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./Wifi5G.xml",
+      "SPDXID": "SPDXRef-File--Wifi5G.xml-EE219CD1CD35BB5E3A587AC4CC46B6844F6D3C1C",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "1dbb34c462f7d2ae52b0f0d427055dfbb70b4657d2169b25fc0e2c022c622102"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "ee219cd1cd35bb5e3a587ac4cc46b6844f6d3c1c"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./netdrives.ps1",
+      "SPDXID": "SPDXRef-File--netdrives.ps1-3156C3EE37ECF627A9982F185B4FF337213D3FD5",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "507d4a3c8c872a211b0c8946b0002d1162695d3e735b7f0fb3bff6f658d1fbf9"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "3156c3ee37ecf627a9982f185b4ff337213d3fd5"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./README.md",
+      "SPDXID": "SPDXRef-File--README.md-37416FE5CB1EB543ADD9CDDA6BDA3CAAFA1A79F1",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "a77783a4989c2a5cb0caa08536d6e08f65fba3b269acf4cf3db3532622680f11"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "37416fe5cb1eb543add9cdda6bda3caafa1a79f1"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./LICENSE",
+      "SPDXID": "SPDXRef-File--LICENSE-471C049EE32DF5D62A71A05943C28CE5AA55899B",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "9f25692d9ab161d64f1f427dd006481d922da2ae14cd4c27b7dd390b419928af"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "471c049ee32df5d62a71a05943c28ce5aa55899b"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./powerwashed.ps1",
+      "SPDXID": "SPDXRef-File--powerwashed.ps1-6920A963510D0B5AF947C2712CE6C1F080C4FF28",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "8cb4b99eeb4d27bf7682029d9380f0d91e1e09bfce0e9ccff257f55dd771ad37"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "6920a963510d0b5af947c2712ce6c1f080c4ff28"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    },
+    {
+      "fileName": "./.github/workflows/powershell.yml",
+      "SPDXID": "SPDXRef-File--.github-workflows-powershell.yml-A9F26BEF6C3FD2CFB434ECBDF2D0E9EEB3DF8D03",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "6a0232f0d589ed2582b33e2e4d4526893decf870e6ff904dbca252707d6546e3"
+        },
+        {
+          "algorithm": "SHA1",
+          "checksumValue": "a9f26bef6c3fd2cfb434ecbdf2d0e9eeb3df8d03"
+        }
+      ],
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoInFiles": [
+        "NOASSERTION"
+      ],
+      "copyrightText": "NOASSERTION"
+    }
+  ],
+  "packages": [
+    {
+      "name": "PSTest",
+      "SPDXID": "SPDXRef-RootPackage",
+      "downloadLocation": "NOASSERTION",
+      "packageVerificationCode": {
+        "packageVerificationCodeValue": "f61cf800fb04a8f6be14b046060fc0a7a09fd0bb"
+      },
+      "filesAnalyzed": true,
+      "licenseConcluded": "NOASSERTION",
+      "licenseInfoFromFiles": [
+        "NOASSERTION"
+      ],
+      "licenseDeclared": "NOASSERTION",
+      "copyrightText": "NOASSERTION",
+      "versionInfo": "7",
+      "externalRefs": [
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:swid/SecurityReviewer/www.securityreviewer.net/PSTest@7?tag_id=29135828-e5b5-4484-b928-d394e1b0e442"
+        }
+      ],
+      "supplier": "Organization: SecurityReviewer",
+      "hasFiles": [
+        "SPDXRef-File--.github-workflows-powershell.yml-A9F26BEF6C3FD2CFB434ECBDF2D0E9EEB3DF8D03",
+        "SPDXRef-File--Wifi5G.xml-EE219CD1CD35BB5E3A587AC4CC46B6844F6D3C1C",
+        "SPDXRef-File--LICENSE-471C049EE32DF5D62A71A05943C28CE5AA55899B",
+        "SPDXRef-File--README.md-37416FE5CB1EB543ADD9CDDA6BDA3CAAFA1A79F1",
+        "SPDXRef-File--powerwashed.ps1-6920A963510D0B5AF947C2712CE6C1F080C4FF28",
+        "SPDXRef-File--Wifi2G.xml-EE219CD1CD35BB5E3A587AC4CC46B6844F6D3C1C",
+        "SPDXRef-File--netdrives.ps1-3156C3EE37ECF627A9982F185B4FF337213D3FD5"
+      ]
+    }
+  ],
+  "externalDocumentRefs": [],
+  "relationships": [
+    {
+      "relationshipType": "DESCRIBES",
+      "relatedSpdxElement": "SPDXRef-RootPackage",
+      "spdxElementId": "SPDXRef-DOCUMENT"
+    }
+  ],
+  "spdxVersion": "SPDX-2.2",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "PSTest 7",
+  "documentNamespace": "https://www.securityreviewer.net/SBOM/PSTest/7/NiqqP-IQaE-pv5ipdIo4mw",
+  "creationInfo": {
+    "created": "2026-02-15T16:37:24Z",
+    "creators": [
+      "Organization: SecurityReviewer",
+      "Tool: Microsoft.SBOMTool-4.1.5"
+    ]
+  },
+  "documentDescribes": [
+    "SPDXRef-RootPackage"
+  ]
+}
