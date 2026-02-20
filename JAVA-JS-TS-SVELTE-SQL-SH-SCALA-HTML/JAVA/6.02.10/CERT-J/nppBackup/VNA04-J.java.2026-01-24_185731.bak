@@ -1,0 +1,62 @@
+/*
+Noncompliant Code Example
+Method chaining is a useful design pattern for building an object and setting its optional fields. A class that supports method chaining provides several setter methods that each return the this reference. However, if accessed concurrently, a thread may observe shared fields to contain inconsistent values. This noncompliant code example shows the JavaBeans pattern, which is not thread-safe:
+The JavaBeans pattern uses a no-argument constructor and a series of parallel setter methods to build an object. This pattern is not thread-safe and can lead to inconsistent object state when the object is modified concurrently. In this noncompliant code example, the client constructs a USCurrency object and starts two threads that use method chaining to set the optional values of the USCurrency object. This example code might result in the USCurrency instance being left in an inconsistent state, for example, with two quarters and one dime or one quarter and two dimes.
+*/
+
+
+final class USCurrency {
+  // Change requested, denomination (optional fields)
+  private int quarters = 0;
+  private int dimes = 0;
+  private int nickels = 0;
+  private int pennies = 0;
+
+  public USCurrency() {}
+
+  // Setter methods
+  public USCurrency setQuarters(int quantity) {
+    quarters = quantity;
+    return this;
+  }
+  public USCurrency setDimes(int quantity) {
+    dimes = quantity;
+    return this;
+  }
+  public USCurrency setNickels(int quantity) {
+    nickels = quantity;
+    return this;
+  }
+  public USCurrency setPennies(int quantity) {
+    pennies = quantity;
+    return this;
+  }
+}
+
+// Client code:
+class ExampleClientCode {
+
+  private final USCurrency currency = new USCurrency();
+  // ...
+
+  public ExampleClientCode() {
+
+    Thread t1 = new Thread(new Runnable() {
+        @Override public void run() {
+          currency.setQuarters(1).setDimes(1);
+        }
+    });
+    t1.start();
+
+    Thread t2 = new Thread(new Runnable() {
+        @Override public void run() {
+          currency.setQuarters(2).setDimes(2);
+        }
+    });
+    t2.start();
+
+    //...
+  }
+}
+
+

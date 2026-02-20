@@ -1,0 +1,32 @@
+int compute(int x) {
+  x += (x << 2) + 1;
+  return x;
+}
+// ...
+
+int x = compute(50);
+
+int compute2(int x) {
+  int y = x << 2;
+  x += y + 1;
+  return x;
+}
+// ...
+
+int x = compute2(50);
+
+int compute3(int x) {
+  x >>>= 2;
+  return x;
+}
+// ...
+
+int x = compute3(-50);
+
+int compute4(int x) {
+  x >>= 2;
+  return x;
+}
+// ...
+
+int x = compute4(-50);

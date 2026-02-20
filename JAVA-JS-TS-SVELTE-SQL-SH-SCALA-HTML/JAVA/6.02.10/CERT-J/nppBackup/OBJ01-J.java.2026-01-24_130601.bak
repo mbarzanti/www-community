@@ -1,0 +1,47 @@
+/*
+Noncompliant Code Example (Public Primitive Field)
+In this noncompliant code example, the total field tracks the total number of elements as they are added to and removed from a container using the methods add() and remove() respectively.
+As a public field, total can be altered by client code independently of the add() and remove() methods.
+*/
+
+public class Widget {
+  public int total; // Number of elements
+
+  void add() {
+    if (total < Integer.MAX_VALUE) {      
+      total++;
+      // ...
+    } else {
+      throw new ArithmeticException("Overflow");
+    }
+  }
+
+  void remove() {  
+    if (total > 0) {      
+      total--;
+      // ...
+    } else {
+      throw new ArithmeticException("Overflow");
+    }
+  }
+}
+
+/*
+Noncompliant Code Example (Public Mutable Field)
+Programmers often incorrectly assume that declaring a field or variable final makes the referenced object immutable. Declaring variables that have a primitive type final does prevent changes to their values after initialization (by normal Java processing). However, when the field has a reference type, declaring the field final only makes the reference itself immutable. The final clause has no effect on the referenced object. According to The Java Language Specification, §4.12.4, "final Variables" [JLS 2015],
+
+If a final variable holds a reference to an object, then the state of the object may be changed by operations on the object, but the variable will always refer to the same object.
+
+This noncompliant code example declares a static final mutable hash map with public accessibility:
+*/
+public static final HashMap<Integer, String> hm = new HashMap<Integer, String>();
+
+/*
+Noncompliant Code Example (Public Final Array)
+A nonzero-length array is always mutable. Declaring a public final array is a potential security risk as the array elements may be modified by a client. 
+
+
+
+public static final String[] items = {/* ... */};
+Declaring the array reference final prevents modification of the reference but does not prevent clients from modifying the contents of the array.
+*/

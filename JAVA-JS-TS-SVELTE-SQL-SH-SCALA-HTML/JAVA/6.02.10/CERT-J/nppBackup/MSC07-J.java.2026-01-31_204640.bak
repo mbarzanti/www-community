@@ -1,0 +1,17 @@
+/*
+Noncompliant Code Example (Nonprivate Constructor)
+This noncompliant code example uses a nonprivate constructor for instantiating a singleton:
+A malicious subclass may extend the accessibility of the constructor from protected to public, allowing untrusted code to create multiple instances of the singleton. Also, the class field Instance has not been declared final.
+*/
+
+class MySingleton {
+  private static MySingleton instance;
+
+  protected MySingleton() {    
+    instance = new MySingleton();
+  }
+
+  public static MySingleton getInstance() {    
+    return instance;
+  }
+}

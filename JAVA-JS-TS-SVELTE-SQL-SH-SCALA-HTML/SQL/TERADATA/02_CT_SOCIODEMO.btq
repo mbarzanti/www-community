@@ -1,0 +1,334 @@
+
+/*
+  Tabella: EBIL_AREE.CT_SOCIO_DEMO
+  Regime: Delta Mensile
+  Gdl: Teradata
+  Progetto: Operazionalizzazione CT
+*/
+
+  
+  
+.SET WIDTH 240;
+.SET ERROROUT STDOUT;
+
+
+
+create volatile table TEMP as (
+	select DESC_COMUNE
+		, COD_COMUNE_MIN_FIN
+		, count(*) as N_INDIRIZZI
+	from EDWAE_VM.INDIRIZZO
+	where DESC_COMUNE is not null 
+		and COD_COMUNE_MIN_FIN is not null 
+		and trim(COD_COMUNE_MIN_FIN) not in ('9999','', 'ND')
+	group by 1,2
+)with data primary index (cod_comune_min_fin) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table CONVERSIONE_COMUNI as (
+	select a.DESC_COMUNE
+		,a.COD_COMUNE_MIN_FIN
+	from TEMP as a
+	join 
+		(select DESC_COMUNE
+			, cast(sum(N_INDIRIZZI) as float) as N_INDIRIZZI
+		from TEMP
+		group by 1
+		) as b
+		on a.DESC_COMUNE = b.DESC_COMUNE
+	where a.N_INDIRIZZI >= 0.99 * b.N_INDIRIZZI
+) with data primary index (cod_comune_min_fin) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+drop table TEMP;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table TEMP as (
+	select CAP
+		, COD_COMUNE_MIN_FIN
+		, count(*) as N_INDIRIZZI
+	from EDWAE_VM.INDIRIZZO
+	where CAP is not null 
+		and COD_COMUNE_MIN_FIN is not null 
+		and trim(COD_COMUNE_MIN_FIN) not in ('9999','', 'ND')
+	group by 1,2
+)with data primary index (cod_comune_min_fin) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table CONVERSIONE_CAP as (
+	select a.CAP
+		,a.COD_COMUNE_MIN_FIN
+	from TEMP as a
+	join 
+		(select CAP
+			, cast(sum(N_INDIRIZZI) as float) as N_INDIRIZZI
+		from TEMP
+		group by 1
+		) as b
+		on a.CAP = b.CAP
+	where a.N_INDIRIZZI >= 0.99 * b.N_INDIRIZZI
+) with data primary index (cod_comune_min_fin) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+
+drop table TEMP;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table CT_SOCIO_DEMO_TEMP as (
+ select
+  cliente.ID_CLIENTE_BIC
+  , cliente.DT_NASCITA
+  , cliente.COD_SESSO
+  , case when cliente.COD_CIAE in ('6085','6097','6089') then 1 else 0 end as FL_DIPENDENTE
+  , case
+   when ppay.DATA_PRIMA_PPAY is null and bfp.DATA_PRIMO_BFPC is null then ndg.DATA_CREAZIONE_NDG
+   when ppay.DATA_PRIMA_PPAY is null and bfp.DATA_PRIMO_BFPC > ndg.DATA_CREAZIONE_NDG then ndg.DATA_CREAZIONE_NDG
+   when ppay.DATA_PRIMA_PPAY > ndg.DATA_CREAZIONE_NDG and bfp.DATA_PRIMO_BFPC is null then ndg.DATA_CREAZIONE_NDG
+   when ppay.DATA_PRIMA_PPAY > ndg.DATA_CREAZIONE_NDG and bfp.DATA_PRIMO_BFPC> ndg.DATA_CREAZIONE_NDG then ndg.DATA_CREAZIONE_NDG
+   when ppay.DATA_PRIMA_PPAY is null then bfp.DATA_PRIMO_BFPC
+   when ppay.DATA_PRIMA_PPAY > bfp.DATA_PRIMO_BFPC then bfp.DATA_PRIMO_BFPC
+   else ppay.DATA_PRIMA_PPAY
+  end as DATA_CENSIMENTO_CLIENTE
+  , coalesce(fraz.FRAZ_ACCORPAMENTO,fraz.CODFRAZIONARIO) as FRAZIONARIO
+  , coalesce(cliente.COD_COMUNE_NASCITA, cliente.DESC_NAZIONE_NASCITA) as COD_COMUNE_NASCITA
+  , indirizzo.COD_COMUNE_MIN_FIN as COD_COMUNE_DOMICILIO
+  , indirizzo.SEZIONECENSIMENTO
+  , indirizzo.ID_INDIRIZZO
+  , indirizzo.TIPO_AGGANCIO
+  , case when indirizzo.SEZIONECENSIMENTO is not null then 1 else 0 end as FL_VALORE_SEZIONECENSIMENTO
+ from EDWAE_VM.CLIENTE as cliente 
+ join EBIL_AREE.CT_PARAMETRI on 1=1
+ left join EDWAE_VM.FRAZIONARI as fraz
+  on fraz.CODFRAZIONARIO = cliente.COD_FRAZIONARIO_RADIC 
+   and EBIL_AREE.CT_PARAMETRI.DATA_AGGIORNAMENTO between fraz.DT_INI_VAL and fraz.DT_FIN_VAL
+ left join 
+  (select a.CODICE_FISCALE
+   , min(b.DATA_CREAZIONE) as DATA_CREAZIONE_NDG
+  from BIC_ODS_SA_V.BP_ANAGRAFICA as a,  BIC_ODS_SA_V.BP_ATTRIBUTO as b, EBIL_AREE.CT_PARAMETRI
+  where a.NDG = b.NDG and a.NATURA_GIURIDICA='PF'
+   and EBIL_AREE.CT_PARAMETRI.DATA_AGGIORNAMENTO between a.DATA_INIZIO_VALIDITA and a.DATA_FINE_VALIDITA
+   and EBIL_AREE.CT_PARAMETRI.DATA_AGGIORNAMENTO between b.DATA_INIZIO_VALIDITA and b.DATA_FINE_VALIDITA
+   and a.CODICE_FISCALE IS NOT NULL
+  group by a.CODICE_FISCALE
+  ) as ndg
+  on cliente.COD_FISCALE = ndg.CODICE_FISCALE
+ left join 
+  (select CD_FISCALE
+   , min(DT_RICHIESTA) as DATA_PRIMA_PPAY  
+  from V_EDW_DW_BP.MON_ANAGRCARTA_ST, EBIL_AREE.CT_PARAMETRI
+  where EBIL_AREE.CT_PARAMETRI.DATA_AGGIORNAMENTO between DT_INI_VAL and DT_FIN_VAL
+   and DT_RICHIESTA is not null and DT_ATTIVAZIONE is not null 
+   and FL_FITTIZIO = 0 and CD_TIPO_CARTA = '16' and CD_PRODOTTO not in ('EUSIM2','VSSIM1', 'VSIOSE','VSIOST')
+  group by CD_FISCALE
+  ) as ppay
+  on cliente.COD_FISCALE = ppay.CD_FISCALE
+ left join 
+  (select c.CODICE_FISCALE
+   , min(DATA_PRIMO_BFPC) as DATA_PRIMO_BFPC
+  from 
+   (select CD_CLIENTE_SORGENTE
+    , min(DT_EMISSIONE) as DATA_PRIMO_BFPC
+   from EBIL_ANAG_V.V_AN_RAPPORTO_BFP as an, EBIL_ANAG_V.V_ASSOC_RAPP_PROD_CLIENTE as assoc, EBIL_AREE.CT_PARAMETRI
+   where assoc.SK_RAPPORTO = an.SK_RAPPORTO and assoc.FK_TIPO_RAPP = an.FK_TIPO_RAPP
+    and EBIL_AREE.CT_PARAMETRI.DATA_AGGIORNAMENTO between an.DT_INI_VAL and an.DT_FIN_VAL
+    and  EBIL_AREE.CT_PARAMETRI.DATA_AGGIORNAMENTO  between assoc.DT_INIZIO_VALIDITA and assoc.DT_FINE_VALIDITA and CD_TIPO_RAPP= 'BFC' 
+    and substr(CD_CLIENTE_SORGENTE,1,1) = 'F'
+   group by CD_CLIENTE_SORGENTE
+   ) as a
+  inner join EBIL_ANAG.NDG_FITTIZI as b 
+   on a.CD_CLIENTE_SORGENTE = b.NDG_FITTIZIO
+  inner join 
+   (select *
+   from BIC_ODS_SA_V.BPF_ASSOC_CLI_BUONI
+   qualify row_number() over (partition by ID_BUONO_BIC, CODICE_FISCALE, NUM_INTESTATARIO order by TS_ULT_MOD desc)=1
+   )  as c
+   on b.ID_BUONO_BIC = c.ID_BUONO_BIC
+  group by 1
+  ) as bfp
+  on cliente.COD_FISCALE = bfp.CODICE_FISCALE
+ left join 
+  (select a.ID_CLIENTE_BIC
+   , coalesce(d.COD_COMUNE_MIN_FIN, c.COD_COMUNE_MIN_FIN, b.COD_COMUNE_MIN_FIN) as COD_COMUNE_MIN_FIN
+   , b.SEZIONECENSIMENTO
+   , b.ID_INDIRIZZO
+   , case when d.COD_COMUNE_MIN_FIN is not null then 2 when c.COD_COMUNE_MIN_FIN is not null then 1 else 0 end as TIPO_AGGANCIO
+  from EDWAE_VM.INDIRIZZO_RIFERIMENTO as a
+  join EDWAE_VM.INDIRIZZO as b
+   on a.ID_INDIRIZZO = b.ID_INDIRIZZO
+  left join CONVERSIONE_COMUNI as c
+   on (b.COD_COMUNE_MIN_FIN is null or trim(b.COD_COMUNE_MIN_FIN) in ('9999','', 'ND'))
+    and c.DESC_COMUNE = b.DESC_COMUNE
+  left join CONVERSIONE_CAP as d
+   on (b.COD_COMUNE_MIN_FIN is null or trim(b.COD_COMUNE_MIN_FIN) in ('9999','', 'ND')) and c.COD_COMUNE_MIN_FIN is null
+    and b.CAP = d.CAP
+  where a.ID_TIPO_RIFERIMENTO_INDIRIZZO in (2, 6)
+  qualify row_number() over (partition by a.ID_CLIENTE_BIC order by a.ID_TIPO_RIFERIMENTO_INDIRIZZO desc) = 1
+  ) as indirizzo
+  on cliente.ID_CLIENTE_BIC = indirizzo.ID_CLIENTE_BIC
+ where cliente.ID_CLIENTE_CRM='0' and cliente.VERSIONE_CORRENTE=1
+  and (ndg.CODICE_FISCALE is not null or cliente.NATURA_GIURIDICA = 'PERSONA FISICA')
+)with data unique primary index(id_cliente_bic)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+
+create volatile table TEMP1 as (
+	select b.*
+	from 
+		(select ID_INDIRIZZO 
+		from CT_SOCIO_DEMO_TEMP 
+		where SEZIONECENSIMENTO is null 
+			and ID_INDIRIZZO is not null) as a
+	join EDWAE_VM.INDIRIZZO as b
+		on a.ID_INDIRIZZO = b.ID_INDIRIZZO
+	where b.NOME_STRADA is not null 
+		and b.TIPO_STRADA is not null 
+		and b.NUMERO_CIVICO is not null 
+		and b.CAP is not null 
+		and b.COD_COMUNE_MIN_FIN is not null
+) with data primary index(id_indirizzo) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table TEMP2 as (
+	select a.ID_INDIRIZZO
+		, b.SEZIONECENSIMENTO
+		, count(*) as RIDONDANZA
+	from TEMP1 as a
+	join EDWAE_VM.INDIRIZZO as b
+		on a.NOME_STRADA = b.NOME_STRADA 
+			and a.TIPO_STRADA = b.TIPO_STRADA 
+			and a.CAP = b.CAP
+			and a.COD_COMUNE_MIN_FIN = b.COD_COMUNE_MIN_FIN 
+			and b.SEZIONECENSIMENTO is not null
+	group by 1, 2
+) with data primary index(id_indirizzo) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table TEMP3 as (
+	select ID_INDIRIZZO
+		, SEZIONECENSIMENTO
+	from TEMP2
+	qualify row_number() over(partition by ID_INDIRIZZO order by RIDONDANZA desc) = 1
+) with data unique primary index(ID_INDIRIZZO) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+---integrazione variabile modello di multibancarizzazione
+-- FL_PORTAFOGLIATI
+create volatile table FL_PORTAFOGLIATI as(
+	select km.ID_CLIENTE_BIC
+		,1 as FL_PORTAFOGLIATI
+	from EBIL_AREE.CT_PARAMETRI as p
+	join BIC_ODS_SA_V.CRM_ANAGRAFICA_NC as ana
+		on p.DATA_AGGIORNAMENTO between ana.DATA_INIZIO_VALIDITA and ana.DATA_FINE_VALIDITA
+			and ana.TIPO_PORTAFOGLIO in ('25','21','24','22')
+	join BIC_ODS_SA_V.CRM_RELAZIONI_BUSINESS_PARTNER as rel 
+		on p.DATA_AGGIORNAMENTO between rel.DATA_INIZIO_VALIDITA and rel.DATA_FINE_VALIDITA
+			and rel.BUSINESS_PARTNER_2=ana.BUSINESS_PARTNER 
+			and rel.TIPO_RELAZIONE='ZB0002' 
+			and coalesce(ana.ARCHIVIAZIONE,'')<>'X'
+			and ana.RAGGR_BUSINESS_PARTNER='Z017'
+	join BIC_ODS_V.KEY_MAP_CLIENTE as km
+		on cast(cast(cast(p.DATA_AGGIORNAMENTO as format 'yyyy-mm-dd') as varchar(10))||' 23:59:59' as timestamp)
+			between km.DT_INIZIO_VALIDITA and coalesce(km.DT_FINE_VALIDITA,cast('2999-12-31 23:59:59' as timestamp))
+				and km.COD_CLIENTE_SORGENTE=rel.BUSINESS_PARTNER_1 and km.COD_SISTEMA_SORGENTE='CRM' and km.FLAG_CERTIFICAZIONE='V'
+)with data primary index (id_cliente_bic) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+---MACROAREA GEO
+create volatile table MACROAREA_GEO as(
+	select a.ID_CLIENTE_BIC
+		/*,case 
+			when upper(b.DESCR_MANAGER) in ('AT LOMBARDIA','AT NORD EST','AT NORD OVEST') THEN 'NORD'
+			when upper(b.DESCR_MANAGER) in ( 'AT CENTRO','AT CENTRO 1','AT CENTRO NORD') THEN 'CENTRO'
+			when upper(b.DESCR_MANAGER) in ('AT SUD','AT SUD 1','AT SICILIA') THEN 'SUD'
+		else 'ND' end as MACROAREA_GEO*/ -- modifica da rilascio I & II tranche, per evitare che venga sempre ND, come da mail Brunelli del 8/5/2019
+		,case 
+			when upper(b.DESCR_MANAGER) in ('AT LOMBARDIA','AT NORD EST','AT NORD OVEST',
+				'MA NORD EST','MA NORD OVEST') THEN 'NORD'
+			when upper(b.DESCR_MANAGER) in ( 'AT CENTRO','AT CENTRO 1','AT CENTRO NORD',
+				'MA CENTRO NORD','MA CENTRO') THEN 'CENTRO'
+			when upper(b.DESCR_MANAGER) in ('AT SUD','AT SUD 1','AT SICILIA',
+				'MA SICILIA','MA SUD') THEN 'SUD'
+			else 'ND'
+		end as MACROAREA_GEO
+	from CT_SOCIO_DEMO_TEMP as A
+	join EDWAE_VM.FRAZIONARI as B
+		on a.FRAZIONARIO=b.CODFRAZIONARIO
+	where EBIL_AREE.CT_PARAMETRI.DATA_AGGIORNAMENTO between b.DT_INI_VAL and b.DT_FIN_VAL
+)with data primary index (id_cliente_bic) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+---AGGANCIO AL PERIMETRO CLIENTI
+create volatile table CT_SOCIO_DEMO as (
+	select 
+		P.ID_CLIENTE_BIC
+		, P.ID_PERIODO_TEMPORALE
+		, A.DT_NASCITA
+		, A.COD_SESSO
+		, coalesce(A.FL_DIPENDENTE,0) as FL_DIPENDENTE
+		, A.DATA_CENSIMENTO_CLIENTE
+		, A.FRAZIONARIO
+		, A.COD_COMUNE_NASCITA
+		, A.COD_COMUNE_DOMICILIO
+		, A.ID_INDIRIZZO
+		, A.TIPO_AGGANCIO
+		, A.FL_VALORE_SEZIONECENSIMENTO
+		, coalesce(A.SEZIONECENSIMENTO, B.SEZIONECENSIMENTO) as SEZIONECENSIMENTO
+		, C.RUOLO_MASTER --integrazione variabile modello di multibancarizzazione
+		, D.MACROAREA_GEO --integrazione variabile modello di multibancarizzazione
+		, coalesce(E.FL_PORTAFOGLIATI,0) as FL_PORTAFOGLIATI --integrazione variabile modello di multibancarizzazione
+	from EBIL_AREE.V_CT_PERIMETRO as P
+	left join CT_SOCIO_DEMO_TEMP as A
+		on P.ID_CLIENTE_BIC = A.ID_CLIENTE_BIC
+	left join TEMP3 as B
+		on A.ID_INDIRIZZO = B.ID_INDIRIZZO	
+	left join EBIL_AREE.V_ANAGRAFICA_UP as C 
+		on a.FRAZIONARIO=C.FRAZ_TESTO
+	left join MACROAREA_GEO as D
+		on P.ID_CLIENTE_BIC=D.ID_CLIENTE_BIC
+	left join FL_PORTAFOGLIATI as E
+		on P.ID_CLIENTE_BIC=E.ID_CLIENTE_BIC
+		WHERE p.ID_PERIODO_TEMPORALE in(SELECT ID_PERIODO_TEMPORALE FROM EBIL_AREE.CT_PARAMETRI)
+) with data primary index(ID_CLIENTE_BIC) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+----CREAZIONE TABELLA SOCIO DEMO 
+
+BT
+
+;DELETE EBIL_AREE.CT_SOCIO_DEMO
+WHERE ID_PERIODO_TEMPORALE= (SELECT ID_PERIODO_TEMPORALE FROM EBIL_AREE.CT_PARAMETRI)
+
+;INSERT INTO EBIL_AREE.CT_SOCIO_DEMO 
+	select * from CT_SOCIO_DEMO
+WHERE ID_PERIODO_TEMPORALE in (SELECT ID_PERIODO_TEMPORALE FROM EBIL_AREE.CT_PARAMETRI)
+
+;ET;
+
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+CREATE VOLATILE TABLE VTB_SOCIO_DEMO_SV AS
+(SELECT ID_PERIODO_TEMPORALE, ROW_NUMBER () over ( ORDER BY ID_PERIODO_TEMPORALE  DESC) AS ORDINAMENTO
+FROM  EBIL_AREE.CT_SOCIO_DEMO
+GROUP BY 1)
+WITH DATA PRIMARY INDEX (ID_PERIODO_TEMPORALE) ON COMMIT PRESERVE ROWS;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+DELETE EBIL_AREE.CT_SOCIO_DEMO
+WHERE ID_PERIODO_TEMPORALE IN ( SELECT ID_PERIODO_TEMPORALE 
+FROM VTB_SOCIO_DEMO_SV
+WHERE ORDINAMENTO >25);
+.IF ERRORCODE > 0 THEN .QUIT 16;
+

@@ -1,0 +1,109 @@
+{
+   ("case-sensitive", "true");
+   ("hash", "-50355806");
+   ("encoding", "KSC5601");
+   ("filename", "C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/config/CUSTConfig.java");
+   ("version", "1.2.4");
+}
+{
+   (!1, "C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/config/CUSTConfig.java");
+   (!2, "com.gtone.dq.customer.util.SysUtil");
+   (!3, "ex");
+   (!4, "paramName");
+   (!5, "defaultValue");
+   (!6, "this");
+   (!7, "paramValue");
+}
+[
+   {"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/config/CUSTConfig.java",
+   CL([public],(com.gtone.dq.customer.config,CUSTConfig),(java.lang,Object),[])
+   {
+
+   }
+   ,(9#8,58#1,!1)},
+
+   {"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/config/CUSTConfig.java",
+   SF([private,static],class((java.util,Properties)),(com.gtone.dq.customer.config,CUSTConfig),"almprop")
+   ,(12#43,12#49,!1)},
+
+   {"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/config/CUSTConfig.java",
+   CN([public],(com.gtone.dq.customer.config,CUSTConfig),[],[],
+   {[
+      {RE0
+      ,(!)}
+      ]
+   ,(14#24,16#17,!1)}
+   )
+   ,(14#24,16#17,!1)},
+
+   {"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/config/CUSTConfig.java",
+   FN([public,synchronized,static],((com.gtone.dq.customer.config,CUSTConfig),"initConfig"):unit,[],[(java.lang,Exception)],
+   {[
+      {TR(
+         {[
+            {({LC((com.gtone.dq.customer.config,CUSTConfig),"almprop"),class((java.util,Properties)),(25#33,25#39,!1)},{NO(class((java.util,Properties)),[],[]),class((java.util,Properties)),(25#43,25#58,!1)})
+            ,(25#33,25#39,!1)};
+            {PC(((java.util,Properties),"load"),[class((java.io,InputStream))],[{NO(class((java.io,FileInputStream)),[string],[{SC(((com.gtone.dq.customer.util,SysUtil),"getRealPath"),[string],[{CA((com.gtone.dq.customer.util,Constants),"ALARM_PROPERTIES"),string,(26#96,26#111,!1)}]),string,(26#74,26#84,!1)}]),class((java.io,FileInputStream)),(26#46,26#113,!1)}],{CA((com.gtone.dq.customer.config,CUSTConfig),"almprop"),class((java.util,Properties)),(26#33,26#39,!1)})
+            ,(26#33,26#114,!1)}
+            ]
+         ,(23#25,31#25,!1)}
+         ,[
+            {((java.lang,Exception),{V(!3),class((java.lang,Exception)),(28#42,28#43,!1)},
+            {[
+               {TE({V(!3),class((java.lang,Exception)),(30#39,30#40,!1)})
+               ,(30#33,30#41,!1)}
+               ]
+            ,(28#25,31#25,!1)}),(28#25,31#25,!1)}],
+         {;
+         ,(23#25,31#25,!1)})
+      ,(23#25,31#25,!1)};
+      {RE0
+      ,(!)}
+      ]
+   ,(21#44,32#17,!1)}
+   )
+   ,(21#44,32#17,!1)},
+
+   {"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/config/CUSTConfig.java",
+   FN([public,synchronized,static],((com.gtone.dq.customer.config,CUSTConfig),"getConfig"):string,[(!4:string,(37#68,37#76,!1)),(!5:string,(37#86,37#97,!1))],[(java.lang,Exception)],
+   {[
+      {IF0({BO(==,{CA((com.gtone.dq.customer.config,CUSTConfig),"almprop"),class((java.util,Properties)),(39#29,39#35,!1)},{NIL,id,(39#40,39#43,!1)}),bool,(39#29,39#35,!1)},
+         {PC(((com.gtone.dq.customer.config,CUSTConfig),"initConfig"),[],[],{V(!6),class((com.gtone.dq.customer.config,CUSTConfig)),(40#33,40#42,!1)})
+         ,(40#33,40#44,!1)})
+      ,(39#25,40#45,!1)};
+      {VD(!7,string,{FC(((java.util,Properties),"getProperty"),[string],[{V(!4),string,(41#65,41#73,!1)}],{CA((com.gtone.dq.customer.config,CUSTConfig),"almprop"),class((java.util,Properties)),(41#45,41#51,!1)}),string,(41#53,41#63,!1)})
+      ,(41#32,41#41,!1)};
+      {IF0({BO(==,{V(!7),string,(42#29,42#38,!1)},{NIL,id,(42#43,42#46,!1)}),bool,(42#29,42#38,!1)},
+         {RE({V(!5),string,(43#40,43#51,!1)})
+         ,(43#33,43#52,!1)})
+      ,(42#25,43#52,!1)};
+      {RE({V(!7),string,(44#32,44#41,!1)})
+      ,(44#25,44#42,!1)}
+      ]
+   ,(37#44,45#17,!1)}
+   )
+   ,(37#44,45#17,!1)},
+
+   {"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/config/CUSTConfig.java",
+   FN([public,synchronized,static],((com.gtone.dq.customer.config,CUSTConfig),"getConfig"):string,[(!4:string,(50#68,50#76,!1))],[(java.lang,Exception)],
+   {[
+      {IF0({BO(==,{CA((com.gtone.dq.customer.config,CUSTConfig),"almprop"),class((java.util,Properties)),(52#29,52#35,!1)},{NIL,id,(52#40,52#43,!1)}),bool,(52#29,52#35,!1)},
+         {PC(((com.gtone.dq.customer.config,CUSTConfig),"initConfig"),[],[],{V(!6),class((com.gtone.dq.customer.config,CUSTConfig)),(53#33,53#42,!1)})
+         ,(53#33,53#44,!1)})
+      ,(52#25,53#45,!1)};
+      {RE({FC(((java.util,Properties),"getProperty"),[string],[{V(!4),string,(54#52,54#60,!1)}],{CA((com.gtone.dq.customer.config,CUSTConfig),"almprop"),class((java.util,Properties)),(54#32,54#38,!1)}),string,(54#40,54#50,!1)})
+      ,(54#25,54#62,!1)}
+      ]
+   ,(50#44,56#17,!1)}
+   )
+   ,(50#44,56#17,!1)},
+
+
+   {"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/config/CUSTConfig.java",
+   [
+      D("/*****\r\n\r\n		 */",18,(18#17,20#19,"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/config/CUSTConfig.java")),
+      D("/*****\r\n\r\n		 */",34,(34#17,36#19,"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/config/CUSTConfig.java")),
+      D("/*****\r\n\r\n		 */",47,(47#17,49#19,"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/config/CUSTConfig.java"))
+   ]
+   }
+]

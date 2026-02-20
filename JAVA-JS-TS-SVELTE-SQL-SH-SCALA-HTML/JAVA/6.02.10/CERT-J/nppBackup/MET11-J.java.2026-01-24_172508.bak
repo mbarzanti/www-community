@@ -1,0 +1,42 @@
+/*
+Noncompliant Code Example
+This noncompliant code example defines a mutable class Employee that consists of the fields name and salary, whose values can be changed using the setEmployeeName() and setSalary() method. The equals() method is overridden to provide a comparison facility by employee name.
+Use of the Employee object as a key to the map is insecure because the properties of the object could change after an ordering has been established. For example, a client could modify the name field when the last name of an employee changes. As a result, clients would observe nondeterministic behavior.
+*/
+
+// Mutable class Employee
+class Employee {
+  private String name;
+  private double salary;
+
+  Employee(String empName, double empSalary) {
+    this.name = empName;
+    this.salary = empSalary;
+  }
+
+  public void setEmployeeName(String empName) {
+    this.name = empName;
+  }
+
+  public void setSalary(double empSalary) {
+    this.salary = empSalary;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (!(o instanceof Employee)) {
+      return false;
+    }
+
+    Employee emp = (Employee)o;
+    return emp.name.equals(name);
+  }
+
+  public int hashCode() {/* ... */}
+
+}
+
+// Client code
+Map<Employee, Calendar> map =
+  new ConcurrentHashMap<Employee, Calendar>();
+// ...

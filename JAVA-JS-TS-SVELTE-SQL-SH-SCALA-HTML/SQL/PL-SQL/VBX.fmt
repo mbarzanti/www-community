@@ -1,0 +1,40 @@
+begin
+control_lib.when_tab_changed(:control.tab_ctl)
+;
+end
+;
+The Package CONTROL_LIB is coded as below.
+Will this code work, technically I think yes, but its always better to ask experts before I move this to test...
+
+package body control_lib is
+g_tab_id number := 0
+;
+procedure when_tab_changed
+(p_tab_id number) is
+l_err_txt varchar2(255);
+begin
+if :system.block_status != 'QUERY' then
+if not good_quiet_post(l_err_txt) then
+raise form_trigger_failure;
+end if
+;
+end if
+;
+if p_tab_id = 0 then
+rpt_ln_lib.new_tab;
+elsif p_tab_id = 1 then
+stat_lib.new_tab;
+elsif p_tab_id = 2 then
+per_acc_rl_lib.new_tab;
+end if
+;
+g_tab_id := p_tab_id
+;
+exception
+when form_trigger_failure then
+:control.tab_ctl := g_tab_id
+;
+synchronize
+;
+end when_tab_changed
+;

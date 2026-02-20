@@ -1,0 +1,2671 @@
+/*	TABELLA: BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_ESTR
+	REGIME: DELTA GIORNALIERO
+	AUTORE: A.C·D.C. 
+	GDL: SOPRA
+	PROGETTO: Order to Cash - Catalogo Prodotti
+	V_1.0
+*****************************************
+	V_1.1 [ Modifica per Azione=0 ]
+	v_1.2 [ Modifica per Passaggio da NO2C a O2C ]
+*/
+
+/* # INDICE VOLATILI  #
+-- VTB_NO2C_ASSOC_PROD ;			--:: Creazione Volatile che contiene tutti i prodotti 'NON_O2C' con tutte le chiavi
+-- VTB_ASSOC_PROD_O2C ; 			--:: Creazione Volatile che contiene tutti i prodotti 'O2C' con tutte le chiavi
+-- VTB_PROD_NON_O2C ; 				--:: Raccolta Prodotti NO2C
+-- VTB_PROD_O2C ;					--:: Raccolta Prodotti O2C
+-- VTB_CATALOGO_PRODOTTI ;			--:: Copia della CatalogoProdotti
+-- VTB_PADRI_VARIATI;				--:: Record Padri (Vecchi e Nuovi Prodotti) che presentano una Variazione (Variazione Invio Precedente = 2 )
+-- VTB_PADRI_CANCELLATI_FIRST_RUN;	--:: Aggiunta dei Record Padri che solo al First Run presentano delle cancellazioni.
+-- VTB_FIGLI_CANCELLATI_FIRST_RUN;	--:: Aggiunta dei Record Figli che solo al First Run presentano delle cancellazioni.
+-- VTB_PADRI_EVOLUTI_O2C;			--:: Aggiunta dei Record Padri che da NonO2C passano ad O2C
+-- VTB_FIGLI_EVOLUTI_O2C;			--:: Aggiunta dei Record Figli che da NonO2C passano ad O2C
+-- VTB_REC_OFFERTA_BECOMING_O2C;	--:: Contiene i record che sono in transizione da NO2C a O2C
+-- VTB_REC_DOUBLE_BECOMING_O2C;		--:: Contiene i record NO2C con Amministrativo = '000000'
+-- VTB_REC_TRIPLE_BECOMING_O2C;		--:: Contiene i record NO2C con Amministrativo <> '000000'
+-- VTB_PADRE_FLAG_M;				--:: Aggiunta Record Modificati che poi tornano Attivi (da 'M' ad 'A' ) 
+-- VTB_ESTRAZIONE_STEP_1;			--:: Prima fase di Estrazione
+-- VTB_ESTRAZIONE_STEP_2;			--:: Rimozione Duplicati sui Padri e sui Figli
+-- VTB_ESTRAZIONE_STEP_3;			--:: Unione della Volatile NO2C con le Volatili O2C
+-- VTB_DELTA_STEP_2;				--:: Modifica del DELTA per Gestione record Modificati che sono tornati attivi solo sui Prodotti
+-- VTB_PROD_APPO;					--:: Gestione Volatile di Appoggio (Utile a gestire il FLAG_INVIO
+
+*/
+
+SELECT 'ODSBIC,Seq_SFA_Estrazione_CatalogoProdotti';
+
+
+--:: Passo_1 - Creazione del DELTA (Grezzo)
+
+--:: Creazione Volatile che contiene tutti i prodotti 'NON_O2C' con tutte le chiavi
+CREATE SET VOLATILE TABLE VTB_NO2C_ASSOC_PROD AS 
+(
+
+SELECT 
+	 ASSOC_PC_PA.SK_OFFERTA
+	,ASSOC_PC_PA.SK_PRODOTTO_COM_VEND
+	,ASSOC_PC_PA.SK_PRODOTTO_AMM
+	,ASSOC_PC_PA.CD_AZIONE
+	
+	,OFFE.sk_offerta            AS OFF_sk_offerta
+	,OFFE.nome_offerta          AS OFF_nome_offerta
+	,OFFE.nome_prodotto_crm     AS OFF_nome_prodotto_crm
+	,OFFE.dt_inizio_validita    AS OFF_dt_inizio_validita
+	,OFFE.dt_fine_validita      AS OFF_dt_fine_validita
+	,OFFE.div_codice            AS OFF_div_codice
+	,OFFE.ts_azione             AS OFF_ts_azione
+	,OFFE.CD_AZIONE             AS OFF_CD_AZIONE
+    ,OFFE.TIPO_OFFERTA          AS OFF_TIPO_OFFERTA
+			
+	,PCOM.sk_prodotto_com       AS COM_sk_prodotto_com   
+	,PCOM.ds_prod_com           AS COM_ds_prod_com       
+	,PCOM.ts_azione             AS COM_ts_azione         
+	,PCOM.nome_prodotto_com     AS COM_nome_prodotto_com 
+	,PCOM.dt_inizio_validita    AS COM_dt_inizio_validita
+	,PCOM.dt_fine_validita      AS COM_dt_fine_validita  
+	,PCOM.div_codice            AS COM_div_codice        
+	,PCOM.cd_azione             AS COM_cd_azione         
+	
+	,PAMM.sk_prodotto_amm       AS AMM_sk_prodotto_amm   
+	,PAMM.nome_prodotto_amm     AS AMM_nome_prodotto_amm 
+	,PAMM.ts_azione             AS AMM_ts_azione                  
+	,PAMM.dt_inizio_validita    AS AMM_dt_inizio_validita
+	,PAMM.dt_fine_validita      AS AMM_dt_fine_validita  
+	,PAMM.div_codice            AS AMM_div_codice        
+	,PAMM.cd_azione             AS AMM_cd_azione  
+
+	
+FROM BIC_CAT_PROD_SA.CAT_PRODOTTO_COM_ULT_VER	 		AS PCOM
+INNER JOIN BIC_CAT_PROD_SA.CAT_ASSOC_PROC_CONT_ULT_VER  AS ASSOC_PC
+      ON PCOM.SK_PRODOTTO_COM = ASSOC_PC.SK_PRODOTTO_COM
+	  AND ASSOC_PC.CD_AZIONE = 'A'
+	  
+INNER JOIN BIC_CAT_PROD_SA.CAT_CONTENITORE_ULT_VER 		AS CONT
+      ON ASSOC_PC.SK_CONTENITORE = CONT.SK_CONTENITORE
+	  AND CONT.CD_AZIONE = 'A' 
+	  
+INNER JOIN BIC_CAT_PROD_SA.CAT_ASSOC_PROC_PROA_ULT_VER  AS ASSOC_PC_PA
+	ON ASSOC_PC.SK_PRODOTTO_COM =ASSOC_PC_PA.SK_PRODOTTO_COM_VEND 
+INNER JOIN BIC_CAT_PROD_SA.CAT_OFFERTA_ULT_VER 			AS OFFE
+	ON ASSOC_PC_PA.SK_OFFERTA = OFFE.SK_OFFERTA 
+LEFT JOIN BIC_CAT_PROD_SA.CAT_PRODOTTO_AMM_ULT_VER 		AS PAMM 
+	ON ASSOC_PC_PA.SK_PRODOTTO_AMM = PAMM.SK_PRODOTTO_AMM
+    AND ( AMM_sk_prodotto_amm <> '000000' AND COM_sk_prodotto_com <> '000000' )   
+	
+WHERE CONT.SK_VISTA = 'MBPA' 
+AND OFFE.TIPO_OFFERTA = 2	  -- Prodotti NO2C 
+ 
+UNION 
+
+SELECT 
+	 ASSOC_PC_PA.SK_OFFERTA
+	,ASSOC_PC_PA.SK_PRODOTTO_COM_VEND
+	,ASSOC_PC_PA.SK_PRODOTTO_AMM
+	,ASSOC_PC_PA.CD_AZIONE
+	
+	,OFFE.sk_offerta            AS OFF_sk_offerta
+	,OFFE.nome_offerta          AS OFF_nome_offerta
+	,OFFE.nome_prodotto_crm     AS OFF_nome_prodotto_crm
+	,OFFE.dt_inizio_validita    AS OFF_dt_inizio_validita
+	,OFFE.dt_fine_validita      AS OFF_dt_fine_validita
+	,OFFE.div_codice            AS OFF_div_codice
+	,OFFE.ts_azione             AS OFF_ts_azione
+	,OFFE.CD_AZIONE             AS OFF_CD_AZIONE
+	, 5          				AS OFF_TIPO_OFFERTA
+			
+	,PCOM.sk_prodotto_com       AS COM_sk_prodotto_com   
+	,PCOM.ds_prod_com           AS COM_ds_prod_com       
+	,PCOM.ts_azione             AS COM_ts_azione         
+	,PCOM.nome_prodotto_com     AS COM_nome_prodotto_com 
+	,PCOM.dt_inizio_validita    AS COM_dt_inizio_validita
+	,PCOM.dt_fine_validita      AS COM_dt_fine_validita  
+	,PCOM.div_codice            AS COM_div_codice        
+	,PCOM.cd_azione             AS COM_cd_azione         
+	
+	,NULL (VARCHAR(6))		    AS AMM_sk_prodotto_amm   
+	,NULL (VARCHAR(160))	    AS AMM_nome_prodotto_amm 
+	,NULL (CHAR(20))		    AS AMM_ts_azione                  
+	,NULL (VARCHAR(10))		    AS AMM_dt_inizio_validita
+	,NULL (VARCHAR(10))		    AS AMM_dt_fine_validita  
+	,NULL (VARCHAR(8))		    AS AMM_div_codice        
+	,NULL (VARCHAR(1))		    AS AMM_cd_azione        
+
+FROM BIC_CAT_PROD_SA.CAT_PRODOTTO_COM_ULT_VER 			AS PCOM 
+INNER JOIN BIC_CAT_PROD_SA.CAT_ASSOC_PROC_PROA_ULT_VER  AS ASSOC_PC_PA
+	ON PCOM.SK_PRODOTTO_COM = SK_PRODOTTO_COM_VEND 
+INNER JOIN BIC_CAT_PROD_SA.CAT_OFFERTA_ULT_VER 			AS OFFE
+	ON ASSOC_PC_PA.SK_OFFERTA = OFFE.SK_OFFERTA 
+LEFT JOIN BIC_CAT_PROD_SA.CAT_PRODOTTO_AMM_ULT_VER 		AS PAMM 
+	ON ASSOC_PC_PA.SK_PRODOTTO_AMM = PAMM.SK_PRODOTTO_AMM
+
+WHERE ASSOC_PC_PA.SK_PRODOTTO_AMM = '000000'
+AND ASSOC_PC_PA.SK_OFFERTA <> '000000'
+AND OFFE.TIPO_OFFERTA = 1  -- Prodotti O2C che ancora non ha l'Amministrativo
+AND OFFE.SK_OFFERTA IN (
+		SELECT SK_OFFERTA -- ALC esclude invio ADD-ON
+		FROM BIC_CAT_PROD_SA.CAT_ASSOC_OFF_CONT_ULT_VER
+		WHERE SK_CONTENITORE = '070034'
+	)
+) WITH DATA
+PRIMARY INDEX ( SK_OFFERTA, SK_PRODOTTO_COM_VEND, SK_PRODOTTO_AMM )
+ON COMMIT PRESERVE ROWS;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+--:: Creazione Volatile che contiene tutti i prodotti 'O2C' con tutte le chiavi
+CREATE SET VOLATILE TABLE VTB_ASSOC_PROD_O2C AS 
+(
+SELECT 
+	 ASSOC_PC_PA.SK_OFFERTA
+	,ASSOC_PC_PA.SK_PRODOTTO_COM_VEND
+	,ASSOC_PC_PA.SK_PRODOTTO_AMM
+	,ASSOC_PC_PA.CD_AZIONE
+	
+	,OFFE.sk_offerta            AS OFF_sk_offerta
+	,OFFE.nome_offerta          AS OFF_nome_offerta
+	,OFFE.nome_prodotto_crm     AS OFF_nome_prodotto_crm
+	,OFFE.dt_inizio_validita    AS OFF_dt_inizio_validita
+	,OFFE.dt_fine_validita      AS OFF_dt_fine_validita
+	,OFFE.div_codice            AS OFF_div_codice
+	,OFFE.ts_azione             AS OFF_ts_azione
+	,OFFE.CD_AZIONE             AS OFF_CD_AZIONE
+	,OFFE.TIPO_OFFERTA          AS OFF_TIPO_OFFERTA
+			
+	,PCOM.sk_prodotto_com       AS COM_sk_prodotto_com   
+	,PCOM.ds_prod_com           AS COM_ds_prod_com       
+	,PCOM.ts_azione             AS COM_ts_azione         
+	,PCOM.nome_prodotto_com     AS COM_nome_prodotto_com 
+	,PCOM.dt_inizio_validita    AS COM_dt_inizio_validita
+	,PCOM.dt_fine_validita      AS COM_dt_fine_validita  
+	,PCOM.div_codice            AS COM_div_codice        
+	,PCOM.cd_azione             AS COM_cd_azione         
+	
+	,PAMM.sk_prodotto_amm       AS AMM_sk_prodotto_amm   
+	,PAMM.nome_prodotto_amm     AS AMM_nome_prodotto_amm 
+	,PAMM.ts_azione             AS AMM_ts_azione                  
+	,PAMM.dt_inizio_validita    AS AMM_dt_inizio_validita
+	,PAMM.dt_fine_validita      AS AMM_dt_fine_validita  
+	,PAMM.div_codice            AS AMM_div_codice        
+	,PAMM.cd_azione             AS AMM_cd_azione         
+
+FROM BIC_CAT_PROD_SA.CAT_PRODOTTO_COM_ULT_VER 			AS PCOM 
+INNER JOIN BIC_CAT_PROD_SA.CAT_ASSOC_PROC_PROA_ULT_VER  AS ASSOC_PC_PA
+	ON PCOM.SK_PRODOTTO_COM = SK_PRODOTTO_COM_VEND 
+INNER JOIN BIC_CAT_PROD_SA.CAT_OFFERTA_ULT_VER 			AS OFFE
+	ON ASSOC_PC_PA.SK_OFFERTA = OFFE.SK_OFFERTA 
+INNER JOIN BIC_CAT_PROD_SA.CAT_PRODOTTO_AMM_ULT_VER 	AS PAMM 
+	ON ASSOC_PC_PA.SK_PRODOTTO_AMM = PAMM.SK_PRODOTTO_AMM
+
+AND ( AMM_sk_prodotto_amm <> '000000' AND COM_sk_prodotto_com <> '000000' )
+AND OFF_TIPO_OFFERTA = 1   -- Prodotti O2C 
+WHERE OFFE.SK_OFFERTA IN (
+		SELECT SK_OFFERTA -- ALC esclude invio ADD-ON
+		FROM BIC_CAT_PROD_SA.CAT_ASSOC_OFF_CONT_ULT_VER
+		WHERE SK_CONTENITORE = '070034'
+	)
+		
+) WITH DATA
+PRIMARY INDEX ( SK_OFFERTA, SK_PRODOTTO_COM_VEND, SK_PRODOTTO_AMM )
+ON COMMIT PRESERVE ROWS;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+--:: Svuoto l'attuale Delta
+DELETE BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+--:: Raccolta Prodotti NO2C
+CREATE SET VOLATILE TABLE VTB_PROD_NON_O2C AS 
+(
+
+/*
+	-- Tipologia 1   
+		SELECT 
+		TB_ASSOC.COM_ds_prod_com 			AS NOME
+		,CASE WHEN (TRIM(TB_ASSOC.COM_ts_azione) = '' )
+				THEN '' 
+				ELSE (CAST( TRIM(TB_ASSOC.COM_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+		END 								AS TS_CREAZIONE_FIGLIO
+		,COALESCE ( PROD_OLD.Pro_nome, TB_ASSOC.COM_nome_prodotto_com ) 		AS COD_PRODOTTO_CRMO
+		,TB_ASSOC.COM_sk_prodotto_com    	AS CODICE_BIC
+		,CAST('' AS VARCHAR(26))			AS TS_CREAZIONE_PADRE
+		,TB_ASSOC.COM_dt_inizio_validita(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8)) AS DT_INIZIO_VALIDITA
+		,TB_ASSOC.COM_dt_fine_validita 	(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8))	AS DT_FINE_VALIDITA
+		,CAST('' AS VARCHAR(6))			AS CODICE_BIC_PADRE
+		,CAST(1 AS VARCHAR(1))			AS TIPOLOGIA
+		,CAST('' AS VARCHAR(1))			AS TIPOLOGIA_PADRE
+		,CAST('' AS VARCHAR(1))			AS AZIONE
+		,TB_ASSOC.COM_div_codice 		AS BU_RICAVI
+		,CAST('' AS VARCHAR(1))			AS STATO
+		,TB_ASSOC.SK_OFFERTA			AS SK_OFFE
+		,TB_ASSOC.SK_PRODOTTO_COM_VEND 	AS SK_PCOM
+		,TB_ASSOC.SK_PRODOTTO_AMM		AS SK_PAMM	
+		,TB_ASSOC.COM_cd_azione			AS CD_AZIONE
+		,'V'							AS FL_ORIGINE_PRODOTTO
+		,TB_ASSOC.CD_AZIONE				AS CD_AZIONE_ASSOC
+		,TB_ASSOC.OFF_TIPO_OFFERTA		AS TIPO_OFFERTA
+		
+	FROM VTB_NO2C_ASSOC_PROD AS TB_ASSOC
+	where TB_ASSOC.OFF_nome_offerta is null
+	    LEFT JOIN BIC_CAT_PROD_SA.CAT_ASSOC_PROC_OLD_NEW_ULT_VER AS PROD_OLD
+		ON TB_ASSOC.COM_sk_prodotto_com = PROD_OLD.sk_prodotto_com
+	
+	UNION ALL
+	
+*/
+	
+	SELECT DISTINCT TB_PROD_NONO2C.* 
+	FROM 
+	(
+	
+		-- Tipologia 3 
+		SELECT 
+		TB_ASSOC.OFF_nome_offerta 			AS NOME
+		,CASE WHEN (TRIM(TB_ASSOC.OFF_ts_azione) = '' )
+				THEN '' 
+				ELSE (CAST( TRIM(TB_ASSOC.OFF_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+		END 								AS TS_CREAZIONE_FIGLIO
+		,TB_ASSOC.OFF_nome_prodotto_crm 	AS COD_PRODOTTO_CRMO
+		,TB_ASSOC.OFF_sk_offerta 			AS CODICE_BIC
+		,CAST('' AS VARCHAR(26))			AS TS_CREAZIONE_PADRE
+		,TB_ASSOC.OFF_dt_inizio_validita(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8)) AS DT_INIZIO_VALIDITA
+		,TB_ASSOC.OFF_dt_fine_validita 	(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8))	AS DT_FINE_VALIDITA
+		,CAST('' AS VARCHAR(6))			AS CODICE_BIC_PADRE
+		,CAST(3 AS VARCHAR(1))			AS TIPOLOGIA
+		,CAST('' AS VARCHAR(1))			AS TIPOLOGIA_PADRE
+		,CAST('' AS VARCHAR(1))			AS AZIONE
+		,TB_ASSOC.OFF_div_codice 		AS BU_RICAVI
+		,CAST('' AS VARCHAR(1))			AS STATO
+		,TB_ASSOC.SK_OFFERTA			AS SK_OFFE
+		,TB_ASSOC.SK_PRODOTTO_COM_VEND 	AS SK_PCOM
+		,TB_ASSOC.SK_PRODOTTO_AMM		AS SK_PAMM	
+		,TB_ASSOC.OFF_cd_azione			AS CD_AZIONE
+		,'N'							AS FL_ORIGINE_PRODOTTO
+		,TB_ASSOC.CD_AZIONE				AS CD_AZIONE_ASSOC
+		,TB_ASSOC.OFF_TIPO_OFFERTA		AS TIPO_OFFERTA
+		
+	FROM VTB_NO2C_ASSOC_PROD AS TB_ASSOC
+	where TB_ASSOC.OFF_nome_offerta is not null
+	
+	UNION ALL
+	
+	-- Tipologia 4          
+	SELECT 
+		TB_ASSOC.COM_ds_prod_com 			AS NOME
+		,CASE WHEN (TRIM(TB_ASSOC.COM_ts_azione) = '' )
+				THEN '' 
+				ELSE (CAST( TRIM(TB_ASSOC.COM_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+		 END 								AS TS_CREAZIONE_FIGLIO
+		,COALESCE ( PROD_OLD.Pro_nome, TB_ASSOC.COM_nome_prodotto_com ) 		AS COD_PRODOTTO_CRMO
+		,COALESCE ( PROD_OLD.Pro_id, TB_ASSOC.COM_sk_prodotto_com) 				AS CODICE_BIC -- ALC se presente si invia BIC OLD
+		,CAST('' AS VARCHAR(26))			AS TS_CREAZIONE_PADRE
+		,TB_ASSOC.COM_dt_inizio_validita(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8)) AS DT_INIZIO_VALIDITA
+		,TB_ASSOC.COM_dt_fine_validita 	(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8))	AS DT_FINE_VALIDITA
+		,CAST('' AS VARCHAR(6))			AS CODICE_BIC_PADRE
+		,CAST(4 AS VARCHAR(1))			AS TIPOLOGIA
+		,CAST('' AS VARCHAR(1))			AS TIPOLOGIA_PADRE
+		,CAST('' AS VARCHAR(1))			AS AZIONE
+		,TB_ASSOC.COM_div_codice 		AS BU_RICAVI
+		,CAST('' AS VARCHAR(1))			AS STATO
+		,TB_ASSOC.SK_OFFERTA			AS SK_OFFE
+		,TB_ASSOC.SK_PRODOTTO_COM_VEND 	AS SK_PCOM
+		,TB_ASSOC.SK_PRODOTTO_AMM		AS SK_PAMM	
+		,TB_ASSOC.COM_cd_azione			AS CD_AZIONE
+		,'N'							AS FL_ORIGINE_PRODOTTO
+		,TB_ASSOC.CD_AZIONE				AS CD_AZIONE_ASSOC
+		,TB_ASSOC.OFF_TIPO_OFFERTA		AS TIPO_OFFERTA
+	
+	FROM VTB_NO2C_ASSOC_PROD AS TB_ASSOC
+	
+		LEFT JOIN BIC_CAT_PROD_SA.CAT_ASSOC_PROC_OLD_NEW_ULT_VER AS PROD_OLD
+		ON TB_ASSOC.COM_sk_prodotto_com = PROD_OLD.sk_prodotto_com
+	where TB_ASSOC.OFF_nome_offerta is not null
+	
+	UNION ALL
+	
+	-- Tipologia 5  
+	SELECT 
+		TB_ASSOC.AMM_nome_prodotto_amm		AS NOME
+		,CASE WHEN (TRIM(TB_ASSOC.AMM_ts_azione) = '' )
+				THEN '' 
+				ELSE (CAST( TRIM(TB_ASSOC.AMM_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+		END 								AS TS_CREAZIONE_FIGLIO
+		,TB_ASSOC.AMM_nome_prodotto_amm 	AS COD_PRODOTTO_CRMO
+		,TB_ASSOC.AMM_sk_prodotto_amm   	AS CODICE_BIC
+		,CAST('' AS VARCHAR(26))			AS TS_CREAZIONE_PADRE
+		,TB_ASSOC.AMM_dt_inizio_validita(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8)) AS DT_INIZIO_VALIDITA
+		,TB_ASSOC.AMM_dt_fine_validita 	(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8))	AS DT_FINE_VALIDITA
+		,CAST('' AS VARCHAR(6))			AS CODICE_BIC_PADRE
+		,CAST(5 AS VARCHAR(1))			AS TIPOLOGIA
+		,CAST('' AS VARCHAR(1))			AS TIPOLOGIA_PADRE
+		,CAST('' AS VARCHAR(1))			AS AZIONE
+		,TB_ASSOC.AMM_div_codice 		AS BU_RICAVI
+		,CAST('' AS VARCHAR(1))			AS STATO
+		,TB_ASSOC.SK_OFFERTA			AS SK_OFFE
+		,TB_ASSOC.SK_PRODOTTO_COM_VEND 	AS SK_PCOM
+		,TB_ASSOC.SK_PRODOTTO_AMM		AS SK_PAMM	
+		,TB_ASSOC.AMM_cd_azione			AS CD_AZIONE
+		,'N'							AS FL_ORIGINE_PRODOTTO
+		,TB_ASSOC.CD_AZIONE				AS CD_AZIONE_ASSOC
+		,TB_ASSOC.OFF_TIPO_OFFERTA		AS TIPO_OFFERTA
+		
+	FROM VTB_NO2C_ASSOC_PROD AS TB_ASSOC
+	where TB_ASSOC.AMM_nome_prodotto_amm is not null
+	
+	UNION ALL
+	
+	-- Relazioni   :  4-3 
+	
+	SELECT 
+		TB_ASSOC.COM_ds_prod_com			AS NOME
+		,CASE WHEN (TRIM(TB_ASSOC.COM_ts_azione) = '' )
+				THEN '' 
+				ELSE (CAST( TRIM(TB_ASSOC.COM_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+		END 								AS TS_CREAZIONE_FIGLIO
+		,COALESCE ( PROD_OLD.Pro_nome, TB_ASSOC.COM_nome_prodotto_com ) 		AS COD_PRODOTTO_CRMO
+		,COALESCE ( PROD_OLD.Pro_id, TB_ASSOC.COM_sk_prodotto_com)				AS CODICE_BIC -- ALC se presente si invia BIC OLD
+		,CASE WHEN (TRIM(TB_ASSOC.OFF_ts_azione) = '' )
+				THEN '' 
+				ELSE (CAST( TRIM(TB_ASSOC.OFF_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+		END 							AS TS_CREAZIONE_PADRE
+		,TB_ASSOC.COM_dt_inizio_validita(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8)) AS DT_INIZIO_VALIDITA
+		,TB_ASSOC.COM_dt_fine_validita 	(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8))	AS DT_FINE_VALIDITA
+		,CAST(TB_ASSOC.sk_offerta 		AS VARCHAR(6))	AS CODICE_BIC_PADRE
+		,CAST(4 AS VARCHAR(1))			AS TIPOLOGIA
+		,'3'							AS TIPOLOGIA_PADRE
+		,CAST('5' AS VARCHAR(1))		AS AZIONE
+		,TB_ASSOC.COM_div_codice 		AS BU_RICAVI
+		,CAST('0' AS VARCHAR(1))		AS STATO
+		,TB_ASSOC.SK_OFFERTA			AS SK_OFFE
+		,TB_ASSOC.SK_PRODOTTO_COM_VEND 	AS SK_PCOM
+		,TB_ASSOC.SK_PRODOTTO_AMM		AS SK_PAMM	
+		,TB_ASSOC.COM_cd_azione			AS CD_AZIONE
+		,'N'							AS FL_ORIGINE_PRODOTTO
+		,TB_ASSOC.CD_AZIONE				AS CD_AZIONE_TB_ASSOC
+		,TB_ASSOC.OFF_TIPO_OFFERTA		AS TIPO_OFFERTA
+	FROM VTB_NO2C_ASSOC_PROD 			AS TB_ASSOC
+	
+	     LEFT JOIN BIC_CAT_PROD_SA.CAT_ASSOC_PROC_OLD_NEW_ULT_VER AS PROD_OLD
+		 ON TB_ASSOC.COM_sk_prodotto_com = PROD_OLD.sk_prodotto_com
+	where TB_ASSOC.OFF_nome_offerta is not null
+	
+	UNION ALL
+
+	-- Relazioni  :  5-3
+	SELECT 
+		TB_ASSOC.AMM_nome_prodotto_amm		AS NOME
+		,CASE WHEN (TRIM(TB_ASSOC.AMM_ts_azione) = '' )
+				THEN '' 
+				ELSE (CAST( TRIM(TB_ASSOC.AMM_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+		END 							AS TS_CREAZIONE_FIGLIO
+		,TB_ASSOC.AMM_nome_prodotto_amm 	AS COD_PRODOTTO_CRMO
+		,TB_ASSOC.AMM_sk_prodotto_amm		AS CODICE_BIC
+		,CASE WHEN (TRIM(TB_ASSOC.OFF_ts_azione) = '' )
+				THEN '' 
+				ELSE (CAST( TRIM(TB_ASSOC.OFF_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+		END 							AS TS_CREAZIONE_PADRE
+		,TB_ASSOC.AMM_dt_inizio_validita(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8)) AS DT_INIZIO_VALIDITA
+		,TB_ASSOC.AMM_dt_fine_validita 	(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8))	AS DT_FINE_VALIDITA
+		,TB_ASSOC.SK_OFFERTA			AS CODICE_BIC_PADRE
+		,CAST(5 AS VARCHAR(1))			AS TIPOLOGIA
+		,'3'							AS TIPOLOGIA_PADRE
+		,CAST('5' AS VARCHAR(1))		AS AZIONE
+		,TB_ASSOC.AMM_div_codice 		AS BU_RICAVI
+		,CAST('0' AS VARCHAR(1))		AS STATO
+		,TB_ASSOC.SK_OFFERTA			AS SK_OFFE
+		,TB_ASSOC.SK_PRODOTTO_COM_VEND 	AS SK_PCOM
+		,TB_ASSOC.SK_PRODOTTO_AMM 		AS SK_PAMM	
+		,TB_ASSOC.AMM_cd_azione			AS CD_AZIONE
+		,'N'							AS FL_ORIGINE_PRODOTTO
+		,TB_ASSOC.CD_AZIONE				AS CD_AZIONE_TB_ASSOC
+		,TB_ASSOC.OFF_TIPO_OFFERTA		AS TIPO_OFFERTA
+		
+	FROM VTB_NO2C_ASSOC_PROD AS TB_ASSOC	
+	where TB_ASSOC.AMM_nome_prodotto_amm is not null
+	
+	UNION ALL
+	
+	-- Relazioni  :  5-4
+	SELECT 
+		TB_ASSOC.AMM_nome_prodotto_amm		AS NOME
+		,CASE WHEN (TRIM(TB_ASSOC.AMM_ts_azione) = '' )
+				THEN '' 
+				ELSE (CAST( TRIM(TB_ASSOC.AMM_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+		 END 								AS TS_CREAZIONE_FIGLIO
+		,TB_ASSOC.AMM_nome_prodotto_amm 	AS COD_PRODOTTO_CRMO
+		,TB_ASSOC.AMM_sk_prodotto_amm		AS CODICE_BIC
+		,CASE WHEN (TRIM(TB_ASSOC.COM_ts_azione) = '' )
+				THEN '' 
+				ELSE (CAST( TRIM(TB_ASSOC.COM_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+		 END 							AS TS_CREAZIONE_PADRE
+		,TB_ASSOC.AMM_dt_inizio_validita(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8)) AS DT_INIZIO_VALIDITA
+		,TB_ASSOC.AMM_dt_fine_validita 	(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8))	AS DT_FINE_VALIDITA
+		,COALESCE ( PROD_OLD.Pro_id, TB_ASSOC.SK_PRODOTTO_COM_VEND) AS CODICE_BIC_PADRE
+		,CAST(5 AS VARCHAR(1))			AS TIPOLOGIA
+		,'4'							AS TIPOLOGIA_PADRE
+		,CAST('5' AS VARCHAR(1))		AS AZIONE
+		,TB_ASSOC.AMM_div_codice 		AS BU_RICAVI
+		,CAST('0' AS VARCHAR(1))		AS STATO
+		,TB_ASSOC.SK_OFFERTA			AS SK_OFFE
+		,TB_ASSOC.SK_PRODOTTO_COM_VEND 	AS SK_PCOM
+		,TB_ASSOC.SK_PRODOTTO_AMM		AS SK_PAMM
+		,TB_ASSOC.AMM_cd_azione			AS CD_AZIONE
+		,'N'							AS FL_ORIGINE_PRODOTTO
+		,TB_ASSOC.CD_AZIONE				AS CD_AZIONE_TB_ASSOC
+		,TB_ASSOC.OFF_TIPO_OFFERTA		AS TIPO_OFFERTA
+	
+	FROM VTB_NO2C_ASSOC_PROD AS TB_ASSOC
+		LEFT JOIN BIC_CAT_PROD_SA.CAT_ASSOC_PROC_OLD_NEW_ULT_VER AS PROD_OLD
+		ON TB_ASSOC.COM_sk_prodotto_com = PROD_OLD.sk_prodotto_com
+		where TB_ASSOC.OFF_nome_offerta is not null
+	AND TB_ASSOC.AMM_nome_prodotto_amm is not null
+	
+	
+) as TB_PROD_NONO2C
+
+
+) WITH DATA
+PRIMARY INDEX ( NOME )
+ON COMMIT PRESERVE ROWS;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+--:: Raccolta Prodotti O2C
+CREATE SET VOLATILE TABLE VTB_PROD_O2C AS 
+(
+
+
+SELECT DISTINCT TB_PROD_O2C.* 
+FROM 
+(
+
+-- Tipologia 3
+SELECT 
+	 TB_ASSOC.OFF_nome_offerta 		AS NOME
+	,CASE WHEN (TRIM(TB_ASSOC.OFF_ts_azione) = '' )
+			THEN '' 
+			ELSE (CAST( TRIM(TB_ASSOC.OFF_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+	 END 							AS TS_CREAZIONE_FIGLIO
+	,TB_ASSOC.OFF_nome_prodotto_crm AS COD_PRODOTTO_CRMO
+	,TB_ASSOC.OFF_sk_offerta 		AS CODICE_BIC
+	,CAST('' AS VARCHAR(26))		AS TS_CREAZIONE_PADRE
+	,TB_ASSOC.OFF_dt_inizio_validita(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8)) AS DT_INIZIO_VALIDITA
+	,TB_ASSOC.OFF_dt_fine_validita 	(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8))	AS DT_FINE_VALIDITA
+	,CAST('' AS VARCHAR(6))			AS CODICE_BIC_PADRE
+	,CAST(3 AS VARCHAR(1))			AS TIPOLOGIA
+	,CAST('' AS VARCHAR(1))			AS TIPOLOGIA_PADRE
+	,CAST('' AS VARCHAR(1))			AS AZIONE
+	,TB_ASSOC.OFF_div_codice 		AS BU_RICAVI
+	,CAST('' AS VARCHAR(1))			AS STATO
+	,TB_ASSOC.SK_OFFERTA			AS SK_OFFE
+	,TB_ASSOC.SK_PRODOTTO_COM_VEND 	AS SK_PCOM
+	,TB_ASSOC.SK_PRODOTTO_AMM		AS SK_PAMM	
+	,TB_ASSOC.OFF_cd_azione			AS CD_AZIONE
+	,'N'							AS FL_ORIGINE_PRODOTTO
+	,TB_ASSOC.CD_AZIONE				AS CD_AZIONE_ASSOC
+	,TB_ASSOC.OFF_TIPO_OFFERTA		AS TIPO_OFFERTA
+	
+FROM VTB_ASSOC_PROD_O2C AS TB_ASSOC
+
+
+UNION ALL
+
+-- Tipologia 4
+SELECT 
+	 TB_ASSOC.COM_ds_prod_com			AS NOME
+	,CASE WHEN (TRIM(TB_ASSOC.COM_ts_azione) = '' )
+			THEN '' 
+			ELSE (CAST( TRIM(TB_ASSOC.COM_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+	 END 								AS TS_CREAZIONE_FIGLIO
+	,COALESCE ( PROD_OLD.Pro_nome, TB_ASSOC.COM_nome_prodotto_com ) 		AS COD_PRODOTTO_CRMO
+	,COALESCE ( PROD_OLD.Pro_id, TB_ASSOC.COM_sk_prodotto_com)				AS CODICE_BIC -- ALC se presente si invia BIC OLD
+	,CAST('' AS VARCHAR(26))			AS TS_CREAZIONE_PADRE
+	,TB_ASSOC.COM_dt_inizio_validita(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8)) AS DT_INIZIO_VALIDITA
+	,TB_ASSOC.COM_dt_fine_validita 	(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8))	AS DT_FINE_VALIDITA
+	,CAST('' AS VARCHAR(6))				AS CODICE_BIC_PADRE
+	,CAST(4 AS VARCHAR(1))				AS TIPOLOGIA
+	,CAST('' AS VARCHAR(1))				AS TIPOLOGIA_PADRE
+	,CAST('' AS VARCHAR(1))				AS AZIONE
+	,TB_ASSOC.COM_div_codice 			AS BU_RICAVI
+	,CAST('' AS VARCHAR(1))				AS STATO
+	,TB_ASSOC.SK_OFFERTA				AS SK_OFFE
+	,TB_ASSOC.SK_PRODOTTO_COM_VEND  	AS SK_PCOM
+	,TB_ASSOC.SK_PRODOTTO_AMM			AS SK_PAMM
+	,TB_ASSOC.COM_cd_azione				AS CD_AZIONE
+	,'N'								AS FL_ORIGINE_PRODOTTO
+	,TB_ASSOC.CD_AZIONE					AS CD_AZIONE_ASSOC
+	,TB_ASSOC.OFF_TIPO_OFFERTA			AS TIPO_OFFERTA
+FROM  VTB_ASSOC_PROD_O2C AS TB_ASSOC
+	
+	LEFT JOIN BIC_CAT_PROD_SA.CAT_ASSOC_PROC_OLD_NEW_ULT_VER AS PROD_OLD
+		ON TB_ASSOC.COM_sk_prodotto_com = PROD_OLD.sk_prodotto_com
+
+
+UNION ALL
+
+
+-- Tipologia 5
+SELECT 
+	 TB_ASSOC.AMM_nome_prodotto_amm		AS NOME
+	,CASE WHEN (TRIM(TB_ASSOC.AMM_ts_azione) = '' )
+			THEN '' 
+			ELSE (CAST( TRIM(TB_ASSOC.AMM_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+	 END 								AS TS_CREAZIONE_FIGLIO
+	,TB_ASSOC.AMM_nome_prodotto_amm 	AS COD_PRODOTTO_CRMO
+	,TB_ASSOC.AMM_sk_prodotto_amm		AS CODICE_BIC
+	,CAST('' AS VARCHAR(26))			AS TS_CREAZIONE_PADRE
+	,TB_ASSOC.AMM_dt_inizio_validita(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8)) AS DT_INIZIO_VALIDITA
+	,TB_ASSOC.AMM_dt_fine_validita 	(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8))	AS DT_FINE_VALIDITA
+	,CAST('' AS VARCHAR(6))				AS CODICE_BIC_PADRE
+	,CAST(5 AS VARCHAR(1))				AS TIPOLOGIA
+	,CAST('' AS VARCHAR(1))				AS TIPOLOGIA_PADRE
+	,CAST('' AS VARCHAR(1))				AS AZIONE
+	,TB_ASSOC.AMM_div_codice 			AS BU_RICAVI
+	,CAST('' AS VARCHAR(1))				AS STATO
+	,TB_ASSOC.SK_OFFERTA				AS SK_OFFE
+	,TB_ASSOC.SK_PRODOTTO_COM_VEND 		AS SK_PCOM
+	,TB_ASSOC.SK_PRODOTTO_AMM 			AS SK_PAMM	
+	,TB_ASSOC.AMM_cd_azione				AS CD_AZIONE
+	,'N'								AS FL_ORIGINE_PRODOTTO
+	,TB_ASSOC.CD_AZIONE					AS CD_AZIONE_TB_ASSOC
+	,TB_ASSOC.OFF_TIPO_OFFERTA			AS TIPO_OFFERTA
+FROM VTB_ASSOC_PROD_O2C AS TB_ASSOC
+
+
+UNION ALL
+
+-- Tipologia 4-3
+SELECT 
+	 TB_ASSOC.COM_ds_prod_com			AS NOME
+	,CASE WHEN (TRIM(TB_ASSOC.COM_ts_azione) = '' )
+			THEN '' 
+			ELSE (CAST( TRIM(TB_ASSOC.COM_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+	 END 								AS TS_CREAZIONE_FIGLIO
+	,COALESCE ( PROD_OLD.Pro_nome, TB_ASSOC.COM_nome_prodotto_com ) 	AS COD_PRODOTTO_CRMO
+	,COALESCE ( PROD_OLD.Pro_id, TB_ASSOC.COM_sk_prodotto_com)			AS CODICE_BIC -- ALC se presente si invia BIC OLD
+	,CASE WHEN (TRIM(TB_ASSOC.OFF_ts_azione) = '' )
+			THEN '' 
+			ELSE (CAST( TRIM(TB_ASSOC.OFF_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+	 END 								AS TS_CREAZIONE_PADRE
+	,TB_ASSOC.COM_dt_inizio_validita(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8)) AS DT_INIZIO_VALIDITA
+	,TB_ASSOC.COM_dt_fine_validita 	(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8))	AS DT_FINE_VALIDITA
+	,CAST(TB_ASSOC.sk_offerta AS VARCHAR(6))	AS CODICE_BIC_PADRE
+	,CAST(4 AS VARCHAR(1))				AS TIPOLOGIA
+	,'3'								AS TIPOLOGIA_PADRE
+	,CAST('5' AS VARCHAR(1))			AS AZIONE
+	,TB_ASSOC.COM_div_codice 			AS BU_RICAVI
+	,CAST('0' AS VARCHAR(1))			AS STATO
+	,TB_ASSOC.SK_OFFERTA				AS SK_OFFE
+	,TB_ASSOC.SK_PRODOTTO_COM_VEND 		AS SK_PCOM
+	,TB_ASSOC.SK_PRODOTTO_AMM			AS SK_PAMM	
+	,TB_ASSOC.COM_cd_azione				AS CD_AZIONE
+	,'N'								AS FL_ORIGINE_PRODOTTO
+	,TB_ASSOC.CD_AZIONE					AS CD_AZIONE_TB_ASSOC
+	,TB_ASSOC.OFF_TIPO_OFFERTA			AS TIPO_OFFERTA
+	FROM VTB_ASSOC_PROD_O2C AS TB_ASSOC
+
+LEFT JOIN BIC_CAT_PROD_SA.CAT_ASSOC_PROC_OLD_NEW_ULT_VER AS PROD_OLD
+	ON TB_ASSOC.COM_sk_prodotto_com = PROD_OLD.sk_prodotto_com
+
+UNION ALL
+
+
+-- Tipologia 5-3
+SELECT 
+	 TB_ASSOC.AMM_nome_prodotto_amm		AS NOME
+	,CASE WHEN (TRIM(TB_ASSOC.AMM_ts_azione) = '' )
+			THEN '' 
+			ELSE (CAST( TRIM(TB_ASSOC.AMM_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+	 END 								AS TS_CREAZIONE_FIGLIO
+	,TB_ASSOC.AMM_nome_prodotto_amm 	AS COD_PRODOTTO_CRMO
+	,TB_ASSOC.AMM_sk_prodotto_amm		AS CODICE_BIC
+	,CASE WHEN (TRIM(TB_ASSOC.OFF_ts_azione) = '' )
+			THEN '' 
+			ELSE (CAST( TRIM(TB_ASSOC.OFF_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+	 END 								AS TS_CREAZIONE_PADRE
+	,TB_ASSOC.AMM_dt_inizio_validita(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8)) AS DT_INIZIO_VALIDITA
+	,TB_ASSOC.AMM_dt_fine_validita 	(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8))	AS DT_FINE_VALIDITA
+	,TB_ASSOC.SK_OFFERTA				AS CODICE_BIC_PADRE
+	,CAST(5 AS VARCHAR(1))				AS TIPOLOGIA
+	,'3'								AS TIPOLOGIA_PADRE
+	,CAST('5' AS VARCHAR(1))			AS AZIONE
+	,TB_ASSOC.AMM_div_codice 			AS BU_RICAVI
+	,CAST('0' AS VARCHAR(1))			AS STATO
+	,TB_ASSOC.SK_OFFERTA				AS SK_OFFE
+	,TB_ASSOC.SK_PRODOTTO_COM_VEND 		AS SK_PCOM
+	,TB_ASSOC.SK_PRODOTTO_AMM 			AS SK_PAMM	
+	,TB_ASSOC.AMM_cd_azione				AS CD_AZIONE
+	,'N'								AS FL_ORIGINE_PRODOTTO
+	,TB_ASSOC.CD_AZIONE					AS CD_AZIONE_TB_ASSOC
+	,TB_ASSOC.OFF_TIPO_OFFERTA			AS TIPO_OFFERTA
+	FROM VTB_ASSOC_PROD_O2C AS TB_ASSOC
+	
+
+UNION ALL
+
+-- Tipologia 5-4
+SELECT 
+	 TB_ASSOC.AMM_nome_prodotto_amm		AS NOME
+	,CASE WHEN (TRIM(TB_ASSOC.AMM_ts_azione) = '' )
+			THEN '' 
+			ELSE (CAST( TRIM(TB_ASSOC.AMM_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+	 END 								AS TS_CREAZIONE_FIGLIO
+	,TB_ASSOC.AMM_nome_prodotto_amm 	AS COD_PRODOTTO_CRMO
+	,TB_ASSOC.AMM_sk_prodotto_amm		AS CODICE_BIC
+	,CASE WHEN (TRIM(TB_ASSOC.COM_ts_azione) = '' )
+			THEN '' 
+			ELSE (CAST( TRIM(TB_ASSOC.COM_ts_azione) AS TIMESTAMP(0)) (FORMAT 'yyyymmddhhmiss') (VARCHAR(26)))
+	 END 								AS TS_CREAZIONE_PADRE
+	,TB_ASSOC.AMM_dt_inizio_validita(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8)) AS DT_INIZIO_VALIDITA
+	,TB_ASSOC.AMM_dt_fine_validita 	(DATE) (FORMAT 'yyyymmdd') (VARCHAR(8))	AS DT_FINE_VALIDITA
+	,COALESCE ( PROD_OLD.Pro_id, TB_ASSOC.SK_PRODOTTO_COM_VEND) AS CODICE_BIC_PADRE
+	,CAST(5 AS VARCHAR(1))				AS TIPOLOGIA
+	,'4'								AS TIPOLOGIA_PADRE
+	,CAST('5' AS VARCHAR(1))			AS AZIONE
+	,TB_ASSOC.AMM_div_codice 			AS BU_RICAVI
+	,CAST('0' AS VARCHAR(1))			AS STATO
+	,TB_ASSOC.SK_OFFERTA				AS SK_OFFE
+	,TB_ASSOC.SK_PRODOTTO_COM_VEND 		AS SK_PCOM
+	,TB_ASSOC.SK_PRODOTTO_AMM			AS SK_PAMM
+	,TB_ASSOC.AMM_cd_azione				AS CD_AZIONE
+	,'N'								AS FL_ORIGINE_PRODOTTO
+	,TB_ASSOC.CD_AZIONE					AS CD_AZIONE_TB_ASSOC
+	,TB_ASSOC.OFF_TIPO_OFFERTA			AS TIPO_OFFERTA
+	FROM VTB_ASSOC_PROD_O2C AS TB_ASSOC
+		LEFT JOIN BIC_CAT_PROD_SA.CAT_ASSOC_PROC_OLD_NEW_ULT_VER AS PROD_OLD
+		ON TB_ASSOC.COM_sk_prodotto_com = PROD_OLD.sk_prodotto_com
+		where TB_ASSOC.OFF_nome_offerta is not null
+				
+) as TB_PROD_O2C
+
+
+
+) WITH DATA
+PRIMARY INDEX ( NOME )
+ON COMMIT PRESERVE ROWS;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+-- Inserisco nel Delta i "Prodotti NON_O2C" + "Prodotti O2C"
+INSERT INTO BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA
+SELECT
+	cast(CAST(ROW_NUMBER() OVER (ORDER BY FL_ORIGINE_PRODOTTO DESC , tipologia_padre, tipologia,nome) AS INTEGER)  as varchar(100)) AS CONTATORE
+	,SFA.* 
+FROM (
+
+			 --## Prodotti Non Order 2 Cash ## 
+	SELECT * FROM VTB_PROD_NON_O2C
+		
+	UNION ALL
+
+			 --## Prodotti     Order 2 Cash  ##
+	SELECT * FROM VTB_PROD_O2C
+
+) AS SFA;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+--:: Passo_2 - Materializzazione del Delta (Calcolato) che verrà utilizzato per l'Estrazione tramite il seguente job:
+-- ODSBIC/Jobs/EstrazioneSFA/ScaricoFileSFA/CatalogoProdotti/JdSFA_Indirizzo_CatalogoProdotti
+
+
+--Creazione della Volatile Prodotti  
+CREATE SET VOLATILE TABLE VTB_CATALOGO_PRODOTTI AS 
+(
+	SELECT *
+	FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PRODOTTI AS PRODOTTI
+
+) WITH DATA
+PRIMARY INDEX ( CONTATORE )
+ON COMMIT PRESERVE ROWS;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+--Record Padri (Vecchi e Nuovi Prodotti) che presentano una Variazione (Variazione Invio Precedente = 2 )
+CREATE SET VOLATILE TABLE VTB_PADRI_VARIATI AS 
+(
+
+	--Aggiunta dei Record Padri (Vecchi Prodotti) che presentano una Variazione (Variazione Invio Precedente = 2 )
+	SELECT  DISTINCT
+		 DELTA.NOME
+		,DELTA.TS_CREAZIONE_FIGLIO 
+		,DELTA.COD_PRODOTTO_CRMO
+		,DELTA.CODICE_BIC
+		,DELTA.TS_CREAZIONE_PADRE
+		,DELTA.DT_INIZIO_VALIDITA
+		,DELTA.DT_FINE_VALIDITA
+		,DELTA.CODICE_BIC_PADRE
+		,DELTA.TIPOLOGIA
+		,DELTA.TIPOLOGIA_PADRE
+		,CASE WHEN DELTA.DT_FINE_VALIDITA <> '29991231' THEN '3' ELSE '2' END AS AZIONE
+		,DELTA.BU_RICAVI
+		,CASE WHEN DELTA.DT_FINE_VALIDITA <> '29991231' THEN '1' ELSE '0' END AS STATO
+		,DELTA.FL_ORIGINE_PRODOTTO
+	FROM VTB_CATALOGO_PRODOTTI AS OUTD
+	INNER JOIN BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+		ON  DELTA.CODICE_BIC = OUTD.CODICE_BIC
+		AND DELTA.TIPOLOGIA = OUTD.TIPOLOGIA
+		AND DELTA.TS_CREAZIONE_PADRE = ''
+		AND OUTD.TS_CREAZIONE_PADRE = ''
+		AND DELTA.CD_AZIONE = 'A'
+		AND DELTA.FL_ORIGINE_PRODOTTO = 'V'
+		AND (
+			COALESCE(OUTD.NOME,'') <> COALESCE(DELTA.NOME,'')
+			OR COALESCE(OUTD.COD_PRODOTTO_CRMO,'') <> COALESCE(DELTA.COD_PRODOTTO_CRMO,'')
+			OR COALESCE(OUTD.DT_INIZIO_VALIDITA,'19000101') <> COALESCE(DELTA.DT_INIZIO_VALIDITA,'19000101')
+			OR COALESCE(OUTD.DT_FINE_VALIDITA, '19000101') <> COALESCE(DELTA.DT_FINE_VALIDITA,'19000101')
+			OR COALESCE(OUTD.BU_RICAVI,'') <> COALESCE(DELTA.BU_RICAVI,'')
+
+		)
+
+	UNION ALL
+	
+	--Aggiunta dei Record Padri (Nuovi Prodotti) che presentano una Variazione (Variazione Invio Precedente = 2 )
+	SELECT  DISTINCT
+		 DELTA.NOME
+		,DELTA.TS_CREAZIONE_FIGLIO 
+		,DELTA.COD_PRODOTTO_CRMO
+		,DELTA.CODICE_BIC
+		,DELTA.TS_CREAZIONE_PADRE
+		,DELTA.DT_INIZIO_VALIDITA
+		,DELTA.DT_FINE_VALIDITA
+		,DELTA.CODICE_BIC_PADRE
+		,DELTA.TIPOLOGIA
+		,DELTA.TIPOLOGIA_PADRE
+		,CASE WHEN DELTA.DT_FINE_VALIDITA <> '29991231' THEN '3' ELSE '2' END AS AZIONE
+		,DELTA.BU_RICAVI
+		,CASE WHEN DELTA.DT_FINE_VALIDITA <> '29991231' THEN '1' ELSE '0' END AS STATO
+		,DELTA.FL_ORIGINE_PRODOTTO
+	FROM VTB_CATALOGO_PRODOTTI AS OUTD
+	INNER JOIN BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+		ON DELTA.SK_OFFE  = OUTD.SK_OFFE
+		AND DELTA.SK_PCOM = OUTD.SK_PCOM		
+		AND DELTA.SK_PAMM = OUTD.SK_PAMM
+		AND OUTD.TIPOLOGIA = DELTA.TIPOLOGIA
+		AND OUTD.TS_CREAZIONE_PADRE = ''
+		AND DELTA.TS_CREAZIONE_PADRE = ''
+		AND DELTA.CD_AZIONE = 'A'
+		AND DELTA.FL_ORIGINE_PRODOTTO = 'N'
+		AND (
+			COALESCE(OUTD.NOME,'') <> COALESCE(DELTA.NOME,'')
+			OR COALESCE(OUTD.COD_PRODOTTO_CRMO,'') <> COALESCE(DELTA.COD_PRODOTTO_CRMO,'')
+			OR COALESCE(OUTD.DT_INIZIO_VALIDITA,'19000101') <> COALESCE(DELTA.DT_INIZIO_VALIDITA,'19000101')
+			OR COALESCE(OUTD.DT_FINE_VALIDITA, '19000101') <> COALESCE(DELTA.DT_FINE_VALIDITA,'19000101')
+			OR COALESCE(OUTD.BU_RICAVI,'') <> COALESCE(DELTA.BU_RICAVI,'')
+		)
+		
+) WITH DATA
+PRIMARY INDEX ( NOME )
+ON COMMIT PRESERVE ROWS;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+--Aggiunta dei Record Padri che solo al First Run presentano delle cancellazioni. 
+CREATE SET VOLATILE TABLE VTB_PADRI_CANCELLATI_FIRST_RUN AS 
+(
+
+     SELECT DISTINCT
+		 A.SK_OFFE
+		,A.SK_PCOM
+		,A.SK_PAMM 
+     FROM 
+     (
+          SELECT *
+          FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+          WHERE  DELTA.CODICE_BIC_PADRE = ''
+          AND DELTA.CD_AZIONE_ASSOC = 'D'
+     ) AS A
+     
+     LEFT JOIN 
+     (
+          SELECT *
+          FROM VTB_CATALOGO_PRODOTTI AS PRODOTTI
+          WHERE  PRODOTTI.CODICE_BIC_PADRE = ''
+     ) AS  B
+     ON  A.SK_OFFE = B.SK_OFFE
+     AND A.SK_PCOM = B.SK_PCOM		
+     AND A.SK_PAMM = B.SK_PAMM
+	 WHERE B.SK_PCOM IS NULL
+
+) WITH DATA
+PRIMARY INDEX ( SK_OFFE )
+ON COMMIT PRESERVE ROWS;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+--Aggiunta dei Record Figli che solo al First Run presentano delle cancellazioni. 
+CREATE SET VOLATILE TABLE VTB_FIGLI_CANCELLATI_FIRST_RUN AS 
+(
+
+     SELECT DISTINCT
+		 A.SK_OFFE
+		,A.SK_PCOM
+		,A.SK_PAMM 
+     FROM 
+     (
+          SELECT *
+          FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+          WHERE  DELTA.CODICE_BIC_PADRE <> ''
+          AND DELTA.CD_AZIONE_ASSOC = 'D'
+     ) AS A
+     
+     LEFT JOIN 
+     (
+          SELECT *
+          FROM VTB_CATALOGO_PRODOTTI AS PRODOTTI
+          WHERE  PRODOTTI.CODICE_BIC_PADRE <> ''
+     ) AS  B
+     ON  A.SK_OFFE = B.SK_OFFE
+     AND A.SK_PCOM = B.SK_PCOM		
+     AND A.SK_PAMM = B.SK_PAMM
+	 WHERE B.SK_PCOM IS NULL
+
+) WITH DATA
+PRIMARY INDEX ( SK_OFFE )
+ON COMMIT PRESERVE ROWS;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+CREATE SET VOLATILE TABLE VTB_PADRI_EVOLUTI_O2C AS 
+(
+
+-- Doppiette In Evoluzione
+	SELECT DISTINCT 
+		 A.CONTATORE                     
+		,A.NOME                          
+		,A.TS_CREAZIONE_FIGLIO           
+		,A.COD_PRODOTTO_CRMO             
+		,A.CODICE_BIC                    
+		,A.TS_CREAZIONE_PADRE            
+		,A.DT_INIZIO_VALIDITA            
+		,A.DT_FINE_VALIDITA              
+		,A.CODICE_BIC_PADRE              
+		,A.TIPOLOGIA                     
+		,A.TIPOLOGIA_PADRE               
+		,A.AZIONE                        
+		,A.BU_RICAVI                     
+		,A.STATO                         
+		,A.SK_OFFE                       
+		,A.SK_PCOM                       
+		,A.SK_PAMM                       
+		,A.CD_AZIONE                     
+		,A.FL_ORIGINE_PRODOTTO           
+		,A.CD_AZIONE_ASSOC
+		,A.TIPO_OFFERTA
+     FROM 
+     (
+          SELECT *
+          FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+          WHERE  DELTA.CODICE_BIC_PADRE = ''
+          AND DELTA.TIPO_OFFERTA = 5
+     ) AS A
+     INNER JOIN 
+     (
+          SELECT *
+          FROM VTB_CATALOGO_PRODOTTI AS PRODOTTI
+          WHERE  PRODOTTI.CODICE_BIC_PADRE = ''
+          AND PRODOTTI.TIPO_OFFERTA = 2
+     ) AS  B
+     ON  A.SK_OFFE = B.SK_OFFE
+     AND A.SK_PCOM = B.SK_PCOM		
+     AND A.SK_PAMM = B.SK_PAMM
+
+UNION
+
+	--Doppietta Evoluta Totalmente
+	SELECT DISTINCT 
+		  A.CONTATORE                     
+		 ,A.NOME                          
+		 ,A.TS_CREAZIONE_FIGLIO           
+		 ,A.COD_PRODOTTO_CRMO             
+		 ,A.CODICE_BIC                    
+		 ,A.TS_CREAZIONE_PADRE            
+		 ,A.DT_INIZIO_VALIDITA            
+		 ,A.DT_FINE_VALIDITA              
+		 ,A.CODICE_BIC_PADRE              
+		 ,A.TIPOLOGIA                     
+		 ,A.TIPOLOGIA_PADRE               
+		 ,A.AZIONE                        
+		 ,A.BU_RICAVI                     
+		 ,A.STATO                         
+		 ,A.SK_OFFE                       
+		 ,A.SK_PCOM                       
+		 ,A.SK_PAMM                       
+		 ,A.CD_AZIONE                     
+		 ,A.FL_ORIGINE_PRODOTTO           
+		 ,A.CD_AZIONE_ASSOC
+		 ,A.TIPO_OFFERTA
+      FROM 
+      (
+           SELECT *
+           FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+           WHERE  DELTA.CODICE_BIC_PADRE = ''
+           AND DELTA.TIPO_OFFERTA = 1
+      ) AS A
+      INNER JOIN 
+      (
+           SELECT *
+           FROM VTB_CATALOGO_PRODOTTI AS PRODOTTI
+           WHERE  PRODOTTI.CODICE_BIC_PADRE = ''
+           AND PRODOTTI.TIPO_OFFERTA = 2
+      ) AS  B
+      ON  A.SK_OFFE = B.SK_OFFE
+      AND A.SK_PCOM = B.SK_PCOM		
+      AND B.SK_PAMM = '000000'
+      AND A.SK_PAMM <> '000000'
+      AND A.TIPOLOGIA IN ('3','4')
+	 
+ UNION
+
+	--Triplette Evolute
+	SELECT DISTINCT 
+		 A.CONTATORE                     
+		,A.NOME                          
+		,A.TS_CREAZIONE_FIGLIO           
+		,A.COD_PRODOTTO_CRMO             
+		,A.CODICE_BIC                    
+		,A.TS_CREAZIONE_PADRE            
+		,A.DT_INIZIO_VALIDITA            
+		,A.DT_FINE_VALIDITA              
+		,A.CODICE_BIC_PADRE              
+		,A.TIPOLOGIA                     
+		,A.TIPOLOGIA_PADRE               
+		,A.AZIONE                        
+		,A.BU_RICAVI                     
+		,A.STATO                         
+		,A.SK_OFFE                       
+		,A.SK_PCOM                       
+		,A.SK_PAMM                       
+		,A.CD_AZIONE                     
+		,A.FL_ORIGINE_PRODOTTO           
+		,A.CD_AZIONE_ASSOC
+		,A.TIPO_OFFERTA
+     FROM 
+     (
+          SELECT *
+          FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+          WHERE  DELTA.CODICE_BIC_PADRE = ''
+          AND DELTA.TIPO_OFFERTA = 1
+     ) AS A
+     
+     INNER JOIN 
+     (
+          SELECT *
+          FROM VTB_CATALOGO_PRODOTTI AS PRODOTTI
+          WHERE  PRODOTTI.CODICE_BIC_PADRE = ''
+          AND PRODOTTI.TIPO_OFFERTA = 2
+     ) AS  B
+     ON  A.SK_OFFE = B.SK_OFFE
+     AND A.SK_PCOM = B.SK_PCOM		
+     AND A.SK_PAMM = B.SK_PAMM
+
+) WITH DATA
+PRIMARY INDEX ( SK_OFFE )
+ON COMMIT PRESERVE ROWS;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+CREATE SET VOLATILE TABLE VTB_FIGLI_EVOLUTI_O2C AS 
+(
+
+-- Doppiette In Evoluzione
+	SELECT DISTINCT 
+		 A.CONTATORE                     
+		,A.NOME                          
+		,A.TS_CREAZIONE_FIGLIO           
+		,A.COD_PRODOTTO_CRMO             
+		,A.CODICE_BIC                    
+		,A.TS_CREAZIONE_PADRE            
+		,A.DT_INIZIO_VALIDITA            
+		,A.DT_FINE_VALIDITA              
+		,A.CODICE_BIC_PADRE              
+		,A.TIPOLOGIA                     
+		,A.TIPOLOGIA_PADRE               
+		,A.AZIONE                        
+		,A.BU_RICAVI                     
+		,A.STATO                         
+		,A.SK_OFFE                       
+		,A.SK_PCOM                       
+		,A.SK_PAMM                       
+		,A.CD_AZIONE                     
+		,A.FL_ORIGINE_PRODOTTO           
+		,A.CD_AZIONE_ASSOC
+		,A.TIPO_OFFERTA 
+     FROM 
+     (
+          SELECT *
+          FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+          WHERE  DELTA.CODICE_BIC_PADRE <> ''
+          AND DELTA.TIPO_OFFERTA = 5
+     ) AS A
+     
+     INNER JOIN 
+     (
+          SELECT *
+          FROM VTB_CATALOGO_PRODOTTI AS PRODOTTI
+          WHERE  PRODOTTI.CODICE_BIC_PADRE <> ''
+          AND PRODOTTI.TIPO_OFFERTA = 2
+     ) AS  B
+     ON  A.SK_OFFE = B.SK_OFFE
+
+     AND A.SK_PCOM = B.SK_PCOM		
+     AND A.SK_PAMM = B.SK_PAMM
+
+	 UNION
+
+	--Doppietta Evoluta Totalmente
+	 SELECT DISTINCT 
+	      A.CONTATORE                     
+		 ,A.NOME                          
+		 ,A.TS_CREAZIONE_FIGLIO           
+		 ,A.COD_PRODOTTO_CRMO             
+		 ,A.CODICE_BIC                    
+		 ,A.TS_CREAZIONE_PADRE            
+		 ,A.DT_INIZIO_VALIDITA            
+		 ,A.DT_FINE_VALIDITA              
+		 ,A.CODICE_BIC_PADRE              
+		 ,A.TIPOLOGIA                     
+		 ,A.TIPOLOGIA_PADRE               
+		 ,A.AZIONE                        
+		 ,A.BU_RICAVI                     
+		 ,A.STATO                         
+		 ,A.SK_OFFE                       
+		 ,A.SK_PCOM                       
+		 ,A.SK_PAMM                       
+		 ,A.CD_AZIONE                     
+		 ,A.FL_ORIGINE_PRODOTTO           
+		 ,A.CD_AZIONE_ASSOC
+		 ,A.TIPO_OFFERTA 
+      FROM 
+      (
+           SELECT *
+           FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+           WHERE  DELTA.CODICE_BIC_PADRE <> ''
+           AND DELTA.TIPO_OFFERTA = 1
+      ) AS A
+      INNER JOIN 
+      (
+           SELECT *
+           FROM VTB_CATALOGO_PRODOTTI AS PRODOTTI
+           WHERE  PRODOTTI.CODICE_BIC_PADRE <> ''
+           AND PRODOTTI.TIPO_OFFERTA = 2
+      ) AS  B
+      ON  A.SK_OFFE = B.SK_OFFE
+      AND A.SK_PCOM = B.SK_PCOM		
+      AND B.SK_PAMM = '000000'
+      AND A.SK_PAMM <> '000000'
+      AND A.TIPOLOGIA IN ('4')
+	 
+	  UNION
+
+	--Triplette Evolute
+	SELECT DISTINCT 
+		 A.CONTATORE                     
+		,A.NOME                          
+		,A.TS_CREAZIONE_FIGLIO           
+		,A.COD_PRODOTTO_CRMO             
+		,A.CODICE_BIC                    
+		,A.TS_CREAZIONE_PADRE            
+		,A.DT_INIZIO_VALIDITA            
+		,A.DT_FINE_VALIDITA              
+		,A.CODICE_BIC_PADRE              
+		,A.TIPOLOGIA                     
+		,A.TIPOLOGIA_PADRE               
+		,A.AZIONE                        
+		,A.BU_RICAVI                     
+		,A.STATO                         
+		,A.SK_OFFE                       
+		,A.SK_PCOM                       
+		,A.SK_PAMM                       
+		,A.CD_AZIONE                     
+		,A.FL_ORIGINE_PRODOTTO           
+		,A.CD_AZIONE_ASSOC
+		,A.TIPO_OFFERTA 
+     FROM 
+     (
+          SELECT *
+          FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+          WHERE  DELTA.CODICE_BIC_PADRE <> ''
+          AND DELTA.TIPO_OFFERTA = 1
+		  --AND DELTA.CD_AZIONE_ASSOC ='A'
+     ) AS A
+     
+     INNER JOIN 
+     (
+          SELECT *
+          FROM VTB_CATALOGO_PRODOTTI AS PRODOTTI
+          WHERE  PRODOTTI.CODICE_BIC_PADRE <> ''
+          AND PRODOTTI.TIPO_OFFERTA = 2
+		  --AND PRODOTTI.CD_AZIONE_ASSOC ='A'
+     ) AS  B
+     ON  A.SK_OFFE = B.SK_OFFE
+     AND A.SK_PCOM = B.SK_PCOM		
+     AND A.SK_PAMM = B.SK_PAMM
+	 
+) WITH DATA
+PRIMARY INDEX ( SK_OFFE )
+ON COMMIT PRESERVE ROWS;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+-- Eliminiamo i redord con cd_azione = 'D' al First Run
+DELETE FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA 
+WHERE ( SK_OFFE, SK_PCOM, SK_PAMM ) IN ( 
+	SELECT SK_OFFE, SK_PCOM, SK_PAMM FROM VTB_PADRI_CANCELLATI_FIRST_RUN 
+	UNION
+	SELECT SK_OFFE, SK_PCOM, SK_PAMM FROM VTB_FIGLI_CANCELLATI_FIRST_RUN
+);
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+-- Eliminiamo dalla Prodotti le Offerte NO2C che sono diventate O2C ma che ancora non hanno l'amministrativo associato
+-- , quindi tutti quei record che sono in uno stato ibrido fra NO2C e O2C
+DELETE FROM VTB_CATALOGO_PRODOTTI
+WHERE  TIPO_OFFERTA = 5 AND SK_PAMM = '000000' AND 
+( SK_OFFE, SK_PCOM ) IN 
+	( 
+		SELECT DISTINCT SK_OFFE, SK_PCOM 
+		FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA
+		WHERE TIPO_OFFERTA = 1
+	);
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+--**** Volatile che contiene il Ritiro e la Deassociazione della Transizione Offerta da 2 a 1  
+-- , in caso di Amministrativo già esistente sulla volatile O2C il record viene eliminato tramite WHERE condition 
+CREATE SET VOLATILE TABLE VTB_REC_OFFERTA_BECOMING_O2C AS 
+(
+SELECT DISTINCT
+	 C.CONTATORE
+	,C.NOME
+	,C.TS_CREAZIONE_FIGLIO
+	,C.COD_PRODOTTO_CRMO
+	,C.CODICE_BIC
+	,C.TS_CREAZIONE_PADRE
+	,C.DT_INIZIO_VALIDITA
+	,C.DT_FINE_VALIDITA
+	,C.CODICE_BIC_PADRE
+	,C.TIPOLOGIA
+	,C.TIPOLOGIA_PADRE
+	,C.AZIONE
+	,C.BU_RICAVI
+	,C.STATO
+	,C.SK_OFFE
+	,C.SK_PCOM
+	,C.SK_PAMM
+	,C.CD_AZIONE
+	,C.FL_ORIGINE_PRODOTTO
+	,C.CD_AZIONE_ASSOC
+	,C.FLAG_INVIO
+	,C.TIPO_OFFERTA
+FROM
+(
+SELECT DISTINCT
+	 A.CONTATORE
+	,A.NOME
+	,A.TS_CREAZIONE_FIGLIO
+	,A.COD_PRODOTTO_CRMO
+	,A.CODICE_BIC
+	,A.TS_CREAZIONE_PADRE
+	,A.DT_INIZIO_VALIDITA
+	,A.DT_FINE_VALIDITA
+	,A.CODICE_BIC_PADRE
+	,A.TIPOLOGIA
+	,A.TIPOLOGIA_PADRE
+	,'3' AS AZIONE
+	,A.BU_RICAVI
+	,'1' AS STATO
+	,A.SK_OFFE
+	,A.SK_PCOM
+	,A.SK_PAMM
+	,A.CD_AZIONE
+	,A.FL_ORIGINE_PRODOTTO
+	,A.CD_AZIONE_ASSOC
+	,'1' AS FLAG_INVIO
+	,A.TIPO_OFFERTA
+FROM VTB_PADRI_EVOLUTI_O2C AS A
+
+UNION
+
+SELECT DISTINCT
+	 A.CONTATORE
+	,A.NOME
+	,A.TS_CREAZIONE_FIGLIO
+	,A.COD_PRODOTTO_CRMO
+	,A.CODICE_BIC
+	,A.TS_CREAZIONE_PADRE
+	,A.DT_INIZIO_VALIDITA
+	,A.DT_FINE_VALIDITA
+	,A.CODICE_BIC_PADRE
+	,A.TIPOLOGIA
+	,A.TIPOLOGIA_PADRE
+	,'6' AS AZIONE
+	,A.BU_RICAVI
+	,A.STATO
+	,A.SK_OFFE
+	,A.SK_PCOM
+	,A.SK_PAMM
+	,A.CD_AZIONE
+	,A.FL_ORIGINE_PRODOTTO
+	,A.CD_AZIONE_ASSOC
+	,'1' AS FLAG_INVIO
+	,A.TIPO_OFFERTA
+FROM VTB_FIGLI_EVOLUTI_O2C AS A
+
+) AS C
+WHERE ( C.CODICE_BIC , C.TIPOLOGIA_PADRE ) NOT IN
+     (
+          SELECT DISTINCT SK_PAMM , ''
+          FROM VTB_CATALOGO_PRODOTTI
+          WHERE CD_AZIONE = 'A'
+          AND TIPO_OFFERTA = 1
+     )
+
+) WITH DATA
+PRIMARY INDEX ( NOME )
+ON COMMIT PRESERVE ROWS;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+-- Contiene i record NO2C con Amministrativo = '000000' 
+-- Volatile che contiene il Nuovo e l' Associazione della Transizione Offerta da 2 a 1
+-- , in caso di Amministrativo già esistente sulla volatile O2C il record viene eliminato tramite WHERE condition
+CREATE SET VOLATILE TABLE VTB_REC_DOUBLE_BECOMING_O2C AS 
+(
+
+SELECT DISTINCT
+	 A.NOME
+	,A.TS_CREAZIONE_FIGLIO
+	,A.COD_PRODOTTO_CRMO
+	,A.CODICE_BIC
+	,A.TS_CREAZIONE_PADRE
+	,A.DT_INIZIO_VALIDITA
+	,A.DT_FINE_VALIDITA
+	,A.CODICE_BIC_PADRE
+	,A.TIPOLOGIA
+	,A.TIPOLOGIA_PADRE
+	,CASE WHEN A.TIPOLOGIA_PADRE <> '' THEN '5' ELSE '1' END AS AZIONE
+	,A.BU_RICAVI
+	,'0' AS STATO
+	,A.FL_ORIGINE_PRODOTTO
+
+FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS A
+INNER JOIN  VTB_CATALOGO_PRODOTTI AS B
+	ON    B.TIPO_OFFERTA = 2
+	AND B.SK_PAMM = '000000'
+	AND A.SK_OFFE = B.SK_OFFE
+	AND A.SK_PCOM = B.SK_PCOM
+	AND A.SK_PAMM <> '000000'
+	AND A.TIPO_OFFERTA <> B.TIPO_OFFERTA
+	--AND A.CD_AZIONE_ASSOC = 'A' AND B.CD_AZIONE_ASSOC = 'A'
+WHERE ( A.CODICE_BIC , A.TIPOLOGIA_PADRE ) NOT IN
+	(
+		SELECT DISTINCT SK_PAMM , ''
+		FROM VTB_CATALOGO_PRODOTTI
+		WHERE CD_AZIONE = 'A'
+		AND TIPO_OFFERTA = 1
+	)
+
+) WITH DATA
+PRIMARY INDEX ( NOME )
+ON COMMIT PRESERVE ROWS;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+-- Contiene i record NO2C con Amministrativo <> '000000' 
+-- , in caso di Amministrativo già esistente sulla volatile O2C il record viene eliminato tramite WHERE condition
+CREATE SET VOLATILE TABLE VTB_REC_TRIPLE_BECOMING_O2C AS 
+(
+
+SELECT DISTINCT
+	A.NOME
+	,A.TS_CREAZIONE_FIGLIO
+	,A.COD_PRODOTTO_CRMO
+	,A.CODICE_BIC
+	,A.TS_CREAZIONE_PADRE
+	,A.DT_INIZIO_VALIDITA
+	,A.DT_FINE_VALIDITA
+	,A.CODICE_BIC_PADRE
+	,A.TIPOLOGIA
+	,A.TIPOLOGIA_PADRE
+	,CASE WHEN A.TIPOLOGIA_PADRE <> '' THEN '5' ELSE '1' END AS AZIONE
+	,A.BU_RICAVI
+	,'0' AS STATO
+	,A.FL_ORIGINE_PRODOTTO
+FROM 		BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA 		  AS A
+INNER JOIN  VTB_CATALOGO_PRODOTTI AS B
+	ON  B.TIPO_OFFERTA = 2
+	AND B.SK_PAMM <> '000000'
+	AND A.SK_OFFE = B.SK_OFFE
+	AND A.SK_PCOM = B.SK_PCOM
+	AND a.SK_PAMM = B.SK_PAMM
+	AND A.TIPO_OFFERTA <> B.TIPO_OFFERTA
+	--AND A.CD_AZIONE_ASSOC = 'A' AND B.CD_AZIONE_ASSOC = 'A'
+WHERE ( A.CODICE_BIC , A.TIPOLOGIA_PADRE ) NOT IN
+	(
+		SELECT DISTINCT SK_PAMM , ''
+		FROM VTB_CATALOGO_PRODOTTI
+		WHERE CD_AZIONE = 'A'
+		AND TIPO_OFFERTA = 1
+	)
+
+
+) WITH DATA
+PRIMARY INDEX ( NOME )
+ON COMMIT PRESERVE ROWS;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+--Aggiunta Record Modificati che poi tornano Attivi (da 'M' ad 'A' ) 
+CREATE VOLATILE SET TABLE VTB_PADRE_FLAG_M AS
+(
+	SELECT 
+
+	 NOME
+	,TS_CREAZIONE_FIGLIO 
+	,COD_PRODOTTO_CRMO
+	,CODICE_BIC
+	,TS_CREAZIONE_PADRE
+	,DT_INIZIO_VALIDITA
+	,DT_FINE_VALIDITA
+	,CODICE_BIC_PADRE
+	,TIPOLOGIA
+	,TIPOLOGIA_PADRE
+	,AZIONE
+	,BU_RICAVI
+	,STATO
+	,SK_OFFE
+	,SK_PCOM
+	,SK_PAMM 
+	,CD_AZIONE
+     ,CASE 
+		WHEN (      CD_AZIONE = 'A' AND       CD_AZIONE_T2 = 'M') 
+		AND  (CD_AZIONE_ASSOC = 'M' AND CD_AZIONE_ASSOC_T2 = 'M') THEN 'X' 
+		
+		WHEN (      CD_AZIONE = 'A' AND       CD_AZIONE_T2 = 'X') 
+		AND  (CD_AZIONE_ASSOC = 'A' AND CD_AZIONE_ASSOC_T2 = 'M') THEN CD_AZIONE
+		
+		ELSE CD_AZIONE_T2
+		
+	 END AS CD_AZIONE_T2
+	,CD_AZIONE_ASSOC
+	,CD_AZIONE_ASSOC_T2
+	,FL_ORIGINE_PRODOTTO
+	,TAB_FONTE
+	,conta
+	,QCOD_D
+
+FROM 
+(
+
+
+	SELECT 
+	NOME
+	,TS_CREAZIONE_FIGLIO 
+	,COD_PRODOTTO_CRMO
+	,CODICE_BIC
+	,TS_CREAZIONE_PADRE
+	,DT_INIZIO_VALIDITA
+	,DT_FINE_VALIDITA
+	,CODICE_BIC_PADRE
+	,TIPOLOGIA
+	,TIPOLOGIA_PADRE
+	,CASE 
+		WHEN (      CD_AZIONE = 'A' AND      (CD_AZIONE_T2 = 'M' OR CD_AZIONE_T2 = 'X' )) 
+		AND  (CD_AZIONE_ASSOC = 'M' AND CD_AZIONE_ASSOC_T2 = 'M') THEN '0'
+		
+		WHEN (      CD_AZIONE = 'A' AND      (CD_AZIONE_T2 = 'M' OR CD_AZIONE_T2 = 'X' ))
+		 AND (CD_AZIONE_ASSOC = 'A' AND CD_AZIONE_ASSOC_T2 = 'M') THEN '1' 
+		 
+		WHEN (      CD_AZIONE = 'A' AND       CD_AZIONE_T2 = 'A')
+		 AND (CD_AZIONE_ASSOC = 'A' AND CD_AZIONE_ASSOC_T2 = 'M') THEN '2'
+		  
+	END AS AZIONE
+	,BU_RICAVI
+	,STATO
+	,SK_OFFE
+	,SK_PCOM
+	,SK_PAMM 
+	,CD_AZIONE
+	,COALESCE(MAX(CD_AZIONE) OVER (PARTITION BY SK_OFFE, SK_PCOM, SK_PAMM,CODICE_BIC,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA, codice_bic_padre ,TIPOLOGIA, TIPOLOGIA_PADRE,BU_RICAVI
+	ORDER BY SK_OFFE, SK_PCOM, SK_PAMM,CODICE_BIC,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA, codice_bic_padre,TIPOLOGIA, TIPOLOGIA_PADRE,BU_RICAVI , TAB_FONTE
+	ROWS BETWEEN 1 FOLLOWING AND 1 FOLLOWING)  ,'-')  AS CD_AZIONE_T2
+	,CD_AZIONE_ASSOC
+	,COALESCE(MAX(CD_AZIONE_ASSOC) OVER (PARTITION BY SK_OFFE, SK_PCOM, SK_PAMM,CODICE_BIC,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA, codice_bic_padre ,TIPOLOGIA, TIPOLOGIA_PADRE,BU_RICAVI
+	ORDER BY SK_OFFE, SK_PCOM, SK_PAMM,CODICE_BIC,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA, codice_bic_padre,TIPOLOGIA, TIPOLOGIA_PADRE,BU_RICAVI , TAB_FONTE
+	ROWS BETWEEN 1 FOLLOWING AND 1 FOLLOWING)  ,'-')  AS CD_AZIONE_ASSOC_T2
+	,FL_ORIGINE_PRODOTTO
+	,TAB_FONTE
+
+	,ROW_NUMBER() OVER (PARTITION BY SK_OFFE, SK_PCOM, SK_PAMM, nome,CODICE_BIC,COD_PRODOTTO_CRMO,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA,TIPOLOGIA , CD_AZIONE, CD_AZIONE_ASSOC
+		ORDER BY SK_OFFE, SK_PCOM, SK_PAMM, nome,CODICE_BIC,COD_PRODOTTO_CRMO,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA,TIPOLOGIA,CD_AZIONE, CD_AZIONE_ASSOC, TAB_FONTE) AS conta
+	,ROW_NUMBER() OVER (PARTITION BY SK_OFFE, SK_PCOM, SK_PAMM, nome,CODICE_BIC,COD_PRODOTTO_CRMO,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA,TIPOLOGIA , CD_AZIONE
+		ORDER BY SK_OFFE, SK_PCOM, SK_PAMM, nome,CODICE_BIC,COD_PRODOTTO_CRMO,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA,TIPOLOGIA,CD_AZIONE, TAB_FONTE) AS QCOD_D
+
+FROM 
+
+(
+	SELECT DISTINCT
+		 NOME
+		,TS_CREAZIONE_FIGLIO 
+		,COD_PRODOTTO_CRMO
+		,CODICE_BIC
+		,TS_CREAZIONE_PADRE
+		,DT_INIZIO_VALIDITA
+		,DT_FINE_VALIDITA
+		,CODICE_BIC_PADRE
+		,TIPOLOGIA
+		,TIPOLOGIA_PADRE
+		,'0' AS AZIONE
+		,BU_RICAVI
+		,'0' AS STATO
+		,SK_OFFE
+		,SK_PCOM
+		,SK_PAMM 
+		,FL_ORIGINE_PRODOTTO
+		,CD_AZIONE
+		,CD_AZIONE_ASSOC
+		,1(INT) AS TAB_FONTE
+	FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+	WHERE CODICE_BIC_PADRE = ''
+
+		UNION 
+
+	SELECT DISTINCT 
+		 NOME
+		,TS_CREAZIONE_FIGLIO 
+		,COD_PRODOTTO_CRMO
+		,CODICE_BIC
+		,TS_CREAZIONE_PADRE
+		,DT_INIZIO_VALIDITA
+		,DT_FINE_VALIDITA
+		,CODICE_BIC_PADRE
+		,TIPOLOGIA
+		,TIPOLOGIA_PADRE
+		,'0' AS AZIONE
+		,BU_RICAVI
+		,'0' AS STATO
+		,SK_OFFE
+		,SK_PCOM
+		,SK_PAMM 
+		,FL_ORIGINE_PRODOTTO
+		,CD_AZIONE
+		,CD_AZIONE_ASSOC
+		,2 (INT) AS TAB_FONTE
+	FROM VTB_CATALOGO_PRODOTTI AS OUTD
+		WHERE CODICE_BIC_PADRE = ''
+            AND FLAG_INVIO = 1
+            AND CD_AZIONE_ASSOC = 'M'
+	) AS a
+
+	QUALIFY CD_AZIONE_ASSOC_T2 = 'M' AND TAB_FONTE = '1'
+	
+) AS TAB_RE_EDIT
+ 
+) WITH DATA
+PRIMARY INDEX (NOME)
+ON COMMIT PRESERVE ROWS
+;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+--Prima fase di Estrazione
+CREATE VOLATILE SET TABLE VTB_ESTRAZIONE_STEP_1 AS
+(
+
+	--Aggiunta dei Record Nuovi (Nuovo Inserimento = 1 per i Padri e = 5 per i Figli )
+	SELECT  DISTINCT
+		 DELTA.NOME
+		,DELTA.TS_CREAZIONE_FIGLIO
+		,DELTA.COD_PRODOTTO_CRMO
+		,DELTA.CODICE_BIC
+		,DELTA.TS_CREAZIONE_PADRE
+		,DELTA.DT_INIZIO_VALIDITA
+		,DELTA.DT_FINE_VALIDITA
+		,DELTA.CODICE_BIC_PADRE
+		,DELTA.TIPOLOGIA
+		,DELTA.TIPOLOGIA_PADRE
+		,CASE WHEN DELTA.Azione = '5' THEN '5' ELSE '1' END AS AZIONE
+		,DELTA.BU_RICAVI
+		,'0' AS STATO
+		,DELTA.FL_ORIGINE_PRODOTTO
+	FROM 		BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA 	AS DELTA
+	LEFT JOIN 	VTB_CATALOGO_PRODOTTI 	AS OUTD
+		ON DELTA.CODICE_BIC = OUTD.CODICE_BIC
+		AND DELTA.TIPOLOGIA = OUTD.TIPOLOGIA
+		WHERE (OUTD.TS_CREAZIONE_PADRE IS NULL OR FLAG_INVIO = 0 )
+		AND DELTA.CD_AZIONE ='A'
+		AND DELTA.CD_AZIONE_ASSOC = 'A'
+		AND DELTA.TIPO_OFFERTA <> 5
+
+	UNION ALL
+
+	--Aggiunta dei Record Padri (Nuovi e Vecchi Prodotti) che presentano una Variazione (Variazione Invio Precedente = 2 )
+	SELECT  DISTINCT
+		 TB_PADRI_VARIATI.NOME
+		,TB_PADRI_VARIATI.TS_CREAZIONE_FIGLIO 
+		,TB_PADRI_VARIATI.COD_PRODOTTO_CRMO
+		,TB_PADRI_VARIATI.CODICE_BIC
+		,TB_PADRI_VARIATI.TS_CREAZIONE_PADRE
+		,TB_PADRI_VARIATI.DT_INIZIO_VALIDITA
+		,TB_PADRI_VARIATI.DT_FINE_VALIDITA
+		,TB_PADRI_VARIATI.CODICE_BIC_PADRE
+		,TB_PADRI_VARIATI.TIPOLOGIA
+		,TB_PADRI_VARIATI.TIPOLOGIA_PADRE
+		,TB_PADRI_VARIATI.AZIONE
+		,TB_PADRI_VARIATI.BU_RICAVI
+		,TB_PADRI_VARIATI.STATO
+		,TB_PADRI_VARIATI.FL_ORIGINE_PRODOTTO
+	FROM VTB_PADRI_VARIATI AS TB_PADRI_VARIATI
+		
+	UNION ALL
+	
+--Aggiunta dei Record  FIGLI che non presentano variazioni (No Action = 0) 
+	SELECT  DISTINCT
+		 DELTA.NOME
+		,DELTA.TS_CREAZIONE_FIGLIO 
+		,DELTA.COD_PRODOTTO_CRMO
+		,DELTA.CODICE_BIC
+		,DELTA.TS_CREAZIONE_PADRE
+		,DELTA.DT_INIZIO_VALIDITA
+		,DELTA.DT_FINE_VALIDITA
+		,DELTA.CODICE_BIC_PADRE
+		,DELTA.TIPOLOGIA
+		,DELTA.TIPOLOGIA_PADRE
+		,'0'  AS AZIONE
+		,DELTA.BU_RICAVI
+		,'0'  AS STATO
+		,DELTA.FL_ORIGINE_PRODOTTO
+	FROM VTB_CATALOGO_PRODOTTI AS OUTD
+	INNER JOIN BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+		ON DELTA.SK_OFFE  = OUTD.SK_OFFE
+		AND DELTA.SK_PCOM = OUTD.SK_PCOM		
+		AND DELTA.SK_PAMM = OUTD.SK_PAMM
+		AND OUTD.TIPOLOGIA = DELTA.TIPOLOGIA
+		AND OUTD.TS_CREAZIONE_PADRE  <> ''
+		AND DELTA.TS_CREAZIONE_PADRE <> ''
+		AND DELTA.CD_AZIONE = 'A'
+		AND (
+			COALESCE(OUTD.NOME,'') <> COALESCE(DELTA.NOME,'')
+			OR COALESCE(OUTD.COD_PRODOTTO_CRMO,'') <> COALESCE(DELTA.COD_PRODOTTO_CRMO,'')
+			OR COALESCE(OUTD.DT_INIZIO_VALIDITA,'19000101') <> COALESCE(DELTA.DT_INIZIO_VALIDITA,'19000101')
+			OR COALESCE(OUTD.DT_FINE_VALIDITA, '19000101') <> COALESCE(DELTA.DT_FINE_VALIDITA,'19000101')
+			OR COALESCE(OUTD.BU_RICAVI,'') <> COALESCE(DELTA.BU_RICAVI,'')
+
+		)
+		
+	UNION ALL
+
+--Aggiunta dei Record Padri che non presentano variazioni (No Action = 0 )
+SELECT DISTINCT
+ NOME
+,TS_CREAZIONE_FIGLIO 
+,COD_PRODOTTO_CRMO
+,CODICE_BIC
+,TS_CREAZIONE_PADRE
+,DT_INIZIO_VALIDITA
+,DT_FINE_VALIDITA
+,CODICE_BIC_PADRE
+,TIPOLOGIA
+,TIPOLOGIA_PADRE
+,AZIONE
+,BU_RICAVI
+,STATO
+,FL_ORIGINE_PRODOTTO
+FROM 
+(
+
+SELECT 
+ NOME
+,TS_CREAZIONE_FIGLIO 
+,COD_PRODOTTO_CRMO
+,CODICE_BIC
+,TS_CREAZIONE_PADRE
+,DT_INIZIO_VALIDITA
+,DT_FINE_VALIDITA
+,CODICE_BIC_PADRE
+,TIPOLOGIA
+,TIPOLOGIA_PADRE
+,AZIONE
+,BU_RICAVI
+,STATO
+,FL_ORIGINE_PRODOTTO
+,ROW_NUMBER() OVER (PARTITION BY nome,CODICE_BIC,COD_PRODOTTO_CRMO,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA,TIPOLOGIA , CD_AZIONE, CD_AZIONE_ASSOC
+	ORDER BY nome,CODICE_BIC,COD_PRODOTTO_CRMO,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA,TIPOLOGIA,CD_AZIONE, CD_AZIONE_ASSOC, tab) AS conta
+,ROW_NUMBER() OVER (PARTITION BY nome,CODICE_BIC,COD_PRODOTTO_CRMO,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA,TIPOLOGIA , CD_AZIONE
+	ORDER BY nome,CODICE_BIC,COD_PRODOTTO_CRMO,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA,TIPOLOGIA,CD_AZIONE, tab) AS QCOD_D
+
+FROM 
+
+(
+	SELECT DISTINCT
+		 NOME
+		,TS_CREAZIONE_FIGLIO 
+		,COD_PRODOTTO_CRMO
+		,CODICE_BIC
+		,TS_CREAZIONE_PADRE
+		,DT_INIZIO_VALIDITA
+		,DT_FINE_VALIDITA
+		,CODICE_BIC_PADRE
+		,TIPOLOGIA
+		,TIPOLOGIA_PADRE
+		,'0' AS AZIONE
+		,BU_RICAVI
+		,'0' AS STATO
+		,SK_OFFE
+		,SK_PCOM
+		,SK_PAMM 
+		,FL_ORIGINE_PRODOTTO
+		,CD_AZIONE
+		,CD_AZIONE_ASSOC
+		,1(INT) AS TAB
+	FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+	WHERE CODICE_BIC_PADRE =''
+
+		UNION 
+
+	select distinct 
+		 NOME
+		,TS_CREAZIONE_FIGLIO 
+		,COD_PRODOTTO_CRMO
+		,CODICE_BIC
+		,TS_CREAZIONE_PADRE
+		,DT_INIZIO_VALIDITA
+		,DT_FINE_VALIDITA
+		,CODICE_BIC_PADRE
+		,TIPOLOGIA
+		,TIPOLOGIA_PADRE
+		,'0' AS AZIONE
+		,BU_RICAVI
+		,'0' AS STATO
+		,SK_OFFE
+		,SK_PCOM
+		,SK_PAMM 
+		,FL_ORIGINE_PRODOTTO
+		,CD_AZIONE
+		,CD_AZIONE_ASSOC
+		,2 (INT) AS TAB
+	FROM VTB_CATALOGO_PRODOTTI AS OUTD
+		WHERE CODICE_BIC_PADRE =''
+            AND FLAG_INVIO =1
+	) AS a
+	WHERE (CODICE_BIC,TIPOLOGIA) NOT IN
+	( 	
+		SELECT TB_PADRI_VARIATI.CODICE_BIC
+			  ,TB_PADRI_VARIATI.TIPOLOGIA
+		FROM VTB_PADRI_VARIATI AS TB_PADRI_VARIATI
+	)
+	QUALIFY conta = 2 
+        OR QCOD_D = 2
+ ) AS TAB_PADRI	
+
+UNION ALL
+
+
+--Aggiunta dei Record Figli COD_4
+SELECT  DISTINCT
+ NOME
+,TS_CREAZIONE_FIGLIO 
+,COD_PRODOTTO_CRMO
+,CODICE_BIC
+,TS_CREAZIONE_PADRE
+,DT_INIZIO_VALIDITA
+,DT_FINE_VALIDITA
+,CODICE_BIC_PADRE
+,TIPOLOGIA
+,TIPOLOGIA_PADRE
+,AZIONE
+,BU_RICAVI
+,STATO
+,FL_ORIGINE_PRODOTTO
+FROM
+(
+
+SELECT DISTINCT
+ NOME
+,TS_CREAZIONE_FIGLIO 
+,COD_PRODOTTO_CRMO
+,CODICE_BIC
+,TS_CREAZIONE_PADRE
+,DT_INIZIO_VALIDITA
+,DT_FINE_VALIDITA
+,CODICE_BIC_PADRE
+,TIPOLOGIA
+,TIPOLOGIA_PADRE
+,CASE 
+	WHEN (conta = 2) AND CD_AZIONE_ASSOC = 'A'  AND CD_AZIONE_ASSOC_T2 = '-' THEN '0' 
+	WHEN (conta = 2) AND TAB_FONTE = 1 AND  (CD_AZIONE_ASSOC = 'A') AND (CD_AZIONE_ASSOC = CD_AZIONE_ASSOC_T2)  THEN '0' 
+	WHEN (conta = 1) AND TAB_FONTE = 1 AND  CD_AZIONE_ASSOC = 'A' THEN '5' 
+	WHEN (conta = 1) AND TAB_FONTE = 2 AND  CD_AZIONE_ASSOC = 'A' THEN '6' 
+     
+     --Record Uguale ma FLAG = D
+    WHEN (conta = 2) AND TAB_FONTE = 1 AND  CD_AZIONE_ASSOC = 'D'  AND (CD_AZIONE_ASSOC <> CD_AZIONE_ASSOC_T2 ) 
+    AND (CD_AZIONE_ASSOC_T3 > 2 ) THEN '0' 
+    WHEN (conta = 2) AND TAB_FONTE = 1 AND  CD_AZIONE_ASSOC = 'D'  AND (CD_AZIONE_ASSOC <> CD_AZIONE_ASSOC_T2 ) 
+    AND (CD_AZIONE_ASSOC_T3 <= 2 ) THEN '6' 
+    WHEN (conta = 2) AND TAB_FONTE = 1 AND  CD_AZIONE_ASSOC = 'D'  AND (CD_AZIONE_ASSOC = CD_AZIONE_ASSOC_T2 ) THEN '0' 
+ 
+      --Record Uguale ma FLAG = M 
+     WHEN (conta = 2) AND TAB_FONTE = 1 AND  (CD_AZIONE_ASSOC = 'M') AND (CD_AZIONE_ASSOC <> CD_AZIONE_ASSOC_T2) THEN '6' 
+     WHEN (conta = 2) AND TAB_FONTE = 1 AND  (CD_AZIONE_ASSOC = 'M') AND (CD_AZIONE_ASSOC = CD_AZIONE_ASSOC_T2)  THEN '0' 
+     WHEN (conta = 2) AND TAB_FONTE = 1 AND  (CD_AZIONE_ASSOC = 'A') AND (CD_AZIONE_ASSOC <> CD_AZIONE_ASSOC_T2)  THEN '5' 
+		
+
+
+  END AS AZIONE
+
+,BU_RICAVI
+,STATO
+,FL_ORIGINE_PRODOTTO
+,cd_azione_Assoc
+,COALESCE(MAX(CD_AZIONE_ASSOC) OVER (PARTITION BY SK_OFFE, SK_PCOM, SK_PAMM,CODICE_BIC,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA, codice_bic_padre ,TIPOLOGIA, TIPOLOGIA_PADRE,BU_RICAVI
+	ORDER BY SK_OFFE, SK_PCOM, SK_PAMM,CODICE_BIC,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA, codice_bic_padre ,TIPOLOGIA, TIPOLOGIA_PADRE,BU_RICAVI , TAB_FONTE
+	ROWS BETWEEN 1 FOLLOWING AND 1 FOLLOWING)  ,'-' )  AS CD_AZIONE_ASSOC_T2
+,TAB_FONTE
+,SUM(1) OVER (PARTITION BY SK_OFFE, SK_PCOM, SK_PAMM,CODICE_BIC,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA, codice_bic_padre ,TIPOLOGIA, TIPOLOGIA_PADRE,BU_RICAVI
+	ORDER BY SK_OFFE, SK_PCOM, SK_PAMM,CODICE_BIC,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA, codice_bic_padre ,TIPOLOGIA, TIPOLOGIA_PADRE,BU_RICAVI , TAB_FONTE)  AS conta 
+,SUM(1)  OVER (PARTITION BY TAB_FONTE, SK_OFFE, SK_PCOM
+	ORDER BY TAB_FONTE, SK_OFFE, SK_PCOM
+	)  AS CD_AZIONE_ASSOC_T3
+
+
+FROM 
+
+(
+	SELECT DISTINCT
+		 NOME
+		,TS_CREAZIONE_FIGLIO 
+		,COD_PRODOTTO_CRMO
+		,CODICE_BIC
+		,TS_CREAZIONE_PADRE
+		,DT_INIZIO_VALIDITA
+		,DT_FINE_VALIDITA
+		,CODICE_BIC_PADRE
+		,TIPOLOGIA
+		,TIPOLOGIA_PADRE
+		,'0' AS AZIONE
+		,BU_RICAVI
+		,'0' AS STATO
+		,SK_OFFE
+		,SK_PCOM
+		,SK_PAMM
+		,FL_ORIGINE_PRODOTTO
+		,CD_AZIONE_ASSOC
+		,1(INT) AS TAB_FONTE
+	FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+	WHERE CODICE_BIC_PADRE <>''
+
+		UNION 
+
+	select distinct 
+
+		 NOME
+		,TS_CREAZIONE_FIGLIO 
+		,COD_PRODOTTO_CRMO
+		,CODICE_BIC
+		,TS_CREAZIONE_PADRE
+		,DT_INIZIO_VALIDITA
+		,DT_FINE_VALIDITA
+		,CODICE_BIC_PADRE
+		,TIPOLOGIA
+		,TIPOLOGIA_PADRE
+		,'0' AS AZIONE
+		,BU_RICAVI
+		,'0' AS STATO
+		,SK_OFFE
+		,SK_PCOM
+		,SK_PAMM
+		,FL_ORIGINE_PRODOTTO
+		,CD_AZIONE_ASSOC
+		,2 (INT) AS TAB_FONTE
+	FROM VTB_CATALOGO_PRODOTTI AS OUTD
+		WHERE CODICE_BIC_PADRE <>''
+            AND FLAG_INVIO =1
+	) AS a
+	WHERE (CODICE_BIC,TIPOLOGIA) NOT IN
+
+	(SELECT DISTINCT DELTA.CODICE_BIC
+		,DELTA.TIPOLOGIA
+	FROM VTB_CATALOGO_PRODOTTI AS OUTB
+	INNER JOIN BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+		ON  OUTB.SK_OFFE = DELTA.SK_OFFE 
+		AND OUTB.SK_PCOM = DELTA.SK_PCOM		
+		AND OUTB.SK_PAMM = DELTA.SK_PAMM
+		AND OUTB.TIPOLOGIA = DELTA.TIPOLOGIA
+		AND OUTB.TS_CREAZIONE_PADRE = ''
+		AND DELTA.TS_CREAZIONE_PADRE = ''
+		AND DELTA.CD_AZIONE = 'A'
+		AND DELTA.FL_ORIGINE_PRODOTTO = 'N'
+		AND (
+			COALESCE(OUTB.NOME,'') <> COALESCE(DELTA.NOME,'')
+			OR COALESCE(OUTB.COD_PRODOTTO_CRMO,'') <> COALESCE(DELTA.COD_PRODOTTO_CRMO,'')
+			OR COALESCE(OUTB.DT_INIZIO_VALIDITA,'19000101') <> COALESCE(DELTA.DT_INIZIO_VALIDITA,'19000101')
+			OR COALESCE(OUTB.DT_FINE_VALIDITA, '19000101') <> COALESCE(DELTA.DT_FINE_VALIDITA,'19000101')
+			OR COALESCE(OUTB.BU_RICAVI,'') <> COALESCE(DELTA.BU_RICAVI,'')
+		)
+	)
+
+	AND tipologia = 4
+ QUALIFY (CONTA = 1) 
+	  OR (CONTA = 2 AND TAB_FONTE = 1)  
+) AS TAB_FIGLI
+
+UNION ALL
+
+--Aggiunta dei Record Figli COD_5_3
+SELECT  DISTINCT
+ NOME
+,TS_CREAZIONE_FIGLIO 
+,COD_PRODOTTO_CRMO
+,CODICE_BIC
+,TS_CREAZIONE_PADRE
+,DT_INIZIO_VALIDITA
+,DT_FINE_VALIDITA
+,CODICE_BIC_PADRE
+,TIPOLOGIA
+,TIPOLOGIA_PADRE
+,AZIONE
+,BU_RICAVI
+,STATO
+,FL_ORIGINE_PRODOTTO
+FROM
+(
+
+SELECT DISTINCT
+ NOME
+,TS_CREAZIONE_FIGLIO 
+,COD_PRODOTTO_CRMO
+,CODICE_BIC
+,TS_CREAZIONE_PADRE
+,DT_INIZIO_VALIDITA
+,DT_FINE_VALIDITA
+,CODICE_BIC_PADRE
+,TIPOLOGIA
+,TIPOLOGIA_PADRE
+,CASE 
+	WHEN (conta = 2) AND CD_AZIONE_ASSOC = 'A'  AND CD_AZIONE_ASSOC_T2 = '-' THEN '0' 
+	WHEN (conta = 2) AND TAB_FONTE = 1 AND  (CD_AZIONE_ASSOC = 'A') AND (CD_AZIONE_ASSOC = CD_AZIONE_ASSOC_T2)  THEN '0' 
+	WHEN (conta = 1) AND TAB_FONTE = 1 AND  CD_AZIONE_ASSOC = 'A' THEN '5' 
+	WHEN (conta = 1) AND TAB_FONTE = 2 AND  CD_AZIONE_ASSOC = 'A' THEN '6' 
+     
+     --Record Uguale ma FLAG = D
+    WHEN (conta = 2) AND TAB_FONTE = 1 AND  CD_AZIONE_ASSOC = 'D'  AND (CD_AZIONE_ASSOC <> CD_AZIONE_ASSOC_T2 ) 
+    AND (CD_AZIONE_ASSOC_T4 > 1 ) THEN '0' 
+    WHEN (conta = 2) AND TAB_FONTE = 1 AND  CD_AZIONE_ASSOC = 'D'  AND (CD_AZIONE_ASSOC <> CD_AZIONE_ASSOC_T2 ) 
+    AND (CD_AZIONE_ASSOC_T4 = 1 ) THEN '6' 
+    WHEN (conta = 2) AND TAB_FONTE = 1 AND  CD_AZIONE_ASSOC = 'D'  AND (CD_AZIONE_ASSOC = CD_AZIONE_ASSOC_T2 ) THEN '0' 
+
+	 
+      --Record Uguale ma FLAG = M 
+     WHEN (conta = 2) AND TAB_FONTE = 1 AND  (CD_AZIONE_ASSOC = 'M') AND (CD_AZIONE_ASSOC <> CD_AZIONE_ASSOC_T2) THEN '6' 
+     WHEN (conta = 2) AND TAB_FONTE = 1 AND  (CD_AZIONE_ASSOC = 'M') AND (CD_AZIONE_ASSOC = CD_AZIONE_ASSOC_T2)  THEN '0' 
+     WHEN (conta = 2) AND TAB_FONTE = 1 AND  (CD_AZIONE_ASSOC = 'A') AND (CD_AZIONE_ASSOC <> CD_AZIONE_ASSOC_T2) THEN '5' 
+		
+
+
+  END AS AZIONE
+
+,BU_RICAVI
+,STATO
+,FL_ORIGINE_PRODOTTO
+,cd_azione_Assoc
+,COALESCE(MAX(CD_AZIONE_ASSOC) OVER (PARTITION BY SK_OFFE, SK_PCOM, SK_PAMM,CODICE_BIC,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA, codice_bic_padre ,TIPOLOGIA, TIPOLOGIA_PADRE,BU_RICAVI
+	ORDER BY SK_OFFE, SK_PCOM, SK_PAMM,CODICE_BIC,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA, codice_bic_padre ,TIPOLOGIA, TIPOLOGIA_PADRE,BU_RICAVI , TAB_FONTE
+	ROWS BETWEEN 1 FOLLOWING AND 1 FOLLOWING)  ,'-' )  AS CD_AZIONE_ASSOC_T2
+,TAB_FONTE
+,SUM(1) OVER (PARTITION BY SK_OFFE, SK_PCOM, SK_PAMM,CODICE_BIC,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA, codice_bic_padre ,TIPOLOGIA, TIPOLOGIA_PADRE,BU_RICAVI
+	ORDER BY SK_OFFE, SK_PCOM, SK_PAMM,CODICE_BIC,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA, codice_bic_padre ,TIPOLOGIA, TIPOLOGIA_PADRE,BU_RICAVI , TAB_FONTE)  AS conta 
+,SUM(1)  OVER (PARTITION BY TAB_FONTE, SK_OFFE, SK_PAMM
+	ORDER BY TAB_FONTE, SK_OFFE, SK_PAMM
+	)  AS CD_AZIONE_ASSOC_T4
+
+FROM 
+
+(
+	SELECT DISTINCT
+		 NOME
+		,TS_CREAZIONE_FIGLIO 
+		,COD_PRODOTTO_CRMO
+		,CODICE_BIC
+		,TS_CREAZIONE_PADRE
+		,DT_INIZIO_VALIDITA
+		,DT_FINE_VALIDITA
+		,CODICE_BIC_PADRE
+		,TIPOLOGIA
+		,TIPOLOGIA_PADRE
+		,'0' AS AZIONE
+		,BU_RICAVI
+		,'0' AS STATO
+		,SK_OFFE
+		,SK_PCOM
+		,SK_PAMM
+		,FL_ORIGINE_PRODOTTO
+		,CD_AZIONE_ASSOC
+		,1(INT) AS TAB_FONTE
+	FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+	WHERE CODICE_BIC_PADRE <>''
+
+		UNION 
+
+	select distinct 
+
+		 NOME
+		,TS_CREAZIONE_FIGLIO 
+		,COD_PRODOTTO_CRMO
+		,CODICE_BIC
+		,TS_CREAZIONE_PADRE
+		,DT_INIZIO_VALIDITA
+		,DT_FINE_VALIDITA
+		,CODICE_BIC_PADRE
+		,TIPOLOGIA
+		,TIPOLOGIA_PADRE
+		,'0' AS AZIONE
+		,BU_RICAVI
+		,'0' AS STATO
+		,SK_OFFE
+		,SK_PCOM
+		,SK_PAMM
+		,FL_ORIGINE_PRODOTTO
+		,CD_AZIONE_ASSOC
+		,2 (INT) AS TAB_FONTE
+	FROM VTB_CATALOGO_PRODOTTI AS OUTD
+		WHERE CODICE_BIC_PADRE <>''
+            AND FLAG_INVIO =1
+	) AS a
+	WHERE (CODICE_BIC,TIPOLOGIA) NOT IN
+
+	(SELECT DISTINCT DELTA.CODICE_BIC
+		,DELTA.TIPOLOGIA
+	FROM VTB_CATALOGO_PRODOTTI AS OUTB
+	INNER JOIN BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+		ON  OUTB.SK_OFFE = DELTA.SK_OFFE 
+		AND OUTB.SK_PCOM = DELTA.SK_PCOM		
+		AND OUTB.SK_PAMM = DELTA.SK_PAMM
+		AND OUTB.TIPOLOGIA = DELTA.TIPOLOGIA
+		AND OUTB.TS_CREAZIONE_PADRE = ''
+		AND DELTA.TS_CREAZIONE_PADRE = ''
+		AND DELTA.CD_AZIONE = 'A'
+		AND DELTA.FL_ORIGINE_PRODOTTO = 'N'
+		AND (
+			COALESCE(OUTB.NOME,'') <> COALESCE(DELTA.NOME,'')
+			OR COALESCE(OUTB.COD_PRODOTTO_CRMO,'') <> COALESCE(DELTA.COD_PRODOTTO_CRMO,'')
+			OR COALESCE(OUTB.DT_INIZIO_VALIDITA,'19000101') <> COALESCE(DELTA.DT_INIZIO_VALIDITA,'19000101')
+			OR COALESCE(OUTB.DT_FINE_VALIDITA, '19000101') <> COALESCE(DELTA.DT_FINE_VALIDITA,'19000101')
+			OR COALESCE(OUTB.BU_RICAVI,'') <> COALESCE(DELTA.BU_RICAVI,'')
+		)
+	)
+
+	AND TIPOLOGIA = 5 AND Tipologia_padre = 3
+ QUALIFY (CONTA = 1) 
+	  OR (CONTA = 2 AND TAB_FONTE = 1)  
+
+) AS TAB_FIGLI_5_3
+
+UNION ALL
+
+--Aggiunta dei Record Figli COD_5_4
+SELECT  DISTINCT
+ NOME
+,TS_CREAZIONE_FIGLIO 
+,COD_PRODOTTO_CRMO
+,CODICE_BIC
+,TS_CREAZIONE_PADRE
+,DT_INIZIO_VALIDITA
+,DT_FINE_VALIDITA
+,CODICE_BIC_PADRE
+,TIPOLOGIA
+,TIPOLOGIA_PADRE
+,AZIONE
+,BU_RICAVI
+,STATO
+,FL_ORIGINE_PRODOTTO
+FROM
+(
+
+SELECT DISTINCT
+ NOME
+,TS_CREAZIONE_FIGLIO 
+,COD_PRODOTTO_CRMO
+,CODICE_BIC
+,TS_CREAZIONE_PADRE
+,DT_INIZIO_VALIDITA
+,DT_FINE_VALIDITA
+,CODICE_BIC_PADRE
+,TIPOLOGIA
+,TIPOLOGIA_PADRE
+,CASE 
+	WHEN (conta = 2) AND CD_AZIONE_ASSOC = 'A'  AND CD_AZIONE_ASSOC_T2 = '-' THEN '0' 
+	WHEN (conta = 2) AND TAB_FONTE = 1 AND  (CD_AZIONE_ASSOC = 'A') AND (CD_AZIONE_ASSOC = CD_AZIONE_ASSOC_T2)  THEN '0' 
+	WHEN (conta = 1) AND TAB_FONTE = 1 AND  CD_AZIONE_ASSOC = 'A' THEN '5' 
+	WHEN (conta = 1) AND TAB_FONTE = 2 AND  CD_AZIONE_ASSOC = 'A' THEN '6' 
+     
+     --Record Uguale ma FLAG = D
+     WHEN (conta = 2) AND TAB_FONTE = 1 AND  CD_AZIONE_ASSOC = 'D'  AND (CD_AZIONE_ASSOC <> CD_AZIONE_ASSOC_T2 ) 
+    AND (CD_AZIONE_ASSOC_T4 > 1 ) THEN '0'
+     WHEN (conta = 2) AND TAB_FONTE = 1 AND  CD_AZIONE_ASSOC = 'D'  AND (CD_AZIONE_ASSOC <> CD_AZIONE_ASSOC_T2 )  
+     AND (CD_AZIONE_ASSOC_T4 = 1 ) THEN '6'
+     WHEN (conta = 2) AND TAB_FONTE = 1 AND  CD_AZIONE_ASSOC = 'D'  AND (CD_AZIONE_ASSOC = CD_AZIONE_ASSOC_T2 ) THEN '0'  
+ 
+      --Record Uguale ma FLAG = M 
+     WHEN (conta = 2) AND TAB_FONTE = 1 AND  (CD_AZIONE_ASSOC = 'M') AND (CD_AZIONE_ASSOC <> CD_AZIONE_ASSOC_T2) THEN '6' 
+     WHEN (conta = 2) AND TAB_FONTE = 1 AND  (CD_AZIONE_ASSOC = 'M') AND (CD_AZIONE_ASSOC = CD_AZIONE_ASSOC_T2)  THEN '0' 
+     WHEN (conta = 2) AND TAB_FONTE = 1 AND  (CD_AZIONE_ASSOC = 'A') AND (CD_AZIONE_ASSOC <> CD_AZIONE_ASSOC_T2)  THEN '5' 
+		
+
+
+  END AS AZIONE
+
+,BU_RICAVI
+,STATO
+,FL_ORIGINE_PRODOTTO
+,cd_azione_Assoc
+,COALESCE(MAX(CD_AZIONE_ASSOC) OVER (PARTITION BY SK_OFFE, SK_PCOM, SK_PAMM,CODICE_BIC,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA, codice_bic_padre ,TIPOLOGIA, TIPOLOGIA_PADRE,BU_RICAVI
+	ORDER BY SK_OFFE, SK_PCOM, SK_PAMM,CODICE_BIC,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA, codice_bic_padre ,TIPOLOGIA, TIPOLOGIA_PADRE,BU_RICAVI , TAB_FONTE
+	ROWS BETWEEN 1 FOLLOWING AND 1 FOLLOWING)  ,'-' )  AS CD_AZIONE_ASSOC_T2
+,TAB_FONTE
+,SUM(1) OVER (PARTITION BY SK_OFFE, SK_PCOM, SK_PAMM,CODICE_BIC,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA, codice_bic_padre ,TIPOLOGIA, TIPOLOGIA_PADRE,BU_RICAVI
+	ORDER BY SK_OFFE, SK_PCOM, SK_PAMM,CODICE_BIC,DT_INIZIO_VALIDITA,DT_FINE_VALIDITA, codice_bic_padre ,TIPOLOGIA, TIPOLOGIA_PADRE,BU_RICAVI , TAB_FONTE)  AS conta 
+
+,SUM(1) OVER (PARTITION BY TAB_FONTE, SK_PCOM, SK_PAMM
+	              ORDER BY TAB_FONTE, SK_PCOM, SK_PAMM
+	)  AS CD_AZIONE_ASSOC_T4
+
+FROM 
+
+(
+	SELECT DISTINCT
+		 NOME
+		,TS_CREAZIONE_FIGLIO 
+		,COD_PRODOTTO_CRMO
+		,CODICE_BIC
+		,TS_CREAZIONE_PADRE
+		,DT_INIZIO_VALIDITA
+		,DT_FINE_VALIDITA
+		,CODICE_BIC_PADRE
+		,TIPOLOGIA
+		,TIPOLOGIA_PADRE
+		,'0' AS AZIONE
+		,BU_RICAVI
+		,'0' AS STATO
+		,SK_OFFE
+		,SK_PCOM
+		,SK_PAMM
+		,FL_ORIGINE_PRODOTTO
+		,CD_AZIONE_ASSOC
+		,1(INT) AS TAB_FONTE
+	FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+	WHERE CODICE_BIC_PADRE <>''
+
+		UNION 
+
+	select distinct 
+
+		 NOME
+		,TS_CREAZIONE_FIGLIO 
+		,COD_PRODOTTO_CRMO
+		,CODICE_BIC
+		,TS_CREAZIONE_PADRE
+		,DT_INIZIO_VALIDITA
+		,DT_FINE_VALIDITA
+		,CODICE_BIC_PADRE
+		,TIPOLOGIA
+		,TIPOLOGIA_PADRE
+		,'0' AS AZIONE
+		,BU_RICAVI
+		,'0' AS STATO
+		,SK_OFFE
+		,SK_PCOM
+		,SK_PAMM
+		,FL_ORIGINE_PRODOTTO
+		,CD_AZIONE_ASSOC
+		,2 (INT) AS TAB_FONTE
+	FROM VTB_CATALOGO_PRODOTTI AS OUTD
+		WHERE CODICE_BIC_PADRE <>''
+            AND FLAG_INVIO =1
+	) AS a
+	WHERE (CODICE_BIC,TIPOLOGIA) NOT IN
+
+	(SELECT DISTINCT DELTA.CODICE_BIC
+		,DELTA.TIPOLOGIA
+	FROM VTB_CATALOGO_PRODOTTI AS OUTB
+	INNER JOIN BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+		ON  OUTB.SK_OFFE = DELTA.SK_OFFE 
+		AND OUTB.SK_PCOM = DELTA.SK_PCOM		
+		AND OUTB.SK_PAMM = DELTA.SK_PAMM
+		AND OUTB.TIPOLOGIA = DELTA.TIPOLOGIA
+		AND OUTB.TS_CREAZIONE_PADRE = ''
+		AND DELTA.TS_CREAZIONE_PADRE = ''
+		AND DELTA.CD_AZIONE = 'A'
+		AND DELTA.FL_ORIGINE_PRODOTTO = 'N'
+		AND (
+			COALESCE(OUTB.NOME,'') <> COALESCE(DELTA.NOME,'')
+			OR COALESCE(OUTB.COD_PRODOTTO_CRMO,'') <> COALESCE(DELTA.COD_PRODOTTO_CRMO,'')
+			OR COALESCE(OUTB.DT_INIZIO_VALIDITA,'19000101') <> COALESCE(DELTA.DT_INIZIO_VALIDITA,'19000101')
+			OR COALESCE(OUTB.DT_FINE_VALIDITA, '19000101') <> COALESCE(DELTA.DT_FINE_VALIDITA,'19000101')
+			OR COALESCE(OUTB.BU_RICAVI,'') <> COALESCE(DELTA.BU_RICAVI,'')
+		)
+	)
+
+	AND TIPOLOGIA = 5 AND Tipologia_padre = 4
+ QUALIFY (CONTA = 1) 
+	  OR (CONTA = 2 AND TAB_FONTE = 1)  
+
+) AS TAB_FIGLI_5_4
+
+UNION ALL 
+
+--Aggiunta dei Record Modificati (M), Gestione relativa solo ai Padri 
+SELECT  DISTINCT
+	 NOME
+	,TS_CREAZIONE_FIGLIO 
+	,COD_PRODOTTO_CRMO
+	,CODICE_BIC
+	,TS_CREAZIONE_PADRE
+	,DT_INIZIO_VALIDITA
+	,DT_FINE_VALIDITA
+	,CODICE_BIC_PADRE
+	,TIPOLOGIA
+	,TIPOLOGIA_PADRE
+	,AZIONE
+	,BU_RICAVI
+	,STATO
+	,FL_ORIGINE_PRODOTTO
+FROM VTB_PADRE_FLAG_M --PER_M
+WHERE AZIONE IN ('0', '1')
+
+
+	UNION ALL
+
+--Aggiunta dei Record Cancellati (D), Gestione relativa solo ai vecchi Prodotti 
+	SELECT  DISTINCT
+		OUTB.NOME
+		,OUTB.TS_CREAZIONE_FIGLIO
+		,OUTB.COD_PRODOTTO_CRMO
+		,OUTB.CODICE_BIC
+		,OUTB.TS_CREAZIONE_PADRE
+		,OUTB.DT_INIZIO_VALIDITA
+		,OUTB.DT_FINE_VALIDITA
+		,OUTB.CODICE_BIC_PADRE
+		,OUTB.TIPOLOGIA
+		,OUTB.TIPOLOGIA_PADRE
+		,'4' AS AZIONE
+		,OUTB.BU_RICAVI
+		,'2' AS STATO
+		,DELTA.FL_ORIGINE_PRODOTTO
+	FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+	RIGHT JOIN VTB_CATALOGO_PRODOTTI AS OUTB
+		ON  DELTA.SK_OFFE = OUTB.SK_OFFE 
+		AND DELTA.SK_PCOM = OUTB.SK_PCOM		
+		AND DELTA.SK_PAMM = OUTB.SK_PAMM
+		AND DELTA.TIPOLOGIA = OUTB.TIPOLOGIA
+		AND DELTA.CODICE_BIC_PADRE = OUTB.CODICE_BIC_PADRE
+	WHERE DELTA.NOME IS NULL
+	AND OUTB.FL_ORIGINE_PRODOTTO = 'V'
+	
+UNION ALL
+
+--Aggiunta dei Record Cancellati o Modificati (D o M), Gestione relativa solo ai Nuovi Prodotti che non sono mai stati inviati
+SELECT  DISTINCT
+		 DELTA.NOME
+		,DELTA.TS_CREAZIONE_FIGLIO
+		,DELTA.COD_PRODOTTO_CRMO
+		,DELTA.CODICE_BIC
+		,DELTA.TS_CREAZIONE_PADRE
+		,DELTA.DT_INIZIO_VALIDITA
+		,DELTA.DT_FINE_VALIDITA
+		,DELTA.CODICE_BIC_PADRE
+		,DELTA.TIPOLOGIA
+		,DELTA.TIPOLOGIA_PADRE
+		,CASE WHEN DELTA.CD_AZIONE = 'M'  THEN '3'
+		      WHEN DELTA.CD_AZIONE = 'D' THEN  '4' 
+		      ELSE ''
+		 END AS AZIONE
+		,DELTA.BU_RICAVI
+		,CASE WHEN DELTA.CD_AZIONE = 'M'  THEN '1'
+		      WHEN DELTA.CD_AZIONE = 'D'  THEN '2' 
+		      ELSE ''
+		 END AS STATO
+		,DELTA.FL_ORIGINE_PRODOTTO
+	FROM 		BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA 	AS DELTA
+	INNER JOIN 	VTB_CATALOGO_PRODOTTI 	AS OUTD
+		ON  DELTA.SK_OFFE = OUTD.SK_OFFE 
+		AND DELTA.SK_PCOM = OUTD.SK_PCOM		
+		AND DELTA.SK_PAMM = OUTD.SK_PAMM
+		AND DELTA.TIPOLOGIA    = OUTD.TIPOLOGIA
+	WHERE OUTD.CODICE_BIC_PADRE IS NULL
+	AND DELTA.CD_AZIONE IN( 'D' , 'M' )
+	AND DELTA.FL_ORIGINE_PRODOTTO = 'N'
+	AND FLAG_INVIO = 0
+
+UNION ALL
+
+--Aggiunta dei Record Cancellati o Modificati (D o M), Gestione relativa solo ai Nuovi Prodotti che sono già stati inviati
+SELECT  DISTINCT
+		 DELTA.NOME
+		,DELTA.TS_CREAZIONE_FIGLIO
+		,DELTA.COD_PRODOTTO_CRMO
+		,DELTA.CODICE_BIC
+		,DELTA.TS_CREAZIONE_PADRE
+		,DELTA.DT_INIZIO_VALIDITA
+		,DELTA.DT_FINE_VALIDITA
+		,DELTA.CODICE_BIC_PADRE
+		,DELTA.TIPOLOGIA
+		,DELTA.TIPOLOGIA_PADRE
+		,CASE WHEN DELTA.CD_AZIONE = 'M'  THEN '3'
+		      WHEN DELTA.CD_AZIONE = 'D' THEN  '4' 
+		      ELSE ''
+		     END AS AZIONE
+		,DELTA.BU_RICAVI
+		,CASE WHEN DELTA.CD_AZIONE = 'M'  THEN '1'
+		      WHEN DELTA.CD_AZIONE = 'D'  THEN '2' 
+		      ELSE ''
+		     END AS STATO
+		,DELTA.FL_ORIGINE_PRODOTTO
+	FROM 		BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA 	AS DELTA
+	INNER JOIN 	VTB_CATALOGO_PRODOTTI 	AS OUTD
+		ON  DELTA.SK_OFFE = OUTD.SK_OFFE 
+		AND DELTA.SK_PCOM = OUTD.SK_PCOM		
+		AND DELTA.SK_PAMM = OUTD.SK_PAMM
+		AND DELTA.TIPOLOGIA    = OUTD.TIPOLOGIA
+	WHERE delta.codice_bic_padre = ''		  
+     AND outd.codice_bic_padre = ''	
+     AND DELTA.CD_AZIONE <> OUTD.CD_AZIONE
+	AND DELTA.CD_AZIONE IN( 'D' , 'M' )
+	AND DELTA.FL_ORIGINE_PRODOTTO = 'N'
+	AND FLAG_INVIO = 1
+	
+
+) WITH DATA
+PRIMARY INDEX (NOME)
+ON COMMIT PRESERVE ROWS
+;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+--Rimozione Duplicati sui Padri e sui Figli
+CREATE VOLATILE SET TABLE VTB_ESTRAZIONE_STEP_2 AS
+(
+
+SELECT 
+	 CAST (CAST(ROW_NUMBER() OVER (ORDER BY FL_ORIGINE_PRODOTTO DESC , tipologia_padre, tipologia,nome) AS INTEGER)  AS VARCHAR(100)) AS CONTATORE
+	,SFA.NOME
+	,SFA.TS_CREAZIONE_FIGLIO 
+	,SFA.COD_PRODOTTO_CRMO
+	,SFA.CODICE_BIC
+	,SFA.TS_CREAZIONE_PADRE
+	,SFA.DT_INIZIO_VALIDITA
+	,SFA.DT_FINE_VALIDITA
+	,SFA.CODICE_BIC_PADRE
+	,SFA.TIPOLOGIA
+	,SFA.TIPOLOGIA_PADRE
+	,SFA.AZIONE
+	,SFA.BU_RICAVI
+	,SFA.STATO
+	,FL_ORIGINE_PRODOTTO
+FROM 
+(
+
+SELECT  
+		NOME
+		,TS_CREAZIONE_FIGLIO 
+		,COD_PRODOTTO_CRMO
+		,CODICE_BIC
+		,TS_CREAZIONE_PADRE
+		,DT_INIZIO_VALIDITA
+		,DT_FINE_VALIDITA
+		,CODICE_BIC_PADRE
+		,TIPOLOGIA
+		,TIPOLOGIA_PADRE
+		,AZIONE
+		,BU_RICAVI
+		,STATO
+		,FL_ORIGINE_PRODOTTO
+		,ROW_NUMBER() OVER (PARTITION BY 	CODICE_BIC, CODICE_BIC_PADRE, TIPOLOGIA, TIPOLOGIA_PADRE
+							ORDER BY        CODICE_BIC, CODICE_BIC_PADRE, TIPOLOGIA, TIPOLOGIA_PADRE, AZIONE DESC
+		) AS FLAG_DUP
+	FROM VTB_ESTRAZIONE_STEP_1 
+	WHERE Tipologia_Padre = ''
+	QUALIFY FLAG_DUP = 1
+	--ORDER BY tipologia_padre, tipologia,azione, codice_bic_padre,nome
+UNION ALL	
+
+	--Rimozione Duplicati per tutti i record, esclusi Tipologia 5 e TipologiaPadre 4, verranno rimossi i duplicati con Azione = 0
+	SELECT  
+		NOME
+		,TS_CREAZIONE_FIGLIO 
+		,COD_PRODOTTO_CRMO
+		,CODICE_BIC
+		,TS_CREAZIONE_PADRE
+		,DT_INIZIO_VALIDITA
+		,DT_FINE_VALIDITA
+		,CODICE_BIC_PADRE
+		,TIPOLOGIA
+		,TIPOLOGIA_PADRE
+		,AZIONE
+		,BU_RICAVI
+		,STATO
+		,FL_ORIGINE_PRODOTTO
+		,ROW_NUMBER() OVER (PARTITION BY 	CODICE_BIC,CODICE_BIC_PADRE,TIPOLOGIA	,TIPOLOGIA_PADRE
+							ORDER BY        CODICE_BIC,CODICE_BIC_PADRE,TIPOLOGIA	,TIPOLOGIA_PADRE,azione ASC
+		) AS FLAG_DUP
+	FROM VTB_ESTRAZIONE_STEP_1 
+	WHERE Tipologia = '4' AND tipologia_padre = '3'
+	QUALIFY FLAG_DUP = 1
+	--ORDER BY tipologia_padre, tipologia,azione, codice_bic_padre,nome
+
+UNION ALL	
+
+
+	--Rimozione Duplicati per tutti i record, esclusi Tipologia 5 e TipologiaPadre 4, verranno rimossi i duplicati con Azione = 0
+	SELECT  
+		NOME
+		,TS_CREAZIONE_FIGLIO 
+		,COD_PRODOTTO_CRMO
+		,CODICE_BIC
+		,TS_CREAZIONE_PADRE
+		,DT_INIZIO_VALIDITA
+		,DT_FINE_VALIDITA
+		,CODICE_BIC_PADRE
+		,TIPOLOGIA
+		,TIPOLOGIA_PADRE
+		,AZIONE
+		,BU_RICAVI
+		,STATO
+		,FL_ORIGINE_PRODOTTO
+		,ROW_NUMBER() OVER (PARTITION BY 	CODICE_BIC,CODICE_BIC_PADRE,TIPOLOGIA	,TIPOLOGIA_PADRE
+							ORDER BY        CODICE_BIC,CODICE_BIC_PADRE,TIPOLOGIA	,TIPOLOGIA_PADRE,azione ASC
+		) AS FLAG_DUP
+	FROM VTB_ESTRAZIONE_STEP_1 
+	WHERE Tipologia = '5' AND Tipologia_Padre = '3'
+	QUALIFY FLAG_DUP = 1
+	--ORDER BY tipologia_padre, tipologia,azione, codice_bic_padre,nome
+
+UNION ALL	
+
+	--Rimozione Duplicati solo per i Figli con Tipologia = 5 e Tipologia_Padre = 4 , verrà rimosso il duplicato con Azione = 6
+	SELECT  
+		NOME
+		,TS_CREAZIONE_FIGLIO 
+		,COD_PRODOTTO_CRMO
+		,CODICE_BIC
+		,TS_CREAZIONE_PADRE
+		,DT_INIZIO_VALIDITA
+		,DT_FINE_VALIDITA
+		,CODICE_BIC_PADRE
+		,TIPOLOGIA
+		,TIPOLOGIA_PADRE
+		,AZIONE
+		,BU_RICAVI
+		,STATO
+		,FL_ORIGINE_PRODOTTO
+		,ROW_NUMBER() OVER (PARTITION BY 	CODICE_BIC,CODICE_BIC_PADRE,TIPOLOGIA	,TIPOLOGIA_PADRE
+							ORDER BY        CODICE_BIC,CODICE_BIC_PADRE,TIPOLOGIA	,TIPOLOGIA_PADRE,azione DESC
+		) AS FLAG_DUP
+	FROM VTB_ESTRAZIONE_STEP_1 
+	WHERE Tipologia = '5' AND Tipologia_Padre = '4'
+	QUALIFY FLAG_DUP = 1
+	--ORDER BY tipologia_padre, tipologia,azione, codice_bic_padre,nome
+
+) AS SFA
+
+
+) WITH DATA
+PRIMARY INDEX (CONTATORE)
+ON COMMIT PRESERVE ROWS
+;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+-- Eliminazione dei BIC NO2C dalla Volatile che contiene tutti gli O2C
+DELETE FROM VTB_ESTRAZIONE_STEP_2
+WHERE CODICE_BIC_PADRE = ''
+AND ( CODICE_BIC , CODICE_BIC_PADRE ) IN ( 
+	SELECT CODICE_BIC , CODICE_BIC_PADRE FROM VTB_REC_OFFERTA_BECOMING_O2C 
+     WHERE codice_bic_padre = ''
+);
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+-- Eliminazione dei BIC NO2C dalla Volatile che contiene tutti gli O2C
+DELETE FROM VTB_ESTRAZIONE_STEP_2
+WHERE CODICE_BIC_PADRE <> ''
+AND ( CODICE_BIC , CODICE_BIC_PADRE ) IN ( 
+	SELECT CODICE_BIC , CODICE_BIC_PADRE FROM VTB_REC_OFFERTA_BECOMING_O2C 
+    WHERE codice_bic_padre <> ''
+);
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+--## Unione Prodotti NonO2C con i Prodotti O2C 
+CREATE VOLATILE SET TABLE VTB_ESTRAZIONE_STEP_3 AS
+( 
+
+SELECT 
+	 CAST (CAST(ROW_NUMBER() OVER (ORDER BY FL_ORIGINE_PRODOTTO DESC , tipologia_padre, tipologia,nome) AS INTEGER)  AS VARCHAR(100)) AS CONTATORE
+	,SFA.NOME
+	,SFA.TS_CREAZIONE_FIGLIO 
+	,SFA.COD_PRODOTTO_CRMO
+	,SFA.CODICE_BIC
+	,SFA.TS_CREAZIONE_PADRE
+	,SFA.DT_INIZIO_VALIDITA
+	,SFA.DT_FINE_VALIDITA
+	,SFA.CODICE_BIC_PADRE
+	,SFA.TIPOLOGIA
+	,SFA.TIPOLOGIA_PADRE
+	,SFA.AZIONE
+	,SFA.BU_RICAVI
+	,SFA.STATO
+FROM 
+(
+
+	SELECT  
+		 DOUBLE_REC.NOME
+		,DOUBLE_REC.TS_CREAZIONE_FIGLIO
+		,DOUBLE_REC.COD_PRODOTTO_CRMO
+		,DOUBLE_REC.CODICE_BIC
+		,DOUBLE_REC.TS_CREAZIONE_PADRE
+		,DOUBLE_REC.DT_INIZIO_VALIDITA
+		,DOUBLE_REC.DT_FINE_VALIDITA
+		,DOUBLE_REC.CODICE_BIC_PADRE
+		,DOUBLE_REC.TIPOLOGIA
+		,DOUBLE_REC.TIPOLOGIA_PADRE
+		,DOUBLE_REC.AZIONE AS AZIONE
+		,DOUBLE_REC.BU_RICAVI
+		,DOUBLE_REC.STATO AS STATO
+		,DOUBLE_REC.FL_ORIGINE_PRODOTTO
+	FROM VTB_REC_DOUBLE_BECOMING_O2C AS DOUBLE_REC
+	
+	UNION
+	SELECT
+		 TRIPLE.NOME
+		,TRIPLE.TS_CREAZIONE_FIGLIO
+		,TRIPLE.COD_PRODOTTO_CRMO
+		,TRIPLE.CODICE_BIC
+		,TRIPLE.TS_CREAZIONE_PADRE
+		,TRIPLE.DT_INIZIO_VALIDITA
+		,TRIPLE.DT_FINE_VALIDITA
+		,TRIPLE.CODICE_BIC_PADRE
+		,TRIPLE.TIPOLOGIA
+		,TRIPLE.TIPOLOGIA_PADRE
+		,TRIPLE.AZIONE AS AZIONE
+		,TRIPLE.BU_RICAVI
+		,TRIPLE.STATO AS STATO
+		,TRIPLE.FL_ORIGINE_PRODOTTO
+	FROM VTB_REC_TRIPLE_BECOMING_O2C AS TRIPLE
+	
+	UNION 
+	
+	SELECT  DISTINCT
+		 DELTA.NOME
+		,DELTA.TS_CREAZIONE_FIGLIO
+		,DELTA.COD_PRODOTTO_CRMO
+		,DELTA.CODICE_BIC
+		,DELTA.TS_CREAZIONE_PADRE
+		,DELTA.DT_INIZIO_VALIDITA
+		,DELTA.DT_FINE_VALIDITA
+		,DELTA.CODICE_BIC_PADRE
+		,DELTA.TIPOLOGIA
+		,DELTA.TIPOLOGIA_PADRE
+		,AZIONE
+		,DELTA.BU_RICAVI
+		,STATO
+		,DELTA.FL_ORIGINE_PRODOTTO
+	FROM VTB_REC_OFFERTA_BECOMING_O2C AS DELTA
+	
+	UNION
+	
+	SELECT 
+		 TB_ESTRAZIONE.NOME
+		,TB_ESTRAZIONE.TS_CREAZIONE_FIGLIO 
+		,TB_ESTRAZIONE.COD_PRODOTTO_CRMO
+		,TB_ESTRAZIONE.CODICE_BIC
+		,TB_ESTRAZIONE.TS_CREAZIONE_PADRE
+		,TB_ESTRAZIONE.DT_INIZIO_VALIDITA
+		,TB_ESTRAZIONE.DT_FINE_VALIDITA
+		,TB_ESTRAZIONE.CODICE_BIC_PADRE
+		,TB_ESTRAZIONE.TIPOLOGIA
+		,TB_ESTRAZIONE.TIPOLOGIA_PADRE
+		,TB_ESTRAZIONE.AZIONE
+		,TB_ESTRAZIONE.BU_RICAVI
+		,TB_ESTRAZIONE.STATO
+		,TB_ESTRAZIONE.FL_ORIGINE_PRODOTTO
+	FROM VTB_ESTRAZIONE_STEP_2 AS TB_ESTRAZIONE
+	WHERE azione IS NOT NULL
+	
+) AS SFA
+
+) WITH DATA
+PRIMARY INDEX (CONTATORE)
+ON COMMIT PRESERVE ROWS
+;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+
+--Inserimento dei Record nella tabella che verrà utilizzata per l'Estrazione
+DELETE FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_ESTR; 
+INSERT INTO BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_ESTR
+SELECT 
+	 TB_ESTRAZIONE.CONTATORE
+	,TB_ESTRAZIONE.NOME
+	,TB_ESTRAZIONE.TS_CREAZIONE_FIGLIO 
+	,TB_ESTRAZIONE.COD_PRODOTTO_CRMO
+	,TB_ESTRAZIONE.CODICE_BIC
+	,TB_ESTRAZIONE.TS_CREAZIONE_PADRE
+	,TB_ESTRAZIONE.DT_INIZIO_VALIDITA
+	,TB_ESTRAZIONE.DT_FINE_VALIDITA
+	,TB_ESTRAZIONE.CODICE_BIC_PADRE
+	,TB_ESTRAZIONE.TIPOLOGIA
+	,TB_ESTRAZIONE.TIPOLOGIA_PADRE
+	,TB_ESTRAZIONE.AZIONE
+	,TB_ESTRAZIONE.BU_RICAVI
+	,TB_ESTRAZIONE.STATO
+FROM VTB_ESTRAZIONE_STEP_3 AS TB_ESTRAZIONE
+WHERE azione IS NOT NULL
+;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+--Modifica del DELTA per Gestione record Modificati che sono tornati attivi solo sui Prodotti
+CREATE VOLATILE SET TABLE VTB_DELTA_STEP_2 AS
+( 
+	SELECT 
+		 DELTA.CONTATORE                     
+		,DELTA.NOME                          
+		,DELTA.TS_CREAZIONE_FIGLIO           
+		,DELTA.COD_PRODOTTO_CRMO             
+		,DELTA.CODICE_BIC                    
+		,DELTA.TS_CREAZIONE_PADRE            
+		,DELTA.DT_INIZIO_VALIDITA            
+		,DELTA.DT_FINE_VALIDITA              
+		,DELTA.CODICE_BIC_PADRE              
+		,DELTA.TIPOLOGIA                     
+		,DELTA.TIPOLOGIA_PADRE               
+		,DELTA.AZIONE                        
+		,DELTA.BU_RICAVI                     
+		,DELTA.STATO                         
+		,DELTA.SK_OFFE                       
+		,DELTA.SK_PCOM                       
+		,DELTA.SK_PAMM                       
+		,CASE WHEN PADRE_FLAG_M.CD_AZIONE_T2 = 'X'  AND DELTA.TIPOLOGIA_PADRE = ''
+		     THEN PADRE_FLAG_M.CD_AZIONE_T2 
+		     ELSE DELTA.CD_AZIONE 
+		END AS CD_AZIONE                     
+		,DELTA.FL_ORIGINE_PRODOTTO           
+		,DELTA.CD_AZIONE_ASSOC
+		,DELTA.TIPO_OFFERTA 
+	FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS DELTA
+	LEFT JOIN VTB_PADRE_FLAG_M AS PADRE_FLAG_M
+	ON DELTA.SK_OFFE  = PADRE_FLAG_M.SK_OFFE
+	AND DELTA.SK_PCOM = PADRE_FLAG_M.SK_PCOM		
+	AND DELTA.SK_PAMM = PADRE_FLAG_M.SK_PAMM
+	AND DELTA.CODICE_BIC = PADRE_FLAG_M.CODICE_BIC
+	AND DELTA.TIPOLOGIA = PADRE_FLAG_M.TIPOLOGIA
+) WITH DATA
+PRIMARY INDEX (CONTATORE)
+ON COMMIT PRESERVE ROWS
+;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+DELETE BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+INSERT INTO BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA
+	SELECT * FROM VTB_DELTA_STEP_2;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+--:: Passo_3 - Gestione Volatile di Appoggio (Utile a gestire il FLAG_INVIO [0 per Record non inviati, 1 per Record Inviati] ) 
+
+CREATE VOLATILE SET TABLE VTB_PROD_APPO AS
+( 
+
+SELECT DISTINCT
+	A.CONTATORE
+	,A.NOME
+	,A.TS_CREAZIONE_FIGLIO
+	,A.COD_PRODOTTO_CRMO
+	,A.CODICE_BIC
+	,A.TS_CREAZIONE_PADRE
+	,A.DT_INIZIO_VALIDITA
+	,A.DT_FINE_VALIDITA
+	,A.CODICE_BIC_PADRE
+	,A.TIPOLOGIA
+	,A.TIPOLOGIA_PADRE
+	,A.AZIONE
+	,A.BU_RICAVI
+	,A.STATO
+	,A.SK_OFFE
+	,A.SK_PCOM
+	,A.SK_PAMM
+	,A.CD_AZIONE
+	,A.FL_ORIGINE_PRODOTTO
+	,A.CD_AZIONE_ASSOC
+	,CASE WHEN ESTR_FLAG_INVIO.CODICE_BIC IS NULL THEN 0 ELSE 1 END AS FLAG_INVIO
+	,A.TIPO_OFFERTA 
+FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PROD_DELTA AS A
+LEFT JOIN VTB_ESTRAZIONE_STEP_3 AS ESTR_FLAG_INVIO
+ON A.CODICE_BIC = ESTR_FLAG_INVIO.CODICE_BIC
+	AND A.TIPOLOGIA = ESTR_FLAG_INVIO.TIPOLOGIA
+	AND A.NOME = ESTR_FLAG_INVIO.NOME
+	AND A.CODICE_BIC_PADRE = ESTR_FLAG_INVIO.CODICE_BIC_PADRE
+	AND A.TIPOLOGIA_PADRE = ESTR_FLAG_INVIO.TIPOLOGIA_PADRE
+	
+
+
+) WITH DATA
+PRIMARY INDEX (CONTATORE)
+ON COMMIT PRESERVE ROWS
+;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+--Inserimento finale 
+BT
+;DELETE FROM BIC_ODS_SA.SFA_OUT_CATALOGO_PRODOTTI
+;INSERT INTO BIC_ODS_SA.SFA_OUT_CATALOGO_PRODOTTI
+	SELECT TB_APPO.*
+	FROM VTB_PROD_APPO AS TB_APPO;ET;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+-- FINE BTQ
+

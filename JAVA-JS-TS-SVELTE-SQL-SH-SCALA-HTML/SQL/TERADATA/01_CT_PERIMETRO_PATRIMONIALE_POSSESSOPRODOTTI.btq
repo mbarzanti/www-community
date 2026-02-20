@@ -1,0 +1,1742 @@
+-------------------------------------------------------------------------
+--------CT PERIMETRO, PATRIMONIALE e POSSESSO PRODOTTI (Tempo T0)--------
+-------------------------------------------------------------------------
+
+/*
+  Tabelle: EBIL_AREE.CT_PATRIMONIALE - CT_POSSESSO_PRODOTTI - CT_PERIMETRO
+  Regime: Delta Mensile
+  Gdl: Teradata
+  Progetto: Operazionalizzazione CT
+  */ 
+
+.SET WIDTH 240;
+.SET ERROROUT STDOUT;
+--------------------------------------------------------PRODOTTI PATRIMONIALI------------------------------------------------------------
+create volatile/*drop/**/table prepatr as(
+	sel
+		patr.id_cliente_bic
+		,case
+			when patr.ds_macroprodotto = 'CONTI' then 'CC'
+			when patr.ds_macroprodotto = 'LIBRETTI' then 'LIB'
+			when patr.ds_macroprodotto = 'CARTACEO' then 'BC'
+			when patr.ds_macroprodotto = 'DEMATERIALIZZATO' then 'BD'
+			when patr.ds_macroprodotto = 'POSTEPAY' then 'PPAY'
+			when patr.ds_macroprodotto = 'EVOLUTION' then 'EVO'
+			when patr.ds_macroprodotto = 'TITOLI' and patr.ds_sottoprodotto = 'AZIONI' then 'AZ'
+			when patr.ds_macroprodotto = 'TITOLI' and patr.ds_sottoprodotto like '%OBBLIGAZIONI%' then 'OB'
+			when patr.ds_macroprodotto = 'TITOLI' and patr.ds_sottoprodotto like '%CERTIFICATES%' then 'CE'
+			when patr.ds_macroprodotto = 'TITOLI' and patr.ds_sottoprodotto like '%TITOLI DI STATO%' then 'TDS'
+			when patr.ds_macroprodotto = 'TITOLI' then 'Al_T'
+			when patr.ds_macroprodotto = 'VITA' and patr.ds_sottoprodotto like '%PREVIDENZA%'  then 'PREV'
+			when patr.ds_macroprodotto = 'VITA' and patr.ds_sottoprodotto like '%GARANZIA ALLA PERSONA%'  then 'PERS'
+			when patr.ds_macroprodotto = 'VITA' and patr.ds_sottoprodotto like '%RAMO III%'  then 'RIII'
+			when patr.ds_macroprodotto = 'VITA' and patr.ds_sottoprodotto like '%RAMO IV%'  then 'RIV'
+			when patr.ds_macroprodotto = 'VITA' and patr.ds_sottoprodotto like '%RAMO I%'  then 'RI'
+			when patr.ds_macroprodotto = 'VITA' and patr.ds_sottoprodotto like '%MULTIRAMO%'  then 'MR'
+			--when patr.ds_macroprodotto = 'VITA' and patr.ds_sottoprodotto = 'NON DEFINITO' then 'Al_P' --FIX:Eliminare riga
+			when patr.ds_macroprodotto = 'VITA' then 'RI'--FIX: Forzati i NON DEFINITI/NULL dentro RAMO I, come da accordi con R. Inverno
+			when patr.ds_macroprodotto = 'FONDI' then 'F'
+			else 'ND'
+		end as prodotto
+		,case when prodotto = 'LIB' and patr.ds_sottoprodotto in ('LIBRETTO SMART CARTACEO','LIBRETTO SMART DEMATERIALIZZATO') then 1 else 0 end as fl_lib_smart
+		,count(*) as n
+		,sum(case when patr.cd_tipo_intestatario = 'U' then patr.im_importo else 0 end) as patr_u
+		,sum(case when patr.cd_tipo_intestatario = 'P' then patr.im_importo else 0 end) as patr_p
+		,sum(case when patr.cd_tipo_intestatario = 'S' then patr.im_importo else 0 end) as patr_s
+	from ebil_aree_v.v_pl_patrimoniale patr  
+	join EBIL_AREE.CT_PARAMETRI as p ON 1=1
+	where patr.cd_natura_giuridica in ('PF', 'COI', '1') and patr.cd_tipo_intestatario in ('P', 'U', 'S')
+		and (patr.ds_macroprodotto <> 'CONTI' or (patr.ds_macroprodotto = 'CONTI' and /*patr.ds_sottoprodotto in ('CONTO CORRENTE CONTO PIU',
+			'CONTO CORRENTE CONTO RETAIL','CONTO CORRENTE CONTO CLICK','CONTO CORRENTE CONTO RETAIL GRUPPO POSTE',
+			'CONTO CORRENTE RETAIL CONVENZIONE BASE','CONTO CORRENTE CONTO BANCOPOSTA GRUPPO POSTE',
+			'CONTO CORRENTE CONTO BANCOPOSTA BASE','CONTO CORRENTE CC BASE BP PENSIONATI2',
+			'CONTO CORRENTE CC BASE BP PENSIONATI1','CONTO CORRENTE CC BASE BP STANDARD')))*/
+			--FIX 2019/10/24:sostituire il filtro per DS_SOTTOPRODOTTO con uno su SK_SOTTOPRODOTTO, recependo anche il nuovo conto CCBP-CONSNEW
+			patr.sk_sottoprodotto in ('007602','007619','007646','007641','007616','007600','007630','007631','007639','035933','035932','069640','069641'
+				,'069642','069643','069644','069645')))
+		and patr.id_cliente_bic is not null   --Patch BP 20191005
+		and patr.id_periodotemporale = (extract(year from p.data_aggiornamento))*100 + extract(month from p.data_aggiornamento)
+	group by 1,2,3
+) with data primary index(id_cliente_bic) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table patrimoniale as(
+	sel patr.id_cliente_bic
+		
+		--FLAG
+		,max(case when patr.prodotto = 'CC' then 1 else 0 end) as fl_ccbp
+		,max(case when patr.prodotto = 'LIB' then 1 else 0 end) as fl_lib
+		,max(patr.fl_lib_smart) as fl_lib_smart
+		,max(case when patr.prodotto = 'BC' then 1 else 0 end) as fl_bpf_cart
+		,max(case when patr.prodotto = 'BD' then 1 else 0 end) as fl_bpf_dem
+		,greatest(fl_bpf_cart, fl_bpf_dem) as fl_bpf
+		,max(case when patr.prodotto = 'PPAY' then 1 else 0 end) as fl_ppay
+		,max(case when patr.prodotto = 'EVO' then 1 else 0 end) as fl_evo
+		,max(case when patr.prodotto = 'AZ' then 1 else 0 end) as fl_az
+		,max(case when patr.prodotto = 'OB' then 1 else 0 end) as fl_ob
+		,max(case when patr.prodotto = 'CE' then 1 else 0 end) as fl_ce
+		,max(case when patr.prodotto = 'TDS' then 1 else 0 end) as fl_tds
+		,max(case when patr.prodotto = 'Al_T' then 1 else 0 end) as fl_altro_tit
+		,max(case when patr.prodotto = 'PREV' then 1 else 0 end) as fl_previdenza
+		,max(case when patr.prodotto = 'PERS' then 1 else 0 end) as fl_persona
+		,max(case when patr.prodotto = 'RI' then 1 else 0 end) as fl_ramo_i
+		,max(case when patr.prodotto = 'RIII' then 1 else 0 end) as fl_ramo_iii
+		,max(case when patr.prodotto = 'RIV' then 1 else 0 end) as fl_ramo_iv
+		,max(case when patr.prodotto = 'MR' then 1 else 0 end) as fl_multiramo
+		,max(case when patr.prodotto = 'Al_P' then 1 else 0 end) as fl_altre_polizze
+		,max(case when patr.prodotto = 'F' then 1 else 0 end) as fl_fondi
+
+		--FASCIA
+		,sum(patr.patr_u + patr.patr_p + patr.patr_s) as fascia
+		
+		--CONTO
+		,sum(case when patr.prodotto = 'CC' then patr.patr_u else 0 end) as cc_u
+		,sum(case when patr.prodotto = 'CC' then patr.patr_p else 0 end) as cc_p
+		,sum(case when patr.prodotto = 'CC' then patr.patr_s else 0 end) as cc_s
+		--LIBRETTO
+		,sum(case when patr.prodotto = 'LIB' then patr.patr_u else 0 end) as lib_u
+		,sum(case when patr.prodotto = 'LIB' then patr.patr_p else 0 end) as lib_p
+		,sum(case when patr.prodotto = 'LIB' then patr.patr_s else 0 end) as lib_s
+		--BPF CART
+		,sum(case when patr.prodotto = 'BC' then patr.patr_u else 0 end) as bpf_cart_u
+		,sum(case when patr.prodotto = 'BC' then patr.patr_p else 0 end) as bpf_cart_p
+		,sum(case when patr.prodotto = 'BC' then patr.patr_s else 0 end) as bpf_cart_s
+		--BPF_DEM
+		,sum(case when patr.prodotto = 'BD' then patr.patr_u else 0 end) as bpf_dem_u
+		,sum(case when patr.prodotto = 'BD' then patr.patr_p else 0 end) as bpf_dem_p
+		,sum(case when patr.prodotto = 'BD' then patr.patr_s else 0 end) as bpf_dem_s
+		--PPAY
+		,sum(case when patr.prodotto = 'PPAY' then patr.patr_u else 0 end) as ppay_u
+		--EVO
+		,sum(case when patr.prodotto = 'EVO' then patr.patr_u else 0 end) as evo_u
+		--AZIONI
+		,sum(case when patr.prodotto = 'AZ' then patr.patr_u else 0 end) as az_u
+		,sum(case when patr.prodotto = 'AZ' then patr.patr_p else 0 end) as az_p
+		,sum(case when patr.prodotto = 'AZ' then patr.patr_s else 0 end) as az_s
+		--OBBLIGAZIONI
+		,sum(case when patr.prodotto = 'OB' then patr.patr_u else 0 end) as ob_u
+		,sum(case when patr.prodotto = 'OB' then patr.patr_p else 0 end) as ob_p
+		,sum(case when patr.prodotto = 'OB' then patr.patr_s else 0 end) as ob_s
+		--CERTIFICATES
+		,sum(case when patr.prodotto = 'CE' then patr.patr_u else 0 end) as ce_u
+		,sum(case when patr.prodotto = 'CE' then patr.patr_p else 0 end) as ce_p
+		,sum(case when patr.prodotto = 'CE' then patr.patr_s else 0 end) as ce_s
+		--TDS
+		,sum(case when patr.prodotto = 'TDS' then patr.patr_u else 0 end) as tds_u
+		,sum(case when patr.prodotto = 'TDS' then patr.patr_p else 0 end) as tds_p
+		,sum(case when patr.prodotto = 'TDS' then patr.patr_s else 0 end) as tds_s
+		--ALTRI TITOLI
+		,sum(case when patr.prodotto = 'Al_T' then patr.patr_u else 0 end) as altro_u
+		,sum(case when patr.prodotto = 'Al_T' then patr.patr_p else 0 end) as altro_p
+		,sum(case when patr.prodotto = 'Al_T' then patr.patr_s else 0 end) as altro_s
+		--PREVIDENZA
+		,sum(case when patr.prodotto = 'PREV' then patr.patr_u else 0 end) as prev_u
+		--PERSONA
+		,sum(case when patr.prodotto = 'PERS' then patr.patr_u else 0 end) as persona_u
+		--RAMO_I
+		,sum(case when patr.prodotto = 'RI' then patr.patr_u else 0 end) as ramo_i_u
+		--RAMO_III
+		,sum(case when patr.prodotto = 'RIII' then patr.patr_u else 0 end) as ramo_iii_u
+		--RAMO_IV
+		,sum(case when patr.prodotto = 'RIV' then patr.patr_u else 0 end) as ramo_iv_u
+		--MULTIRAMO
+		,sum(case when patr.prodotto = 'MR' then patr.patr_u else 0 end) as multiramo_u
+		--ALTRE POLIZZE
+		,sum(case when patr.prodotto = 'Al_P' then patr.patr_u else 0 end) as altre_polizze_u
+		--FONDI
+		,sum(case when patr.prodotto = 'F' then patr.patr_u else 0 end) as f_u -- PATCH come da mail Brunelli del 2/5/2019: cambiato fondi_u in f_u
+		,sum(case when patr.prodotto = 'F' then patr.patr_p else 0 end) as f_p -- PATCH come da mail Brunelli del 2/5/2019: cambiato fondi_p in f_p
+		,sum(case when patr.prodotto = 'F' then patr.patr_s else 0 end) as f_s -- PATCH come da mail Brunelli del 2/5/2019: cambiato fondi_s in f_s
+
+		--NUMERO PEZZI
+		,sum(case when patr.prodotto = 'CC' then patr.n else 0 end) as n_conto
+		,sum(case when patr.prodotto = 'LIB' then patr.n else 0 end) as n_libretto
+		,sum(case when patr.fl_lib_smart = 1 then patr.n else 0 end) as n_lib_smart
+		,sum(case when patr.prodotto = 'BC' then patr.n else 0 end) as n_bpf_cart
+		,sum(case when patr.prodotto = 'BD' then patr.n else 0 end) as n_bpf_dem
+		,n_bpf_cart + n_bpf_dem as n_bpf
+		,sum(case when patr.prodotto = 'PPAY' then patr.n else 0 end) as n_ppay
+		,sum(case when patr.prodotto = 'EVO' then patr.n else 0 end) as n_evo
+		,sum(case when patr.prodotto = 'AZ' then patr.n else 0 end) as n_az
+		,sum(case when patr.prodotto = 'OB' then patr.n else 0 end) as n_ob
+		,sum(case when patr.prodotto = 'CE' then patr.n else 0 end) as n_ce
+		,sum(case when patr.prodotto = 'TDS' then patr.n else 0 end) as n_tds
+		,sum(case when patr.prodotto = 'Al_T' then patr.n else 0 end) as n_altro_tit
+		,sum(case when patr.prodotto = 'PREV' then patr.n else 0 end) as n_previdenza
+		,sum(case when patr.prodotto = 'PERS' then patr.n else 0 end) as n_persona
+		,sum(case when patr.prodotto = 'RI' then patr.n else 0 end) as n_ramo_i
+		,sum(case when patr.prodotto = 'RIII' then patr.n else 0 end) as n_ramo_iii
+		,sum(case when patr.prodotto = 'RIV' then patr.n else 0 end) as n_ramo_iv
+		,sum(case when patr.prodotto = 'MR' then patr.n else 0 end) as n_multiramo
+		,sum(case when patr.prodotto = 'Al_P' then patr.n else 0 end) as n_altre_polizze
+		,sum(case when patr.prodotto = 'F' then patr.n else 0 end) as n_fondi
+
+	from prepatr as patr
+	group by 1
+) with data unique primary index(id_cliente_bic) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+drop table prepatr;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+--------------------------------------------------------PRODOTTI NON PATRIMONIALI------------------------------------------------------------
+----------POSTAMAT----------
+create volatile table POSTAMAT as (
+	select   
+		C.ID_CLIENTE_BIC,
+		1 as FL_POSTAMAT_RICHIESTA, 
+		COUNT(DISTINCT NR_CARTA) as NR_POSTAMAT_RICHIESTA
+	from
+		(select 
+			NR_CARTA, CD_TIPO_CARTA, CD_SOTTOTIPO_CARTA, CD_PRODOTTO, DT_RICHIESTA, FLG_RINNOVO, CD_FISCALE 
+		from V_EDW_DW_BP.MON_ANAGRCARTA_ST		
+		join EBIL_AREE.CT_PARAMETRI on 1=1					
+		where DATA_AGGIORNAMENTO between DT_INI_VAL and DT_FIN_VAL
+			and DT_RICHIESTA <=  DATA_AGGIORNAMENTO and DT_SCADENZA >  DATA_AGGIORNAMENTO
+			and (DT_ESTINZIONE >  DATA_AGGIORNAMENTO or DT_ESTINZIONE IS NULL)
+			and (CD_STATO_CARTA <>'B' or CD_STATO_CARTA IS NULL)
+			and FL_FITTIZIO = 0
+			and CD_TIPO_CARTA = '01' 
+			and CD_SOTTOTIPO_CARTA NOT IN ('58', '40', '09', '87')
+		) as A 					
+	inner join
+		(sel 
+			ID_CLIENTE_BIC, COD_FISCALE
+		from EDWAE_VM.CLIENTE
+		where VERSIONE_CORRENTE=1
+		group by 1,2
+		) as C
+		on A.CD_FISCALE=C.COD_FISCALE
+	inner join
+		(sel ID_CLIENTE_BIC 
+		from PATRIMONIALE
+		where FL_CCBP>0) as D
+		on C.ID_CLIENTE_BIC=D.ID_CLIENTE_BIC
+	group by 1
+	)with data primary index (ID_CLIENTE_BIC)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+----------CARTA DI CREDITO----------
+create volatile table CARTA_DI_CREDITO as (
+	select 
+		C.ID_CLIENTE_BIC, 
+		1 as FL_CARTA_DI_CREDITO,
+		COUNT(DISTINCT NR_CARTA) as NR_CARTE_CREDITO
+	from 
+		(select  
+			CD_CC||NDG_TITOLARE||CD_PRODOTTO as NR_CARTA, CD_FISCALE
+		from V_EDW_DW_BP.MON_ANAGRCARTA_ST  as G 		
+		join EBIL_AREE.CT_PARAMETRI on 1=1		
+		where G.CD_TIPO_CARTA in ('09','25') 
+			and DATA_AGGIORNAMENTO between DT_INI_VAL and DT_FIN_VAL 
+			and DT_RICHIESTA<=  DATA_AGGIORNAMENTO
+			and DT_SCADENZA>  DATA_AGGIORNAMENTO
+			and (DT_ESTINZIONE>  DATA_AGGIORNAMENTO or DT_ESTINZIONE is NULL)
+			and CD_STATO_CARTA<>'B'
+		) A			
+	inner join		
+		(select 
+			ID_CLIENTE_BIC, COD_FISCALE
+		from EDWAE_VM.CLIENTE
+		where VERSIONE_CORRENTE=1
+		group by 1,2
+		) C
+		on A.CD_FISCALE=C.COD_FISCALE
+	inner join
+		(sel ID_CLIENTE_BIC 
+		from PATRIMONIALE
+		where FL_CCBP>0) as D
+		on C.ID_CLIENTE_BIC=D.ID_CLIENTE_BIC
+	group by 1
+	)with data primary index (ID_CLIENTE_BIC,NR_CARTE_CREDITO)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+----------CARTA LIBRETTO----------
+create volatile table CARTA_LIBRETTO as (
+	select 
+		C.ID_CLIENTE_BIC, 
+		1 as FL_CARTA_LIBRETTO,
+		COUNT(DISTINCT NR_CARTA) as NR_CARTE_LIBRETTO
+	from
+		(select 
+			NR_CARTA, CD_TIPO_CARTA, CD_SOTTOTIPO_CARTA, CD_PRODOTTO, DT_RICHIESTA, FLG_RINNOVO, CD_FISCALE 
+		from V_EDW_DW_BP.MON_ANAGRCARTA_ST
+		join EBIL_AREE.CT_PARAMETRI on 1=1 		
+		where DATA_AGGIORNAMENTO between DT_INI_VAL and DT_FIN_VAL
+			and DT_RICHIESTA <=  DATA_AGGIORNAMENTO  and DT_SCADENZA >  DATA_AGGIORNAMENTO
+			and (DT_ESTINZIONE >  DATA_AGGIORNAMENTO or DT_ESTINZIONE is NULL)
+			and (CD_STATO_CARTA <>'B' or CD_STATO_CARTA is NULL)
+			and DT_ATTIVAZIONE is NOT NULL 
+			and DT_ATTIVAZIONE <= DATA_AGGIORNAMENTO
+			and FL_FITTIZIO = 0
+			and CD_TIPO_CARTA = '01' 
+			and CD_SOTTOTIPO_CARTA IN ('58', '40', '09')
+		) A	
+	inner join
+		(sel ID_CLIENTE_BIC, COD_FISCALE
+		from EDWAE_VM.CLIENTE
+		where VERSIONE_CORRENTE=1
+		group by 1,2) C
+		on A.CD_FISCALE=C.COD_FISCALE
+	inner join
+		(sel ID_CLIENTE_BIC 
+		from PATRIMONIALE
+		where FL_LIB>0) as D
+		on C.ID_CLIENTE_BIC=D.ID_CLIENTE_BIC
+	group by 1
+	)with data primary index (ID_CLIENTE_BIC,FL_CARTA_LIBRETTO)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+----------SCOPERTO----------
+create volatile table SCOPERTO as (
+	select 
+		B.ID_CLIENTE_BIC, 
+		1 as FL_SCOPERTO, 
+		COUNT(DISTINCT A.ID_RAPPORTO) as NR_SCOPERTO
+	from
+		(sel ID_RAPPORTO
+		from EDWAE_VM.RAPPORTO_FINANZIAMENTI
+		join EBIL_AREE.CT_PARAMETRI on 1=1 		
+		where DT_INI_VAL <= DATA_AGGIORNAMENTO  and DT_FIN_VAL >= DATA_AGGIORNAMENTO
+			and STATO_SINTETICO='1'
+			and CD_FLUSSO ='007' 
+		) as A				
+	inner join	
+		(sel ID_RAPPORTO, TIPO_INTESTATARIO, ID_CLIENTE_BIC
+		from EDWAE_VM.ASSOC_RAPPORTO_CLIENTE
+		where CD_FLUSSO= '007'
+			and ID_CLIENTE_CRM = '0') as B
+		on A.ID_RAPPORTO= B.ID_RAPPORTO
+	inner join
+		(select ID_CLIENTE_BIC
+		from PATRIMONIALE
+		where FL_CCBP>0) as C
+		on B.ID_CLIENTE_BIC=C.ID_CLIENTE_BIC
+	group by 1
+	) with data primary index (ID_CLIENTE_BIC,FL_SCOPERTO)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+----------DEPOSITO TITOLI----------
+create volatile table DEPOSITO_TITOLI as (
+	sel 
+		ID_CLIENTE_BIC, 
+		1 as FL_DEP_TIT, 
+		COUNT(DISTINCT A.ID_RAPPORTO) as NR_DEP_TIT
+	from  
+		(sel ID_RAPPORTO
+		from EDWAE_VM.RAPPORTO_INVESTIMENTI
+		join EBIL_AREE.CT_PARAMETRI on 1=1
+		where DT_INI_VAL <= DATA_AGGIORNAMENTO and DT_FIN_VAL >= DATA_AGGIORNAMENTO
+			and STATO_SINTETICO='1'
+		) as A
+	inner join 
+		(sel  ID_CLIENTE_BIC, ID_RAPPORTO
+		from EDWAE_VM.ASSOC_RAPPORTO_CLIENTE
+		where CD_FLUSSO IN ('012')
+		and ID_CLIENTE_CRM = '0' 
+		) as B
+		on A.ID_RAPPORTO = B.ID_RAPPORTO 		
+	group by 1
+	) with data primary index (ID_CLIENTE_BIC,FL_DEP_TIT)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+----------MUTUO----------
+create volatile table MUTUO_TMP as (
+	select 
+		MUTUO_CLI.CODICE_FISCALE, 
+		COUNT(DISTINCT MUTUO_POSIDONIA.ID_PRATICA_POSIDONIA) as NR_MUTUI,
+		SUM(CASE WHEN  ASSICURAZIONE_IMPORTO>0 THEN 1 ELSE 0 END) AS NR_CPI_MUTUO
+	from  V_EDW_DW_BP.FIN_MUTUI_POSID_ST as MUTUO_POSIDONIA
+	join EBIL_AREE.CT_PARAMETRI on 1=1
+	inner join V_EDW_DW_BP.FIN_MUTUI_CLI_ST as MUTUO_CLI
+		on MUTUO_POSIDONIA.ID_PRATICA_POSIDONIA = MUTUO_CLI.ID_PRATICA_POSIDONIA
+			and CT_PARAMETRI.DATA_AGGIORNAMENTO between MUTUO_POSIDONIA.DT_INI_VAL and MUTUO_POSIDONIA.DT_FIN_VAL
+			and CT_PARAMETRI.DATA_AGGIORNAMENTO between MUTUO_CLI.DT_INI_VAL and MUTUO_CLI.DT_FIN_VAL
+			and MUTUO_POSIDONIA.DT_EROGAZIONE <=  CT_PARAMETRI.DATA_AGGIORNAMENTO 
+			and (MUTUO_POSIDONIA.DT_ANNULLO > CT_PARAMETRI.DATA_AGGIORNAMENTO or MUTUO_POSIDONIA.DT_ANNULLO is NULL)
+			and (MUTUO_POSIDONIA.DT_SCADENZA_MUTUO > CT_PARAMETRI.DATA_AGGIORNAMENTO or MUTUO_POSIDONIA.DT_SCADENZA_MUTUO is NULL)
+			and (MUTUO_POSIDONIA.DT_ESTINZIONE_ANTICIPATA > CT_PARAMETRI.DATA_AGGIORNAMENTO or MUTUO_POSIDONIA.DT_ESTINZIONE_ANTICIPATA is NULL)
+	group by 1
+	) with data primary index(CODICE_FISCALE) 
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table MUTUO as (
+	sel 
+		DISTINCT ID_CLIENTE_BIC, 
+		1 as FL_MUTUO
+	from MUTUO_TMP as A
+	inner join
+		(sel 
+			ID_CLIENTE_BIC, 
+			cod_fiscale_sorgente
+		from BIC_ODS_V.KEY_MAP_CLIENTE
+		where DT_FINE_VALIDITA is NULL
+			and COD_SISTEMA_SORGENTE = 'BP') B 	
+		on A.codice_fiscale=B.COD_fiscale_SORGENTE
+	) with data primary index(ID_CLIENTE_BIC) 
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+----------PRESTITI----------
+/*create volatile table PRESTITI as (
+	select 
+		CODICE_FISCALE, 
+		case 
+			when partner = 8 then 'FINDOMESTIC' 
+			when partner = 4 then 'COMPASS'
+			when partner = 2 then 'DB' else partner end as partner, 
+		case 
+			when prodotto = '000000000000100130' then 'PRONTISSIMO'
+			when prodotto in ('000000000000100160', '000000000000100165') then 'SPECIAL CASH'
+			when prodotto = '000000000000100500' then 'PRESTITO'
+			else prodotto end as Prodotto,
+		SUM(case when A.DT_SCADENZA_PRESTITO between C.DATA_AGGIORNAMENTO+1 and 
+case when substr(CAST(C.DATA_AGGIORNAMENTO AS DATE FORMAT 'YYYY-MM-DD'), 6,5) = '02-29' then
+C.DATA_AGGIORNAMENTO-INTERVAL '1' DAY+INTERVAL '1' YEAR else C.DATA_AGGIORNAMENTO+INTERVAL '1' YEAR end	then 1 else 0 end) as N_PRESTITI_SCADENZA,
+		COUNT(DISTINCT A.ID_PRATICA_POSIDONIA) as NR_PRESTITI,
+		SUM(CASE WHEN  ASSICURAZIONE_IMPORTO>0 THEN 1 ELSE 0 END) AS NR_CPI_PRESTITI
+	from V_EDW_DW_BP.FIN_PRESTITI_POSID_ST A, 
+		V_EDW_DW_BP.FIN_PRESTITI_CLI_ST B,
+		EBIL_AREE.CT_PARAMETRI C
+	where A.ID_PRATICA_POSIDONIA = B.ID_PRATICA_POSIDONIA
+		and C.DATA_AGGIORNAMENTO between A.DT_INI_VAL and A.DT_FIN_VAL
+		and C.DATA_AGGIORNAMENTO between B.DT_INI_VAL and B.DT_FIN_VAL
+		and DT_EROGAZIONE <= C.DATA_AGGIORNAMENTO
+		and (DT_ANNULLO >= C.DATA_AGGIORNAMENTO or DT_ANNULLO is NULL)
+		and (DT_SCADENZA_PRESTITO > C.DATA_AGGIORNAMENTO or DT_SCADENZA_PRESTITO is NULL)
+		and (DT_ESTINZIONE_ANTICIPATA > C.DATA_AGGIORNAMENTO or DT_ESTINZIONE_ANTICIPATA is NULL)
+		and CODICE_FISCALE is NOT NULL
+		and CODICE_FISCALE <> ' '
+		and 1=1 
+	group by 1,2,3
+	) with data primary index (CODICE_FISCALE, PARTNER, PRODOTTO)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+*/
+
+----------PRESTITI----------
+--HH  FIX FLAG PRESTITI E CQ 202003 
+create volatile table PRESTITI as (
+	select 
+		CODICE_FISCALE, 
+		partner, 
+		'PRESTITO' AS PRODOTTO, --HH  FIX FLAG PRESTITI E CQ 202003 
+		/*case 
+			when prodotto = '000000000000100130' then 'PRONTISSIMO'
+			when prodotto in ('000000000000100160', '000000000000100165') then 'SPECIAL CASH'
+			when prodotto = '000000000000100500' then 'PRESTITO'
+			else prodotto end as Prodotto, HH  FIX FLAG PRESTITI E CQ 202003 */
+		SUM(case when A.DT_SCADENZA_PRESTITO between C.DATA_AGGIORNAMENTO+1 and C.DATA_AGGIORNAMENTO+INTERVAL '1' YEAR then 1 else 0 end) as N_PRESTITI_SCADENZA,
+		COUNT(DISTINCT A.ID_PRATICA_POSIDONIA) as NR_PRESTITI,
+		SUM(CASE WHEN  ASSICURAZIONE_IMPORTO>0 THEN 1 ELSE 0 END) AS NR_CPI_PRESTITI
+	from V_EDW_DW_BP.FIN_PRESTITI_POSID_ST A, 
+		V_EDW_DW_BP.FIN_PRESTITI_CLI_ST B,
+		EBIL_AREE.CT_PARAMETRI C
+	where A.ID_PRATICA_POSIDONIA = B.ID_PRATICA_POSIDONIA
+		and C.DATA_AGGIORNAMENTO between A.DT_INI_VAL and A.DT_FIN_VAL
+		and C.DATA_AGGIORNAMENTO between B.DT_INI_VAL and B.DT_FIN_VAL
+		and DT_EROGAZIONE <= C.DATA_AGGIORNAMENTO
+		and (DT_ANNULLO >= C.DATA_AGGIORNAMENTO or DT_ANNULLO is NULL)
+		and (DT_SCADENZA_PRESTITO > C.DATA_AGGIORNAMENTO or DT_SCADENZA_PRESTITO is NULL)
+		and (DT_ESTINZIONE_ANTICIPATA > C.DATA_AGGIORNAMENTO or DT_ESTINZIONE_ANTICIPATA is NULL)
+		and CODICE_FISCALE is NOT NULL
+		and CODICE_FISCALE <> ' '
+		and 1=1 
+	group by 1,2,3 
+	) with data primary index (CODICE_FISCALE, PARTNER ,PRODOTTO) 
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+----------POLIZZE DANNI----------
+
+create volatile table annullo as (
+sel 
+	NUMERO_POLIZZA 
+FROM v_edw_sa_bp.BP_NP_ANNULLI PRO
+join EBIL_AREE.CT_PARAMETRI as P on 1=1
+where EFFETTO_ANNULLO_POL<=P.DATA_AGGIORNAMENTO
+) WITH DATA UNIQUE PRIMARY INDEX (NUMERO_POLIZZA)
+ON COMMIT PRESERVE ROWS;
+
+create volatile table  polizze_emesse as (
+sel
+	NUMERO_POLIZZA
+FROM v_edw_sa_bp.BP_NP_ANNULLI PRO
+join EBIL_AREE.CT_PARAMETRI as P on 1=1
+where EMISSIONE_POL<=P.DATA_AGGIORNAMENTO
+	and numero_polizza not in ( sel numero_polizza from annullo)
+group by 1
+) WITH DATA UNIQUE PRIMARY INDEX (NUMERO_POLIZZA)
+ON COMMIT PRESERVE ROWS;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+create volatile table  polizze_tot as (
+sel 
+	NUMERO_POLIZZA,
+	CODICE_PRODOTTO,
+	max(data_operazione) as dt_operazione
+from v_edw_sa_bp.BP_NP_ANNULLI PRO
+group by 1,2
+) WITH DATA UNIQUE PRIMARY INDEX (NUMERO_POLIZZA)
+ON COMMIT PRESERVE ROWS;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+CREATE VOLATILE TABLE STOCK_DANNI AS (
+sel
+	e.NUMERO_POLIZZA,
+	Linea_Prod,
+	Desc_Prod,
+	tot.CODICE_PRODOTTO
+from polizze_emesse e
+left join polizze_tot tot
+	on e.numero_polizza=tot.numero_polizza
+left join EBIL_AREE.V_ANAG_POSTEASSICURA tip
+	on tot.CODICE_PRODOTTO=TIP.CODICE_PRODOTTO
+group by 1, 2,3,4
+) WITH DATA UNIQUE PRIMARY INDEX (NUMERO_POLIZZA)
+ON COMMIT PRESERVE ROWS;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+ 
+
+CREATE VOLATILE TABLE CLIENTE_DANNI_BENI_PERSONA AS (
+sel 
+	id_cliente_bic, 
+	RETAIL, 
+	linea_prod, 
+	min(cli.ndg) as ndg, 
+	COUNT(DISTINCT NUMERO_POLIZZA) AS NR_POLIZZE
+from stock_danni pro
+join EBIL_AREE.CT_PARAMETRI as P on 1=1
+LEFT join V_EDW_DW_BP.POL_RAPPORTO_ST rapp
+on SUBSTR(TRIM(pro.numero_polizza), 1,11) =substr(trim(rapp.nr_polizza),2,11)
+	and P.DATA_AGGIORNAMENTO between rapp.dt_ini_val and rapp.dt_fin_val
+LEFT join (SEL ID_CLIENTE_BIC, NDG, 1 AS RETAIL
+	FROM EBIL_AREE.NDG_BIC
+	WHERE TIPO_INTESTATARIO='U'
+	UNION ALL
+	SEL ID_CLIENTE_BIC, NDG, 0 AS RETAIL
+	FROM EBIL_AREE.NDG_BIC_PG
+	GROUP BY 1,2) cli
+on rapp.ndg_cliente=cli.ndg
+WHERE LINEA_PROD IN ('BENI', 'PERSONA')
+group by 1,2,3
+) WITH DATA UNIQUE PRIMARY INDEX ( linea_prod, ID_CLIENTE_BIC)
+ON COMMIT PRESERVE ROWS;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+CREATE VOLATILE TABLE CLIENTE_DANNI_PAGAMENTI AS (
+SEL  
+	ID_CLIENTE_BIC, 
+	SUM(NR_CPI) AS NR_CPI
+	--SUM(CASE WHEN TIPO_CPI='MUTUO' THEN NR_CPI ELSE 0 END) AS NR_CPI_MUTUO,
+	--SUM(CASE WHEN TIPO_CPI='PREST' THEN NR_CPI ELSE 0 END) AS NR_CPI_PRESTITO
+FROM
+    (SEL CODICE_FISCALE, 'MUTUO' AS TIPO_CPI, NR_CPI_MUTUO AS NR_CPI
+    from MUTUO_TMP
+    WHERE NR_CPI_MUTUO>0
+    UNION ALL 
+    SEL CODICE_FISCALE, 'PRESTITO' AS TIPO_CPI, NR_CPI_PRESTITI AS NR_CPI
+    from PRESTITI
+    WHERE NR_CPI_PRESTITI>0
+    ) A
+    LEFT JOIN
+    (SEL COD_FISCALE, ID_CLIENTE_BIC
+    FROM EDWAE_VM.CLIENTE
+    WHERE VERSIONE_CORRENTE=1
+    AND NATURA_GIURIDICA='PERSONA FISICA'
+    ) B
+ON A.CODICE_FISCALE=B.COD_FISCALE
+GROUP BY 1
+) WITH DATA UNIQUE PRIMARY INDEX (ID_CLIENTE_BIC)
+ON COMMIT PRESERVE ROWS;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+CREATE VOLATILE TABLE DANNI AS (
+SEL A.*, 
+	CASE WHEN NR_PERSONA_PA>0 THEN 1 ELSE 0 END AS FL_PERSONA_PA,
+	CASE WHEN NR_BENI_PA>0 THEN 1 ELSE 0 END AS FL_BENI_PA, 
+	CASE WHEN NR_PAGAMENTI_PA>0 THEN 1 ELSE 0 END AS FL_PAGAMENTI_PA, 
+	1 AS FL_DANNI_PA 
+
+FROM
+(SEL ID_CLIENTE_BIC, SUM(NR_PERSONA) AS NR_PERSONA_PA, SUM(NR_BENI) AS NR_BENI_PA, SUM(NR_PAGAMENTI) AS NR_PAGAMENTI_PA, 
+SUM(NR_PAGAMENTI+NR_PERSONA+NR_BENI) AS NR_DANNI_PA
+FROM 
+	(
+	SEL ID_CLIENTE_BIC, 
+	SUM(CASE WHEN LINEA_PROD='PERSONA' THEN NR_POLIZZE ELSE 0 END) AS NR_PERSONA,
+	SUM(CASE WHEN LINEA_PROD='BENI' THEN NR_POLIZZE ELSE 0 END) AS NR_BENI,
+	CAST(0 AS INTEGER) AS NR_PAGAMENTI
+	FROM CLIENTE_DANNI_BENI_PERSONA
+	GROUP BY 1
+	UNION ALL 
+	SEL ID_CLIENTE_BIC,
+	0 AS NR_PERSONA,
+	0 AS NR_BENI,
+	NR_CPI AS NR_PAGAMENTI
+	FROM CLIENTE_DANNI_PAGAMENTI
+	) A
+GROUP BY 1
+) A
+) WITH DATA UNIQUE PRIMARY INDEX (ID_CLIENTE_BIC)
+ON COMMIT PRESERVE ROWS;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+----------CQS----------
+
+/*create volatile table finanziamenti_cqs as (
+	select 
+		'CQS' as PRODOTTO,	
+		case 
+			when PARTNER = 8 then 'FINDOMESTIC' 
+			when PARTNER = 4 then 'COMPASS'
+			when PARTNER = 2 then 'DB'
+			when PARTNER = 1 then 'BDM'
+			when PARTNER = 3 then 'BNL'
+			else PARTNER end as PARTNER, 
+		CODICE_FISCALE,
+		SUM(case when A.DT_SCADENZA_PRESTITO between C.DATA_AGGIORNAMENTO+1 and case when substr(CAST(c.DATA_AGGIORNAMENTO AS DATE FORMAT 'YYYY-MM-DD'), 6,5) = '02-29' then
+C.DATA_AGGIORNAMENTO-INTERVAL '1' DAY+INTERVAL '1' YEAR else C.DATA_AGGIORNAMENTO+INTERVAL '1' YEAR end then 1 else 0 end) as N_CQS_SCADENZA,
+		COUNT(DISTINCT B.ID_PRATICA_POSIDONIA) as NR_CQS
+	from V_EDW_DW_BP.FIN_PRATICHE_CQS_ST A,
+		V_EDW_DW_BP.FIN_CQS_CLI_ST B,
+		EBIL_AREE.CT_PARAMETRI C
+	where A.ID_PRATICA_POSIDONIA=B.ID_PRATICA_POSIDONIA
+		and C.DATA_AGGIORNAMENTO between A.DT_INI_VAL and A.DT_FIN_VAL
+		and C.DATA_AGGIORNAMENTO between B.DT_INI_VAL and B.DT_FIN_VAL
+		and DT_EROGAZIONE <= C.DATA_AGGIORNAMENTO
+		and (DT_ANNULLO >C.DATA_AGGIORNAMENTO or DT_ANNULLO is NULL)
+		and (DT_SCADENZA_PRESTITO >C.DATA_AGGIORNAMENTO or DT_SCADENZA_PRESTITO is NULL)
+		and (DT_ESTINZIONE_ANTICIPATA > C.DATA_AGGIORNAMENTO or DT_ESTINZIONE_ANTICIPATA is NULL)
+		and 1=1 
+	group by 1,2,3
+	) with data unique primary index (CODICE_FISCALE, PARTNER, PRODOTTO)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+*/
+
+----------CQS----------
+--HH  FIX FLAG PRESTITI E CQ 202003 
+
+create volatile table finanziamenti_cqs as (
+	select 
+		'CQS' as PRODOTTO,
+		PARTNER, --HH  FIX FLAG PRESTITI E CQ 202003 
+		/* case 
+			when PARTNER = 8 then 'FINDOMESTIC' 
+			when PARTNER = 4 then 'COMPASS'
+			when PARTNER = 2 then 'DB'
+			when PARTNER = 1 then 'BDM'
+			when PARTNER = 3 then 'BNL'
+			else PARTNER end as PARTNER, HH  FIX FLAG PRESTITI E CQ 202003 */
+		CODICE_FISCALE,
+		SUM(case when A.DT_SCADENZA_PRESTITO between C.DATA_AGGIORNAMENTO+1 and C.DATA_AGGIORNAMENTO+INTERVAL '1' YEAR then 1 else 0 end) as N_CQS_SCADENZA,
+		COUNT(DISTINCT B.ID_PRATICA_POSIDONIA) as NR_CQS
+	from V_EDW_DW_BP.FIN_PRATICHE_CQS_ST A,
+		V_EDW_DW_BP.FIN_CQS_CLI_ST B,
+		EBIL_AREE.CT_PARAMETRI C
+	where A.ID_PRATICA_POSIDONIA=B.ID_PRATICA_POSIDONIA
+		and C.DATA_AGGIORNAMENTO between A.DT_INI_VAL and A.DT_FIN_VAL
+		and C.DATA_AGGIORNAMENTO between B.DT_INI_VAL and B.DT_FIN_VAL
+		and DT_EROGAZIONE <= C.DATA_AGGIORNAMENTO
+		and (DT_ANNULLO >C.DATA_AGGIORNAMENTO or DT_ANNULLO is NULL)
+		and (DT_SCADENZA_PRESTITO >C.DATA_AGGIORNAMENTO or DT_SCADENZA_PRESTITO is NULL)
+		and (DT_ESTINZIONE_ANTICIPATA > C.DATA_AGGIORNAMENTO or DT_ESTINZIONE_ANTICIPATA is NULL)
+		and 1=1 
+	group by 1,2,3  --HH  FIX FLAG PRESTITI E CQ 202003 
+	) with data unique primary index (CODICE_FISCALE, PARTNER, PRODOTTO) 
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+
+/*create volatile table PRODOTTI_PRESTITI as (
+	sel 
+		B.ID_CLIENTE_BIC,
+		MAX(case when A.TIPO_PRESTITO='PRESTITO_COMPASS' then 1 else 0 end) as FL_PRESTITO_COMPASS,
+		MAX(case when A.TIPO_PRESTITO='BNL' then 1 else 0 end) as FL_CQS_BNL,
+		MAX(case when A.TIPO_PRESTITO='FINDOMESTIC' then 1 else 0 end) as FL_PRESTITO_FINDO,
+		MAX(case when A.TIPO_PRESTITO='PRONTISSIMO' then 1 else 0 end) as FL_PRONTISSIMO,
+		MAX(case when A.TIPO_PRESTITO='SPECIAL_CASH' then 1 else 0 end) as FL_SPECIAL_CASH,
+		MAX(case when A.TIPO_PRESTITO='CQS_DB' then 1 else 0 end) as FL_CQS_DB,
+		MAX(case when A.TIPO_PRESTITO='PRESTITO_DB' then 1 else 0 end) as FL_PRESTITO_DB,
+		MAX(case when A.TIPO_PRESTITO='CQS_COMPASS' then 1 else 0 end) as FL_CQS_COMPASS, --la variabile non risulta mai valorizzata.
+
+		case when SUM(A.N_PRESTITI_SCADENZA)>0 then 1 else 0 end as FL_PRESTITI_SCADENZA,
+		case when SUM(A.N_CQS_SCADENZA)>0 then 1 else 0 end as FL_CQS_SCADENZA 
+	from
+		(sel CODICE_FISCALE, N_PRESTITI_SCADENZA, 0 as N_CQS_SCADENZA, 'PRESTITO_COMPASS' as TIPO_PRESTITO
+		from PRESTITI
+		where PARTNER = 'COMPASS' and PRODOTTO = 'PRESTITO'
+		group by 1,2,3,4
+		
+		union
+			sel CODICE_FISCALE, 0 as N_PRESTITI_SCADENZA, N_CQS_SCADENZA, 'BNL' as TIPO_PRESTITO
+			from FINANZIAMENTI_CQS
+			where TRIM(PARTNER)='BNL'
+			group by 1,2,3,4
+		
+		union
+			sel CODICE_FISCALE, N_PRESTITI_SCADENZA, 0 as N_CQS_SCADENZA,'FINDOMESTIC' as TIPO_PRESTITO
+			from  PRESTITI
+			where  PARTNER = 'FINDOMESTIC' and PRODOTTO = 'PRESTITO'
+			group by 1,2,3,4
+		
+		union
+			sel CODICE_FISCALE, N_PRESTITI_SCADENZA, 0 as N_CQS_SCADENZA,'PRONTISSIMO' as TIPO_PRESTITO
+			from  PRESTITI
+			where  PARTNER = 'COMPASS' and PRODOTTO = 'PRONTISSIMO'
+			group by 1,2,3,4
+		
+		union 
+			sel CODICE_FISCALE, N_PRESTITI_SCADENZA, 0 as N_CQS_SCADENZA, 'SPECIAL_CASH' as TIPO_PRESTITO
+			from PRESTITI
+			where PARTNER = 'COMPASS' and PRODOTTO = 'SPECIAL CASH'
+			group by 1,2,3,4
+		
+		union
+			sel CODICE_FISCALE, 0 as N_PRESTITI_SCADENZA, N_CQS_SCADENZA, 'CQS_DB' as TIPO_PRESTITO
+			from FINANZIAMENTI_CQS
+			where TRIM(PARTNER)='DB'
+			group by 1,2,3,4	
+		
+		union
+			sel CODICE_FISCALE, N_PRESTITI_SCADENZA, 0 as N_CQS_SCADENZA, 'PRESTITO_DB' as TIPO_PRESTITO
+			from PRESTITI
+			where PARTNER = 'DB' and PRODOTTO = 'PRESTITO'
+			group by 1,2,3,4
+
+		union
+			sel CODICE_FISCALE, 0 as N_PRESTITI_SCADENZA, N_CQS_SCADENZA, 'CQS_COMPASS' as TIPO_PRESTITO 
+			from FINANZIAMENTI_CQS
+			where TRIM(PARTNER)='COMPASS'
+			group by 1,2,3,4
+		) A 
+	
+	inner join
+		(sel ID_CLIENTE_BIC, COD_FISCALE_SORGENTE as COD_FISCALE
+		from BIC_ODS_V.KEY_MAP_CLIENTE
+		where DT_FINE_VALIDITA is NULL
+			and COD_SISTEMA_SORGENTE ='BP') B
+		on A.CODICE_FISCALE=B.COD_FISCALE
+	group by 1
+	)with data unique primary index(ID_CLIENTE_BIC)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+*/
+
+-- HH  FIX FLAG PRESTITI E CQ 202003 
+
+create volatile table PRODOTTI_PRESTITI as (
+	sel 
+		B.ID_CLIENTE_BIC,
+		MAX(case when A.TIPO_PRESTITO='PRESTITO' then 1 else 0 end) as FL_PRESTITO,
+		MAX(case when A.TIPO_PRESTITO='CQ' then 1 else 0 end) as FL_CQS,
+		/*
+		MAX(case when A.TIPO_PRESTITO='PRESTITO_COMPASS' then 1 else 0 end) as FL_PRESTITO_COMPASS,
+		MAX(case when A.TIPO_PRESTITO='BNL' then 1 else 0 end) as FL_CQS_BNL,
+		MAX(case when A.TIPO_PRESTITO='FINDOMESTIC' then 1 else 0 end) as FL_PRESTITO_FINDO,
+		MAX(case when A.TIPO_PRESTITO='PRONTISSIMO' then 1 else 0 end) as FL_PRONTISSIMO,
+		MAX(case when A.TIPO_PRESTITO='SPECIAL_CASH' then 1 else 0 end) as FL_SPECIAL_CASH,
+		MAX(case when A.TIPO_PRESTITO='CQS_DB' then 1 else 0 end) as FL_CQS_DB,
+		MAX(case when A.TIPO_PRESTITO='PRESTITO_DB' then 1 else 0 end) as FL_PRESTITO_DB,
+		MAX(case when A.TIPO_PRESTITO='CQS_COMPASS' then 1 else 0 end) as FL_CQS_COMPASS, --la variabile non risulta mai valorizzata.
+*/
+		case when SUM(A.N_PRESTITI_SCADENZA)>0 then 1 else 0 end as FL_PRESTITI_SCADENZA,
+		case when SUM(A.N_CQS_SCADENZA)>0 then 1 else 0 end as FL_CQS_SCADENZA 
+	from
+		(sel CODICE_FISCALE, N_PRESTITI_SCADENZA, 0 as N_CQS_SCADENZA, 'PRESTITO' as TIPO_PRESTITO
+		from PRESTITI
+		group by 1,2,3,4
+		
+		union
+			sel CODICE_FISCALE, 0 as N_PRESTITI_SCADENZA, N_CQS_SCADENZA, 'CQ' as TIPO_PRESTITO
+			from FINANZIAMENTI_CQS
+			group by 1,2,3,4
+		) A 
+	
+	inner join
+		(sel ID_CLIENTE_BIC, COD_FISCALE_SORGENTE as COD_FISCALE
+		from BIC_ODS_V.KEY_MAP_CLIENTE
+		where DT_FINE_VALIDITA is NULL
+			and COD_SISTEMA_SORGENTE ='BP') B
+		on A.CODICE_FISCALE=B.COD_FISCALE
+	group by 1
+	)with data unique primary index(ID_CLIENTE_BIC)
+on commit preserve rows;
+
+
+----------SUPER SMART----------
+create volatile table LIBRETTO_SUPER_SMART as (
+	sel 
+		ID_CLIENTE_BIC,
+		1 as FL_LIB_SUPER_SMART,
+		COUNT(distinct SK_RAPPORTO) as NR_LIB_SUPER_SMART
+	from 
+		(sel '002'||ANAG.NR_RAPPORTO as ID_RAPPORTO, SVIN.SK_RAPPORTO 
+		from
+			(sel *
+			from V_EDW_DW_BP.LIB_SUPSMART_RAPP_ST
+			JOIN ebil_aree.CT_PARAMETRI on 1=1
+			where data_aggiornamento between DT_INI_VAL and DT_FIN_VAL  
+			) anag
+			join ebil_aree.CT_PARAMETRI  on 1=1
+			inner join 
+				(sel *
+				from V_EDW_DW_BP.LIB_SUPSMART_ATVINC_ST
+				where ebil_aree.CT_PARAMETRI.DATA_AGGIORNAMENTO between DT_INI_VAL and DT_FIN_VAL
+					and DT_ATT_PVR >='2017-05-29'
+					and DT_SCADENZA_PVR > ebil_aree.CT_PARAMETRI.DATA_AGGIORNAMENTO
+					and FL_FITTIZIO = 0
+				) SVIN 
+				on ANAG.NR_RAPPORTO = SVIN.NR_RAPPORTO and ANAG.NR_PGR_PVR = SVIN.NR_PGR_PVR
+			where ANAG.DT_ATT_PVR  >='2017-05-29' and SVIN.DT_SCADENZA_PVR>ebil_aree.CT_PARAMETRI.DATA_AGGIORNAMENTO
+	group by 1,2
+	) A
+	inner join
+		(sel ID_RAPPORTO
+		from EDWAE_VM.RAPPORTO_RISPARMIO_POSTALE
+		where CD_FLUSSO='002'
+			and DT_INI_VAL<=ebil_aree.CT_PARAMETRI.DATA_AGGIORNAMENTO and DT_FIN_VAL>=ebil_aree.CT_PARAMETRI.DATA_AGGIORNAMENTO 
+			and STATO_SINTETICO='1') B
+		on A.ID_RAPPORTO=B.ID_RAPPORTO
+	inner join
+		(sel ID_RAPPORTO, ID_CLIENTE_BIC
+		from EDWAE_VM.ASSOC_RAPPORTO_CLIENTE
+		where CD_FLUSSO='002'
+			and ID_CLIENTE_CRM='0') C
+		on B.ID_RAPPORTO=C.ID_RAPPORTO
+	join EBIL_AREE.CT_PARAMETRI on 1=1
+	group by 1
+	)with data unique primary index(ID_CLIENTE_BIC)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+----------RPOL----------
+create volatile table RPOL_TMP as (
+	select 
+		NDG, 
+		MIN(STATO_PRI) as STATO
+	from
+		(select 
+			R.CD_CLI_SRG as NDG, 
+			case
+				when STATO_SERVIZIO_DISPOSITIVO = 'C' then 1
+				when STATO_SERVIZIO_DISPOSITIVO = 'R' then 2
+				when STATO_SERVIZIO_DISPOSITIVO = 'N' then 3
+				when STATO_SERVIZIO_DISPOSITIVO is NULL or STATO_SERVIZIO_DISPOSITIVO not in ('C','R','N') then 4
+				end as STATO_PRI  
+		from EDW_VM_DBP_MOV.EDW_TDD_SERV_RPOL R, 
+		EDW_VM_DBP_MOV.EDW_MKT_TDD_RAPP_BP RAP
+		join EBIL_AREE.CT_PARAMETRI as PAR on 1=1
+		where (R.DT_REVOCA is NULL or R.DT_REVOCA > PAR.DATA_AGGIORNAMENTO)
+			and R.NR_RAPP = RAP.NR_RAPP
+			and R.TIPO_RAPP = RAP.TIPO_RAPP
+			and RAP.DT_ESTINZ > PAR.DATA_AGGIORNAMENTO
+		)AA
+	group by 1
+	) with data unique primary index (NDG)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table RPOL as (
+	sel 
+		H.ID_CLIENTE_BIC, 
+		1 as FL_RPOL_INFORMATIVO, 
+		(case when H.STATO=1 then 1 else 0 end) as FL_RPOL_DISPOSITIVO
+	from
+		(sel ID_CLIENTE_BIC, MIN(STATO) as STATO
+		from RPOL_TMP as a
+		inner join
+			(sel
+				ID_CLIENTE_BIC,
+				COD_CLIENTE_SORGENTE,
+				COD_FISCALE_SORGENTE,
+				FLAG_CERTIFICAZIONE
+			from V_BIC_ODS.KEY_MAP_CLIENTE
+			where UPPER(COD_SISTEMA_SORGENTE) = 'BP'
+				and DT_FINE_VALIDITA is NULL
+				and FLAG_ARCHIVIAZIONE is NULL) b
+			on A.NDG=B.COD_CLIENTE_SORGENTE
+		group by 1
+		) as h
+		inner join PATRIMONIALE patr
+			on h.id_cliente_bic=patr.id_cliente_bic and patr.FL_LIB_SMART>0
+	) with data unique primary index (ID_CLIENTE_BIC)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+--------------------------------------------------------VARIABILI PER MODELLO DI MULTIBANCARIZZAZIONE------------------------------------------------------------
+
+----------FL_BPOL_CLICK----------
+
+-- FIX HH 15/01/2020: ripristinate modifiche sulla volatile FL_BPOL_CLICK per nuovo conto CCBP-CONSNEW come da script 1_CT_PERIMETRO_PRODOTTI_PATRIMONIALE_4.0_patch_20191024
+
+
+create volatile table FL_BPOL_CLICK as(
+	select distinct assoc.ID_CLIENTE_BIC,1 as FL_BPOL_CLICK
+	from EDWAE_VM.ASSOC_RAPPORTO_CLIENTE as assoc
+	where assoc.ID_CLIENTE_CRM='0' and assoc.CD_FLUSSO in ('001','020') and assoc.ID_RAPPORTO in(
+		select
+			case
+				when rap_cc.CODICE_PRODOTTO in ('CCBP-CLICK','CCBP-CONSNEW') then rap_cc.ID_RAPPORTO--FIX 2019/10/24: aggiunto CCBP-CONSNEW
+				else rap_ser.ID_RAPPORTO
+			end as ID_RAPPORTO_ONLINE
+		from EBIL_AREE.CT_PARAMETRI as p
+		join EDWAE_VM.RAPPORTO_CONTO as rap_cc
+			on p.DATA_AGGIORNAMENTO between rap_cc.DT_INI_VAL and rap_cc.DT_FIN_VAL
+				and rap_cc.STATO_SINTETICO='1' and rap_cc.CODICE_PRODOTTO in ('CCBP-RETAIL','CCBPCONSUMER','CCBP-CLICK','CCBP-CONSNEW')--FIX 2019/10/24: aggiunto CCBP-CONSNEW
+		left join EDWAE_VM.RAPPORTO_SERVIZI_TELEMATICI as rap_ser
+			on rap_cc.CODICE_PRODOTTO in ('CCBP-RETAIL','CCBPCONSUMER')
+				and p.DATA_AGGIORNAMENTO between rap_ser.DT_INI_VAL and rap_ser.DT_FIN_VAL
+				and rap_ser.STATO_NATURALE='Attivo' and rap_ser.CD_FLUSSO='020'
+				and rap_cc.ID_RAPPORTO=rap_ser.ID_RAPPORTO_REGOLAMENTO
+	) and assoc.ID_CLIENTE_BIC in (select ID_CLIENTE_BIC from PATRIMONIALE where FL_CCBP=1)
+)with data unique primary index (ID_CLIENTE_BIC) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+----------FL_ACCREDITO_CONTO_EDWAE----------
+create volatile table FL_ACCREDITO_CONTO_EDWAE as(
+	select assoc.ID_CLIENTE_BIC,1 as FL_ACCREDITO_CONTO_EDWAE
+	from EDWAE_VM.ASSOC_RAPPORTO_CLIENTE as assoc
+	where assoc.CD_FLUSSO='001' and assoc.ID_RAPPORTO in (
+		select rap_cc.id_rapporto
+		from EBIL_AREE.CT_PARAMETRI as p
+		join EDWAE_VM.RAPPORTO_CONTO as rap_cc
+			on p.DATA_AGGIORNAMENTO between rap_cc.DT_INI_VAL and rap_cc.DT_FIN_VAL and rap_cc.STATO_SINTETICO='1'and rap_cc.ID_RAPPORTO in (
+				select ID_RAPPORTO_REGOLAMENTO
+				from EDWAE_VM.RAPPORTO_INCASSI_PAGAMENTI as rap_inc
+				where p.DATA_AGGIORNAMENTO between rap_inc.DT_INI_VAL and rap_inc.DT_FIN_VAL and rap_inc.CD_FLUSSO='025'
+					and rap_inc.STATO_SINTETICO='1'
+			)
+	) and assoc.ID_CLIENTE_BIC in (select ID_CLIENTE_BIC from PATRIMONIALE where FL_CCBP=1)
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+--------------------------------------------------------SCADENZE------------------------------------------------------------
+----------POLIZZE----------
+create volatile table TMP_RAPP_POL_EBIL as (
+	sel 
+			POL_RAPP.PK_RAPPORTO as PK_RAPPORTO,																																					
+			POL_RAPP.NR_POLIZZA	AS CODICE_RAPPORTO,  
+			ASSOC.CD_CLIENTE_SORGENTE as NDG,    
+			'13' as TIPO_RAPPORTO,           
+			coalesce(cast(cast(POL_RAPP.DT_SCADENZA as DATE format 'YYYYMMDD') as VARCHAR(8)),'19000101') as DATA_SCADENZA,
+			case when CD_COMP_ASS='PV' then 'VITA' 
+					when CD_COMP_ASS='PA' then 'DANNI' 
+					else 'ALTRE_POLIZZE' end  as PRODOTTO,
+			DS_RAMO_PROD as CATALOGO
+		from  EBIL_ANAG_V.V_AN_RAPPORTO_POLIZZA as POL_RAPP
+		join EBIL_AREE.CT_PARAMETRI on 1=1
+		inner join  EBIL_ANAG_V.V_ASSOC_RAPP_PROD_CLIENTE ASSOC
+			on POL_RAPP.PK_RAPPORTO=ASSOC.FK_RAPPORTO
+				and CD_TIPO_RAPP='PZ'
+				and CT_PARAMETRI.DATA_AGGIORNAMENTO between ASSOC.DT_INIZIO_VALIDITA and ASSOC.DT_FINE_VALIDITA
+				and ASSOC.FL_VALIDITA='1'
+				and ASSOC.CD_CLIENTE_SORGENTE<>'000000000000' 
+		inner join EBIL_AREE_V.V_F_POLIZZE PG  
+			on POL_RAPP.PK_RAPPORTO =  PG.FK_RAPPORTO
+				and CT_PARAMETRI.DATA_AGGIORNAMENTO between PG.DT_INI_VAL_SALDO and PG.DT_FIN_VAL_SALDO
+				and PG.FL_VALIDITA='1'
+		where CT_PARAMETRI.DATA_AGGIORNAMENTO between POL_RAPP.DT_INI_VAL and POL_RAPP.DT_FIN_VAL
+		--qualify row_number() over (partition by CODICE_RAPPORTO, NDG, TIPO_RAPPORTO order by CODICE_RAPPORTO desc) = 1
+-- FIX HH 15/01/2020: ripristinata qualify per chiave duplicata		
+		qualify row_number() over (partition by CODICE_RAPPORTO, NDG, TIPO_RAPPORTO order by DATA_SCADENZA desc) = 1
+) with data unique primary index (CODICE_RAPPORTO,NDG,TIPO_RAPPORTO)  
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+----------TITOLI----------
+create volatile table TMP_RAPP_TIT_EBIL as(
+	sel 		
+		DEP_RAPP.PK_RAPPORTO as PK_RAPPORTO,																																		
+		TRIM(DEP_RAPP.NR_DEPOSITO) || TRIM(DEP_RAPP.NR_SOTTODEPOSITO) as CODICE_RAPPORTO,  
+		ASSOC.CD_CLIENTE_SORGENTE as NDG,
+		coalesce(cast(cast(DEP_RAPP.DT_APERTURA as DATE format 'YYYYMMDD') as VARCHAR(8)) ,'19000101') as DT_APERTURA,
+		cast(cast(DEP_RAPP.DT_CHIUSURA as DATE format 'YYYYMMDD') as VARCHAR(8)) as DT_ESTINZIONE,
+		case when cast(cast(CT_PARAMETRI.DATA_AGGIORNAMENTO as DATE format 'YYYYMMDD') as VARCHAR(8)) >= DT_ESTINZIONE then 'CHIUSO' else 'APERTO' end as STATO,
+		'15' as TIPO_RAPPORTO
+	from  EBIL_ANAG_V.V_AN_RAPPORTO_DEP_TITOLI DEP_RAPP
+	join EBIL_AREE.CT_PARAMETRI on 1=1
+	inner join  EBIL_ANAG_V.V_ASSOC_RAPP_PROD_CLIENTE ASSOC
+		on DEP_RAPP.PK_RAPPORTO=ASSOC.FK_RAPPORTO
+			and CD_TIPO_RAPP='DT'
+			and CT_PARAMETRI.DATA_AGGIORNAMENTO between ASSOC.DT_INIZIO_VALIDITA and ASSOC.DT_FINE_VALIDITA
+			and ASSOC.FL_VALIDITA='1'
+			and ASSOC.CD_CLIENTE_SORGENTE<>'000000000000' 
+	where CT_PARAMETRI.DATA_AGGIORNAMENTO between DEP_RAPP.DT_INI_VAL and DEP_RAPP.DT_FIN_VAL
+		and DEP_RAPP.FL_VALIDITA='1'
+		and DEP_RAPP.FK_RAPPORTO_REGOLAMENTO is not NULL
+	--qualify row_number() over (partition by CODICE_RAPPORTO, NDG,TIPO_RAPPORTO order by CODICE_RAPPORTO desc) = 1			
+	) with data primary index (CODICE_RAPPORTO,NDG,TIPO_RAPPORTO) 
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table CG_TITOLI_1 as (
+	select 
+		FK_RAPPORTO_DEP_TIT,
+		FK_RAPPORTO_TIT
+	from EBIL_AREE_V.V_F_TITOLI_G as TIT	
+	join EBIL_AREE.CT_PARAMETRI on 1=1
+	where CT_PARAMETRI.DATA_AGGIORNAMENTO between TIT.DT_INI_VAL and TIT.DT_FIN_VAL
+		and TIT.FL_VALIDITA='1'
+		and TIT.IM_CONTROVALORE_MERCATO>0
+	) with data primary index (FK_RAPPORTO_DEP_TIT,FK_RAPPORTO_TIT)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table CG_TITOLI_4 as (
+	select 
+		RAP_TIT.CD_TITOLO_INTERNO as CODICE_INTERNO,
+		RAP_TIT.PK_RAPPORTO,
+		FK_TIPO_RAPP,
+		SK_RAPPORTO
+	from  EBIL_ANAG_V.V_AN_RAPPORTO_TITOLI as RAP_TIT
+	join EBIL_AREE.CT_PARAMETRI on 1=1
+	where CT_PARAMETRI.DATA_AGGIORNAMENTO between RAP_TIT.DT_INI_VAL and RAP_TIT.DT_FIN_VAL
+		and RAP_TIT.FL_VALIDITA='1' 
+	) with data primary index (CODICE_INTERNO,PK_RAPPORTO)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table CG_TITOLI_3 as (
+	select 
+		PRIM_RAPP.SK_RAPPORTO,
+		PRIM_RAPP.TIPO_RAPPORTO,
+		coalesce(cast(cast(PRIM_RAPP.DT_SCADENZA as DATE format 'YYYYMMDD') as VARCHAR(8)),'99991231') as DATA_SCADENZA
+	from V_EDW_DW_BP.TIT_RAPPORTO_ST PRIM_RAPP
+	join EBIL_AREE.CT_PARAMETRI on 1=1
+	where CT_PARAMETRI.DATA_AGGIORNAMENTO between PRIM_RAPP.DT_INI_VAL and PRIM_RAPP.DT_FIN_VAL
+		and FL_FITTIZIO ='0'
+	)with data primary index (SK_RAPPORTO,TIPO_RAPPORTO,DATA_SCADENZA)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table CG_TITOLI_2 as (
+	select
+		 RAPP.CODICE_RAPPORTO
+		, RAPP.PK_RAPPORTO
+		, RAPP.NDG
+		, RAPP.TIPO_RAPPORTO as TIPO_RAPPORTO    
+		, RAP_TIT.CODICE_INTERNO
+		, CT_PARAMETRI.DATA_AGGIORNAMENTO as DATA_SALDO
+		, PRIM_RAPP.DATA_SCADENZA
+	from TMP_RAPP_TIT_EBIL as RAPP
+	join EBIL_AREE.CT_PARAMETRI on 1=1
+	join CG_TITOLI_1 as TIT
+		on RAPP.PK_RAPPORTO=TIT.FK_RAPPORTO_DEP_TIT
+	join CG_TITOLI_4 as RAP_TIT
+		on TIT.FK_RAPPORTO_TIT=RAP_TIT.PK_RAPPORTO
+	left join  EBIL_ANAG_V.V_TPL_TIPO_RAPPORTO as TIPO_RAPP
+		on RAP_TIT.FK_TIPO_RAPP=TIPO_RAPP.PK_TIPO_RAPP
+	inner join CG_TITOLI_3 as PRIM_RAPP
+		on RAP_TIT.SK_RAPPORTO=PRIM_RAPP.SK_RAPPORTO
+			and TIPO_RAPP.CD_TIPO_RAPP=PRIM_RAPP.TIPO_RAPPORTO
+	where RAPP.TIPO_RAPPORTO='15'
+		and RAPP.STATO='APERTO'
+	) with data unique primary index (CODICE_RAPPORTO,CODICE_INTERNO,PK_RAPPORTO,NDG,TIPO_RAPPORTO,DATA_SCADENZA)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table TITOLI as (
+	sel 
+		CODICE_RAPPORTO, 
+		TIPO_RAPPORTO, 
+		NDG, 
+		DATA_SALDO, 
+		CATALOGO, 
+		DATA_SCADENZA
+	from CG_TITOLI_2 as A
+	left join
+		(sel CD_TITOLO_INTERNO, DS_PRODOTTO_GESTIONALE, 
+			case 
+				when DS_PRODOTTO_GESTIONALE like '%CERTIFICATES%' then 'CERTIFICATES'
+				when DS_PRODOTTO_GESTIONALE like any ( '%OBBLIGAZIONI%',  '%FONDI IMMOBILIARI%') then 'OBBLIGAZIONI'
+				when DS_PRODOTTO_GESTIONALE like '%AZIONI%' and DS_PRODOTTO_GESTIONALE not like '%OBBLIGAZIONI%' then 'AZIONI'
+				when DS_PRODOTTO_GESTIONALE like '%TITOLI DI STATO%' then 'TITOLI_DI_STATO'
+				else 'ALTRO' end as CATALOGO
+			from  EBIL_ANAG_V.V_AN_RAPPORTO_TITOLI
+			join EBIL_AREE.CT_PARAMETRI on 1=1
+			where CT_PARAMETRI.DATA_AGGIORNAMENTO between DT_INI_VAL and DT_FIN_VAL and FL_VALIDITA='1'
+		) B
+		on A.CODICE_INTERNO = B.CD_TITOLO_INTERNO
+	group by 1,2,3,4,5,6
+	) with data unique primary index (CODICE_RAPPORTO, TIPO_RAPPORTO, CATALOGO,DATA_SCADENZA)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+----------UNIONE TITOLI E POLIZZE----------
+create volatile table SCADENZE as (
+		sel 
+			cast(CODICE_RAPPORTO as VARCHAR(64)) as CODICE_RAPPORTO, 
+			NDG, 
+			TIPO_RAPPORTO, 
+			DATA_SCADENZA,
+			cast('TITOLI' as VARCHAR(32)) as PRODOTTO,
+			cast(CATALOGO as VARCHAR(32)) as CATEGORIA
+		from TITOLI
+
+	union all
+		sel 
+			cast(CODICE_RAPPORTO as VARCHAR(64)) as CODICE_RAPPORTO, 
+			NDG, 
+			TIPO_RAPPORTO, 
+			DATA_SCADENZA,
+			PRODOTTO,
+			coalesce(CATALOGO, 'ND') as CATEGORIA
+		from TMP_RAPP_POL_EBIL
+
+	) with data unique primary index (CODICE_RAPPORTO, NDG, TIPO_RAPPORTO, CATEGORIA, DATA_SCADENZA)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+create volatile table CONVERSIONE_BIC_NDG as (
+select 
+	distinct ID_CLIENTE_BIC, CD_NDG_RAPPORTO as NDG
+from EBIL_AREE_V.V_PL_PATRIMONIALE patr, EBIL_AREE.CT_PARAMETRI P
+where patr.CD_NATURA_GIURIDICA in ('PF', 'COI', '1') and patr.CD_TIPO_INTESTATARIO in ('P', 'U', 'S')
+	            and (patr.DS_MACROPRODOTTO <> 'CONTI' or (patr.DS_MACROPRODOTTO = 'CONTI' and /*patr.ds_sottoprodotto in ('CONTO CORRENTE CONTO PIU',
+			'CONTO CORRENTE CONTO RETAIL','CONTO CORRENTE CONTO CLICK','CONTO CORRENTE CONTO RETAIL GRUPPO POSTE',
+			'CONTO CORRENTE RETAIL CONVENZIONE BASE','CONTO CORRENTE CONTO BANCOPOSTA GRUPPO POSTE',
+			'CONTO CORRENTE CONTO BANCOPOSTA BASE','CONTO CORRENTE CC BASE BP PENSIONATI2',
+			'CONTO CORRENTE CC BASE BP PENSIONATI1','CONTO CORRENTE CC BASE BP STANDARD')))*/
+			--FIX 2019/10/24:sostituire il filtro per DS_SOTTOPRODOTTO con uno su SK_SOTTOPRODOTTO, recependo anche il nuovo conto CCBP-CONSNEW
+			patr.sk_sottoprodotto in ('007602','007619','007646','007641','007616','007600','007630','007631','007639','035933','035932','069640','069641'
+				,'069642','069643','069644','069645')))
+	            and patr.ID_CLIENTE_BIC is not null
+				and patr.ID_PERIODOTEMPORALE = (extract(year from P.DATA_AGGIORNAMENTO))*100 + extract(month from P.DATA_AGGIORNAMENTO)
+				and CD_NDG_RAPPORTO is not null  --PATCH BP 20191025
+) with data unique primary index (ID_CLIENTE_BIC, NDG)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+create volatile table SCADENZE_2 as (
+	sel 
+		conv.ID_CLIENTE_BIC,
+		A.TIPO_RAPPORTO, 
+		A.CODICE_RAPPORTO,
+		A.CATEGORIA,
+		A.NDG,
+		A.DATA_SCADENZA,
+		(case when A.DATA_SCADENZA<(coalesce(cast(cast(P.DATA_AGGIORNAMENTO+1 as DATE format 'YYYYMMDD') as VARCHAR(8)),'19000101'))
+			or A.DATA_SCADENZA>(coalesce(cast(cast(case when substr(CAST(P.DATA_AGGIORNAMENTO AS DATE FORMAT 'YYYY-MM-DD'), 6,5) = '02-29' then
+P.DATA_AGGIORNAMENTO-INTERVAL '1' DAY+INTERVAL '1' YEAR else P.DATA_AGGIORNAMENTO+INTERVAL '1' YEAR end as DATE format 'YYYYMMDD') as VARCHAR(8)),'19000101'))
+			 or A.DATA_SCADENZA='00000000' then 0 else 1 end) as FL_DATA_SCADENZA
+	from SCADENZE as A
+	join EBIL_AREE.CT_PARAMETRI as P on 1=1
+	inner join  CONVERSIONE_BIC_NDG as conv
+		on A.NDG=conv.NDG 
+	)with data primary index (ID_CLIENTE_BIC, TIPO_RAPPORTO, CODICE_RAPPORTO, CATEGORIA, NDG, FL_DATA_SCADENZA)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+----------BPF----------
+create volatile table COPIA_ANAGRAFICA_BFP as (
+	sel *
+	from  EBIL_ANAG_V.V_AN_RAPPORTO_BFP AN
+	join EBIL_AREE.CT_PARAMETRI on 1=1
+	where DATA_AGGIORNAMENTO between AN.DT_INI_VAL and AN.DT_FIN_VAL
+	)with data primary index (PK_RAPPORTO)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table COPIA_ASSOCIATIVA_BFP as (
+	sel *
+	from  EBIL_ANAG_V.V_ASSOC_RAPP_PROD_CLIENTE ASSOC
+	join EBIL_AREE.CT_PARAMETRI on 1=1
+	where DATA_AGGIORNAMENTO between ASSOC.DT_INIZIO_VALIDITA and ASSOC.DT_FINE_VALIDITA
+		and CD_TIPO_RAPP in ( 'BFD', 'BFC') 
+	)with data primary index (FK_RAPPORTO)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table COPIA_SALDI_BFP as (
+	sel 
+		FK_RAPPORTO,
+		SAL.DT_RIFERIMENTO,
+		SAL.IM_RIMBORSO_LORDO,
+		SAL.IM_RIMBORSO_NETTO,
+		SAL.FL_LORDISTA
+	from EBIL_AREE_V.V_F_BFP_M SAL
+	join EBIL_AREE.CT_PARAMETRI on 1=1
+	where DT_RIFERIMENTO=cast(DATA_AGGIORNAMENTO as DATE)
+		and SAL.IM_RIMBORSO_LORDO is NOT NULL
+		and SAL.IM_RIMBORSO_NETTO is NOT NULL
+	)with data primary index (FK_RAPPORTO)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table ANAGRAFICA_BFP as (
+	sel 
+		PK_RAPPORTO, 
+		AN.SK_RAPPORTO, 
+		CD_SISTEMA_SORGENTE, 
+		TIPO_BUONO, 
+		FL_COINTESTAZIONE, 
+		DT_EMISSIONE, 
+		DT_SCADENZA,
+		case when SAL.FL_LORDISTA = 'S' then SAL.IM_RIMBORSO_LORDO else SAL.IM_RIMBORSO_NETTO end as VALORE_DI_RIMBORSO,
+		MAX(CD_CLIENTE_SORGENTE) as CD_CLIENTE_SORGENTE, 
+		MAX(FK_CLIENTE) as FK_CLIENTE
+	from
+		(sel *
+		from COPIA_ANAGRAFICA_BFP) AN
+	left join
+		(sel *
+		from COPIA_ASSOCIATIVA_BFP) ASSOC
+		on ASSOC.FK_RAPPORTO = AN.PK_RAPPORTO
+			and ASSOC.FK_TIPO_RAPP = AN.FK_TIPO_RAPP
+	inner join	
+		(sel *
+		from COPIA_SALDI_BFP) SAL
+		on AN.PK_RAPPORTO=SAL.FK_RAPPORTO
+	group by 1,2,3,4,5,6,7,8	
+	)with data unique primary index (SK_RAPPORTO, TIPO_BUONO)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table ANAGRAFICA_BFP_1 as (
+	sel 
+		CD_CLIENTE_SORGENTE as NDG,
+		'03' AS TIPO_RAPPORTO,
+		SUM(case when TRIM(TIPO_BUONO)='CART' then 1 else 0 end) as N_BFP_CART, 
+		SUM(case when TRIM(TIPO_BUONO)='DEMAT' then 1 else 0 end) as N_BFP_DEMAT,
+		COUNT(*) as N_BFP,
+		SUM(case when TRIM(TIPO_BUONO)='CART' then VALORE_DI_RIMBORSO else 0 end) as VALORE_DI_RIMBORSO_CART, 
+		SUM(case when TRIM(TIPO_BUONO)='DEMAT' then VALORE_DI_RIMBORSO else 0 end) as VALORE_DI_RIMBORSO_DEMAT,
+		SUM(VALORE_DI_RIMBORSO) as VALORE_DI_RIMBORSO,
+		SUM(case when TRIM(TIPO_BUONO)='CART' and DT_SCADENZA between DATA_AGGIORNAMENTO+1 and 
+case when substr(CAST(DATA_AGGIORNAMENTO AS DATE FORMAT 'YYYY-MM-DD'), 6,5) = '02-29' then
+DATA_AGGIORNAMENTO-INTERVAL '1' DAY+INTERVAL '1' YEAR else DATA_AGGIORNAMENTO+INTERVAL '1' YEAR end		then 1 else 0 end) as N_BFP_CART_SCADENZA,
+		SUM(case when TRIM(TIPO_BUONO)='DEMAT' and DT_SCADENZA between DATA_AGGIORNAMENTO+1 and 
+case when substr(CAST(DATA_AGGIORNAMENTO AS DATE FORMAT 'YYYY-MM-DD'), 6,5) = '02-29' then
+DATA_AGGIORNAMENTO-INTERVAL '1' DAY+INTERVAL '1' YEAR else DATA_AGGIORNAMENTO+INTERVAL '1' YEAR end		then 1 else 0 end) as N_BFP_DEMAT_SCADENZA
+	from ANAGRAFICA_BFP
+	join EBIL_AREE.CT_PARAMETRI on 1=1
+	group by 1
+	) with data unique primary index (NDG)
+on commit preserve rows;
+
+create volatile table ANAGRAFICA_BFP_2 as(
+sel conv.ID_CLIENTE_BIC, A.* 
+from  ANAGRAFICA_BFP_1 as A
+	join EBIL_AREE.CT_PARAMETRI as P on 1=1
+	inner join  CONVERSIONE_BIC_NDG as conv
+		on A.NDG=conv.NDG 
+	)with data primary index (ID_CLIENTE_BIC)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+----------UNIONE POLIZZE TITOLI E BPF----------
+create volatile table SCADENZE_3 as (
+	sel 
+		TIPO_RAPPORTO,
+		CATEGORIA,
+		NDG, 
+		ID_CLIENTE_BIC,
+		SUM(FL_DATA_SCADENZA) as NUMERO_PRODOTTI_SCADENZA
+	from SCADENZE_2
+	group by 1,2,3,4
+
+		union all
+			sel 
+				'03' as TIPO_RAPPORTO, 
+				'DEMATERIALIZZATO' as CATEGORIA, 
+				NDG,
+				ID_CLIENTE_BIC,
+				SUM(N_BFP_DEMAT_SCADENZA) as NUMERO_PRODOTTI_SCADENZA
+			from 
+				(sel ID_CLIENTE_BIC,NDG, N_BFP_CART_SCADENZA, N_BFP_DEMAT_SCADENZA
+				from ANAGRAFICA_BFP_2
+				where N_BFP_DEMAT>0
+				) A
+		group by 1,2,3,4
+		
+		union all
+		sel 
+			'03' as TIPO_RAPPORTO, 
+			'CARTACEO' as CATEGORIA, 
+			NDG, 
+			ID_CLIENTE_BIC,
+			SUM(N_BFP_CART_SCADENZA) as NUMERO_PRODOTTI_SCADENZA
+		from 
+			(sel  ID_CLIENTE_BIC,NDG, N_BFP_CART_SCADENZA, N_BFP_DEMAT_SCADENZA
+			from ANAGRAFICA_BFP_2
+			where N_BFP_CART>0
+			) A
+		group by 1,2,3,4
+	) with data unique primary index ( ID_CLIENTE_BIC, NDG, TIPO_RAPPORTO, CATEGORIA)
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+
+--------------------------------------------------------CREAZIONE TABELLE------------------------------------------------------------
+----------Definizione Perimetro Clientela----------
+
+/*create volatile table PERIMETRO_finale as(
+select A.ID_CLIENTE_BIC
+from (select ID_CLIENTE_BIC from PATRIMONIALE
+			where (FL_CCBP>0 or
+				FL_LIB>0 or
+				FL_BPF_CART>0 or
+				FL_BPF_DEM>0 or
+				FL_BPF>0 or
+				FL_PPAY>0 or
+				FL_EVO>0 or
+				FL_AZ>0 or
+				FL_OB>0 or
+				FL_CE>0 or
+				FL_TDS>0 or
+				FL_ALTRO_TIT>0 or
+				FL_PREVIDENZA>0 or
+				FL_PERSONA>0 or
+				FL_RAMO_I>0 or
+				FL_RAMO_III>0 or
+				FL_RAMO_IV>0 or
+				FL_MULTIRAMO>0 or
+				FL_FONDI>0)
+	
+	union 
+		select ID_CLIENTE_BIC from MUTUO	
+			where FL_MUTUO>0 	
+	union 
+		select ID_CLIENTE_BIC from PRODOTTI_PRESTITI
+			where (FL_PRESTITO_COMPASS>0 or
+				FL_CQS_BNL>0 or
+				FL_PRESTITO_FINDO>0 or
+				FL_PRONTISSIMO>0 or
+				FL_SPECIAL_CASH>0 or
+				FL_CQS_DB>0 or
+				FL_PRESTITO_DB>0 or
+				FL_CQS_COMPASS>0)
+	union 
+		select ID_CLIENTE_BIC from PATRIMONIALE
+			where FL_LIB_SMART>0
+	union 
+		select ID_CLIENTE_BIC from LIBRETTO_SUPER_SMART
+			where FL_LIB_SUPER_SMART>0
+	union 
+		select ID_CLIENTE_BIC from POSTAMAT
+			where FL_POSTAMAT_RICHIESTA>0
+	union 
+		select ID_CLIENTE_BIC from CARTA_DI_CREDITO
+			where FL_CARTA_DI_CREDITO>0
+	union 
+		select ID_CLIENTE_BIC from CARTA_LIBRETTO
+			where FL_CARTA_LIBRETTO>0
+	union 
+		select ID_CLIENTE_BIC from SCOPERTO
+			where FL_SCOPERTO>0
+	union 
+		select ID_CLIENTE_BIC from DANNI
+			where FL_DANNI_PA>0
+	union 
+		select ID_CLIENTE_BIC from DEPOSITO_TITOLI
+			where FL_DEP_TIT>0			
+	union 
+		select ID_CLIENTE_BIC from FL_BPOL_CLICK
+			where FL_BPOL_CLICK>0			
+) A 
+where ID_CLIENTE_BIC>0)
+with data unique primary index (id_cliente_bic) on commit preserve rows
+;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+*/
+
+-- HH  FIX FLAG PRESTITI E CQ 202003  
+create volatile table PERIMETRO_finale as(
+select A.ID_CLIENTE_BIC
+from (select ID_CLIENTE_BIC from PATRIMONIALE
+			where (FL_CCBP>0 or
+				FL_LIB>0 or
+				FL_BPF_CART>0 or
+				FL_BPF_DEM>0 or
+				FL_BPF>0 or
+				FL_PPAY>0 or
+				FL_EVO>0 or
+				FL_AZ>0 or
+				FL_OB>0 or
+				FL_CE>0 or
+				FL_TDS>0 or
+				FL_ALTRO_TIT>0 or
+				FL_PREVIDENZA>0 or
+				FL_PERSONA>0 or
+				FL_RAMO_I>0 or
+				FL_RAMO_III>0 or
+				FL_RAMO_IV>0 or
+				FL_MULTIRAMO>0 or
+				FL_FONDI>0)
+	
+	union 
+		select ID_CLIENTE_BIC from MUTUO	
+			where FL_MUTUO>0 	
+	union 
+		select ID_CLIENTE_BIC from PRODOTTI_PRESTITI
+			/*where (FL_PRESTITO_COMPASS>0 or
+				FL_CQS_BNL>0 or
+				FL_PRESTITO_FINDO>0 or
+				FL_PRONTISSIMO>0 or
+				FL_SPECIAL_CASH>0 or
+				FL_CQS_DB>0 or
+				FL_PRESTITO_DB>0 or
+				FL_CQS_COMPASS>0)* HH  FIX FLAG PRESTITI E CQ 202003 */
+				
+				where (FL_PRESTITO>0 or
+				FL_CQS>0)
+				
+	union 
+		select ID_CLIENTE_BIC from PATRIMONIALE
+			where FL_LIB_SMART>0
+	union 
+		select ID_CLIENTE_BIC from LIBRETTO_SUPER_SMART
+			where FL_LIB_SUPER_SMART>0
+	union 
+		select ID_CLIENTE_BIC from POSTAMAT
+			where FL_POSTAMAT_RICHIESTA>0
+	union 
+		select ID_CLIENTE_BIC from CARTA_DI_CREDITO
+			where FL_CARTA_DI_CREDITO>0
+	union 
+		select ID_CLIENTE_BIC from CARTA_LIBRETTO
+			where FL_CARTA_LIBRETTO>0
+	union 
+		select ID_CLIENTE_BIC from SCOPERTO
+			where FL_SCOPERTO>0
+	union 
+		select ID_CLIENTE_BIC from DANNI
+			where FL_DANNI_PA>0
+	union 
+		select ID_CLIENTE_BIC from DEPOSITO_TITOLI
+			where FL_DEP_TIT>0			
+	union 
+		select ID_CLIENTE_BIC from FL_BPOL_CLICK
+			where FL_BPOL_CLICK>0			
+) A 
+where ID_CLIENTE_BIC>0)
+with data unique primary index (id_cliente_bic) on commit preserve rows
+;
+
+
+BT
+
+;DELETE EBIL_AREE.CT_PERIMETRO
+WHERE ID_PERIODO_TEMPORALE= (SELECT ID_PERIODO_TEMPORALE FROM EBIL_AREE.CT_PARAMETRI)
+
+;insert into EBIL_AREE.CT_PERIMETRO 
+select per.ID_CLIENTE_BIC, par.id_periodo_temporale, par.data_aggiornamento
+from perimetro_finale per
+join 
+ebil_aree.ct_parametri par on 1=1
+
+;ET;
+
+CREATE VOLATILE TABLE VTB_PERIMETRO_SV AS
+(SELECT ID_PERIODO_TEMPORALE, ROW_NUMBER () over ( ORDER BY ID_PERIODO_TEMPORALE  DESC) AS ORDINAMENTO
+FROM  EBIL_AREE.CT_PERIMETRO
+GROUP BY 1)
+WITH DATA PRIMARY INDEX (ID_PERIODO_TEMPORALE) ON COMMIT PRESERVE ROWS;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+DELETE EBIL_AREE.CT_PERIMETRO
+WHERE ID_PERIODO_TEMPORALE IN ( SELECT ID_PERIODO_TEMPORALE 
+FROM VTB_PERIMETRO_SV
+WHERE ORDINAMENTO >25);
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+----------Tabella POSSESSO PRODOTTI----------
+create volatile table CT_POSSESSO_PRODOTTI_1 as (
+	select P.ID_CLIENTE_BIC,
+           P.ID_PERIODO_TEMPORALE,	
+		coalesce(A.FL_CCBP,0) as FL_CCBP,
+		coalesce(A.FL_LIB,0) as FL_LIB,
+		coalesce(A.FL_BPF_CART,0) as FL_BPF_CART,
+		coalesce(A.FL_BPF_DEM,0) as FL_BPF_DEM,
+		coalesce(A.FL_BPF,0) as FL_BPF,
+		coalesce(A.FL_PPAY,0) as FL_PPAY,
+		coalesce(A.FL_EVO,0) as FL_EVO,
+		coalesce(A.FL_AZ,0) as FL_AZ,
+		coalesce(A.FL_OB,0) as FL_OB,
+		coalesce(A.FL_CE,0) as FL_CE,
+		coalesce(A.FL_TDS,0) as FL_TDS,
+		coalesce(A.FL_ALTRO_TIT,0) as FL_ALTRO_TIT,
+		coalesce(A.FL_PREVIDENZA,0) as FL_PREVIDENZA,
+		coalesce(A.FL_PERSONA,0) as FL_PERSONA,
+		coalesce(A.FL_RAMO_I,0) as FL_RAMO_I,
+		coalesce(A.FL_RAMO_III,0) as FL_RAMO_III,
+		coalesce(A.FL_RAMO_IV,0) as FL_RAMO_IV,
+		coalesce(A.FL_MULTIRAMO,0) as FL_MULTIRAMO,
+		coalesce(A.FL_FONDI,0) as FL_FONDI,
+		(case when POL.N_BFP_CART_SCADENZA>0 and FL_BPF_CART>0 then 1 else 0 end) as  FL_BFP_CART_SCADENZA,
+		(case when POL.N_BFP_DEM_SCADENZA>0 and FL_BPF_DEM>0 then 1 else 0 end) as  FL_BFP_DEM_SCADENZA,
+		(case when POL.N_AZ_SCADENZA>0 and FL_AZ>0 then 1 else 0 end) as FL_AZ_SCADENZA,
+		(case when POL.N_OB_SCADENZA>0 and FL_OB>0 then 1 else 0 end) as FL_OB_SCADENZA,
+		(case when POL.N_CE_SCADENZA>0 and FL_CE>0 then 1 else 0 end) as FL_CE_SCADENZA,
+		(case when POL.N_TDS_SCADENZA>0 and FL_TDS>0 then 1 else 0 end) as FL_TDS_SCADENZA,
+		(case when POL.N_ALTRO_TIT_SCADENZA>0 and FL_ALTRO_TIT>0 then 1 else 0 end) as FL_ALTRO_TIT_SCADENZA,
+		(case when POL.N_PREVIDENZA_SCADENZA>0 and FL_PREVIDENZA>0 then 1 else 0 end) as FL_PREVIDENZA_SCADENZA,
+		(case when POL.N_PERSONA_SCADENZA>0 and FL_PERSONA>0 then 1 else 0 end) as FL_PERSONA_SCADENZA,
+		(case when POL.N_RAMO_I_SCADENZA>0 and FL_RAMO_I>0 then 1 else 0 end) as FL_RAMO_I_SCADENZA,
+		(case when POL.N_RAMO_III_SCADENZA>0 and FL_RAMO_III>0 then 1 else 0 end) as FL_RAMO_III_SCADENZA,
+		(case when POL.N_RAMO_IV_SCADENZA>0 and FL_RAMO_IV>0 then 1 else 0 end) as FL_RAMO_IV_SCADENZA,
+		(case when POL.N_MULTIRAMO_SCADENZA>0 and FL_MULTIRAMO>0 then 1 else 0 end) as FL_MULTIRAMO_SCADENZA
+	from EBIL_AREE.V_CT_PERIMETRO as P 
+	left join PATRIMONIALE as A 
+		on P.ID_CLIENTE_BIC=A.ID_CLIENTE_BIC
+	left join 
+		(sel 
+			ID_CLIENTE_BIC,
+			SUM(case when TIPO_RAPPORTO='03' and CATEGORIA='CARTACEO' and NUMERO_PRODOTTI_SCADENZA>0 then 1 else 0 end) as N_BFP_CART_SCADENZA,
+			SUM(case when TIPO_RAPPORTO='03' and CATEGORIA='DEMATERIALIZZATO' and NUMERO_PRODOTTI_SCADENZA>0 then 1 else 0 end) as N_BFP_DEM_SCADENZA,
+
+			SUM(case when TIPO_RAPPORTO='15' and CATEGORIA='AZIONI' and NUMERO_PRODOTTI_SCADENZA>0 then 1 else 0 end) as N_AZ_SCADENZA, 
+			SUM(case when TIPO_RAPPORTO='15' and CATEGORIA='OBBLIGAZIONI' and NUMERO_PRODOTTI_SCADENZA>0 then 1 else 0 end) as N_OB_SCADENZA,
+			SUM(case when TIPO_RAPPORTO='15' and CATEGORIA='CERTIFICATES' and NUMERO_PRODOTTI_SCADENZA>0 then 1 else 0 end) as N_CE_SCADENZA,
+			SUM(case when TIPO_RAPPORTO='15' and CATEGORIA='TITOLI_DI_STATO' and NUMERO_PRODOTTI_SCADENZA>0 then 1 else 0 end) as N_TDS_SCADENZA,
+			SUM(case when TIPO_RAPPORTO='15' and CATEGORIA='ALTRO' and NUMERO_PRODOTTI_SCADENZA>0 then 1 else 0 end) as N_ALTRO_TIT_SCADENZA,
+
+			SUM(case when TIPO_RAPPORTO='13' and CATEGORIA='PREVIDENZA' and NUMERO_PRODOTTI_SCADENZA>0 then 1 else 0 end) as N_PREVIDENZA_SCADENZA,
+			SUM(case when TIPO_RAPPORTO='13' and CATEGORIA='GARANZIA ALLA PERSONA_VITA' and NUMERO_PRODOTTI_SCADENZA>0 then 1 else 0 end) as N_PERSONA_SCADENZA,
+			SUM(case when TIPO_RAPPORTO='13' and CATEGORIA='RAMO I' and NUMERO_PRODOTTI_SCADENZA>0 then 1 else 0 end) as N_RAMO_I_SCADENZA,
+			SUM(case when TIPO_RAPPORTO='13' and CATEGORIA='RAMO III' and NUMERO_PRODOTTI_SCADENZA>0 then 1 else 0 end) as N_RAMO_III_SCADENZA,
+			SUM(case when TIPO_RAPPORTO='13' and CATEGORIA='RAMO IV' and NUMERO_PRODOTTI_SCADENZA>0 then 1 else 0 end) as N_RAMO_IV_SCADENZA,
+			SUM(case when TIPO_RAPPORTO='13' and CATEGORIA='MULTIRAMO' and NUMERO_PRODOTTI_SCADENZA>0 then 1 else 0 end) as N_MULTIRAMO_SCADENZA
+		from SCADENZE_3
+		group by 1) POL
+ON A.ID_CLIENTE_BIC=POL.ID_CLIENTE_BIC
+) with data primary index (ID_CLIENTE_BIC) 
+on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+BT 
+
+;DELETE EBIL_AREE.CT_POSSESSO_PRODOTTI
+WHERE ID_PERIODO_TEMPORALE= (SELECT ID_PERIODO_TEMPORALE FROM EBIL_AREE.CT_PARAMETRI)
+
+
+--HH FIX FLAG PRESTITI E CQ 202003 
+;INSERT INTO EBIL_AREE.CT_POSSESSO_PRODOTTI
+	select P.*,
+		coalesce(B.FL_MUTUO, 0) as FL_MUTUO,
+		coalesce(C.FL_PRESTITO, 0) as FL_PRESTITO,
+		coalesce(C.FL_CQS, 0) as FL_CQS,
+		/*HH FIX FLAG PRESTITI E CQ 202003 
+		--coalesce(C.FL_PRESTITO_COMPASS, 0) as FL_PRESTITO_COMPASS,
+		--coalesce(C.FL_CQS_BNL, 0) as FL_CQS_BNL,
+		--coalesce(C.FL_PRESTITO_FINDO, 0) as FL_PRESTITO_FINDO,
+		--coalesce(C.FL_PRONTISSIMO, 0) as FL_PRONTISSIMO,
+		--coalesce(C.FL_SPECIAL_CASH, 0) as FL_SPECIAL_CASH,
+		--coalesce(C.FL_CQS_DB, 0) as FL_CQS_DB,
+		--coalesce(C.FL_PRESTITO_DB, 0) as FL_PRESTITO_DB,
+		--coalesce(C.FL_CQS_COMPASS, 0) as FL_CQS_COMPASS,*/
+		coalesce(C.FL_PRESTITI_SCADENZA,0) as FL_PRESTITI_SCADENZA,
+		coalesce(C.FL_CQS_SCADENZA,0) as FL_CQS_SCADENZA,
+		coalesce(D.FL_LIB_SMART, 0) as FL_LIB_SMART,
+		coalesce(E.FL_LIB_SUPER_SMART, 0) as FL_LIB_SUPER_SMART,
+		coalesce(F.FL_POSTAMAT_RICHIESTA,0) as FL_POSTAMAT_RICHIESTA,
+		coalesce(G.FL_CARTA_DI_CREDITO,0) as FL_CARTA_DI_CREDITO,
+		coalesce(H.FL_CARTA_LIBRETTO,0) as FL_CARTA_LIBRETTO,
+		coalesce(I.FL_SCOPERTO ,0) as FL_SCOPERTO,
+		coalesce(L.FL_DANNI_PA,0) as FL_DANNI_PA,
+		coalesce(L.FL_PERSONA_PA,0) as FL_PERSONA_PA,
+		coalesce(L.FL_BENI_PA,0) as FL_BENI_PA,
+		coalesce(L.FL_PAGAMENTI_PA,0) as FL_PAGAMENTI_PA,
+		coalesce(L.NR_DANNI_PA,0) as NR_DANNI_PA,
+		coalesce(L.NR_PERSONA_PA,0) as NR_PERSONA_PA,
+		coalesce(L.NR_BENI_PA,0) as NR_BENI_PA,
+		coalesce(L.NR_PAGAMENTI_PA,0) as NR_PAGAMENTI_PA,
+		coalesce(M.FL_DEP_TIT,0) as FL_DEP_TIT,
+		coalesce(N.FL_BPOL_CLICK,0) as FL_BPOL_CLICK,
+		coalesce(R.FL_ACCREDITO_CONTO_EDWAE,0) as FL_ACCREDITO_CONTO_EDWAE
+	from CT_POSSESSO_PRODOTTI_1 as P
+	left join MUTUO as B on P.ID_CLIENTE_BIC=B.ID_CLIENTE_BIC
+	left join PRODOTTI_PRESTITI as C on P.ID_CLIENTE_BIC=C.ID_CLIENTE_BIC
+	left join PATRIMONIALE as D on P.ID_CLIENTE_BIC=D.ID_CLIENTE_BIC
+	left join LIBRETTO_SUPER_SMART as E on P.ID_CLIENTE_BIC=E.ID_CLIENTE_BIC
+	left join POSTAMAT as F on P.ID_CLIENTE_BIC=F.ID_CLIENTE_BIC 
+	left join CARTA_DI_CREDITO as G on P.ID_CLIENTE_BIC=G.ID_CLIENTE_BIC
+	left join CARTA_LIBRETTO as H on P.ID_CLIENTE_BIC=H.ID_CLIENTE_BIC
+	left join SCOPERTO as I on P.ID_CLIENTE_BIC=I.ID_CLIENTE_BIC
+	left join DANNI as L on P.ID_CLIENTE_BIC=L.ID_CLIENTE_BIC
+	left join DEPOSITO_TITOLI as M on P.ID_CLIENTE_BIC=M.ID_CLIENTE_BIC
+	left join FL_BPOL_CLICK as N on P.ID_CLIENTE_BIC=N.ID_CLIENTE_BIC
+	left join FL_ACCREDITO_CONTO_EDWAE as R on P.ID_CLIENTE_BIC=R.ID_CLIENTE_BIC
+     where P.id_periodo_temporale in (SELECT ID_PERIODO_TEMPORALE FROM EBIL_AREE.CT_PARAMETRI)
+
+
+		;ET;
+
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+/*
+INSERT INTO EBIL_AREE.CT_POSSESSO_PRODOTTI
+	select P.*,
+		coalesce(B.FL_MUTUO, 0) as FL_MUTUO,
+		coalesce(C.FL_PRESTITO_COMPASS, 0) as FL_PRESTITO_COMPASS,
+		coalesce(C.FL_CQS_BNL, 0) as FL_CQS_BNL,
+		coalesce(C.FL_PRESTITO_FINDO, 0) as FL_PRESTITO_FINDO,
+		coalesce(C.FL_PRONTISSIMO, 0) as FL_PRONTISSIMO,
+		coalesce(C.FL_SPECIAL_CASH, 0) as FL_SPECIAL_CASH,
+		coalesce(C.FL_CQS_DB, 0) as FL_CQS_DB,
+		coalesce(C.FL_PRESTITO_DB, 0) as FL_PRESTITO_DB,
+		coalesce(C.FL_CQS_COMPASS, 0) as FL_CQS_COMPASS,
+		coalesce(C.FL_PRESTITI_SCADENZA,0) as FL_PRESTITI_SCADENZA,
+		coalesce(C.FL_CQS_SCADENZA,0) as FL_CQS_SCADENZA,
+		coalesce(D.FL_LIB_SMART, 0) as FL_LIB_SMART,
+		coalesce(E.FL_LIB_SUPER_SMART, 0) as FL_LIB_SUPER_SMART,
+		coalesce(F.FL_POSTAMAT_RICHIESTA,0) as FL_POSTAMAT_RICHIESTA,
+		coalesce(G.FL_CARTA_DI_CREDITO,0) as FL_CARTA_DI_CREDITO,
+		coalesce(H.FL_CARTA_LIBRETTO,0) as FL_CARTA_LIBRETTO,
+		coalesce(I.FL_SCOPERTO ,0) as FL_SCOPERTO,
+		coalesce(L.FL_DANNI_PA,0) as FL_DANNI_PA,
+		coalesce(L.FL_PERSONA_PA,0) as FL_PERSONA_PA,
+		coalesce(L.FL_BENI_PA,0) as FL_BENI_PA,
+		coalesce(L.FL_PAGAMENTI_PA,0) as FL_PAGAMENTI_PA,
+		coalesce(L.NR_DANNI_PA,0) as NR_DANNI_PA,
+		coalesce(L.NR_PERSONA_PA,0) as NR_PERSONA_PA,
+		coalesce(L.NR_BENI_PA,0) as NR_BENI_PA,
+		coalesce(L.NR_PAGAMENTI_PA,0) as NR_PAGAMENTI_PA,
+		coalesce(M.FL_DEP_TIT,0) as FL_DEP_TIT,
+		coalesce(N.FL_BPOL_CLICK,0) as FL_BPOL_CLICK,
+		coalesce(R.FL_ACCREDITO_CONTO_EDWAE,0) as FL_ACCREDITO_CONTO_EDWAE
+	from CT_POSSESSO_PRODOTTI_1 as P
+	left join MUTUO as B on P.ID_CLIENTE_BIC=B.ID_CLIENTE_BIC
+	left join PRODOTTI_PRESTITI as C on P.ID_CLIENTE_BIC=C.ID_CLIENTE_BIC
+	left join PATRIMONIALE as D on P.ID_CLIENTE_BIC=D.ID_CLIENTE_BIC
+	left join LIBRETTO_SUPER_SMART as E on P.ID_CLIENTE_BIC=E.ID_CLIENTE_BIC
+	left join POSTAMAT as F on P.ID_CLIENTE_BIC=F.ID_CLIENTE_BIC 
+	left join CARTA_DI_CREDITO as G on P.ID_CLIENTE_BIC=G.ID_CLIENTE_BIC
+	left join CARTA_LIBRETTO as H on P.ID_CLIENTE_BIC=H.ID_CLIENTE_BIC
+	left join SCOPERTO as I on P.ID_CLIENTE_BIC=I.ID_CLIENTE_BIC
+	left join DANNI as L on P.ID_CLIENTE_BIC=L.ID_CLIENTE_BIC
+	left join DEPOSITO_TITOLI as M on P.ID_CLIENTE_BIC=M.ID_CLIENTE_BIC
+	left join FL_BPOL_CLICK as N on P.ID_CLIENTE_BIC=N.ID_CLIENTE_BIC
+	left join FL_ACCREDITO_CONTO_EDWAE as R on P.ID_CLIENTE_BIC=R.ID_CLIENTE_BIC
+     where P.id_periodo_temporale in (SELECT ID_PERIODO_TEMPORALE FROM EBIL_AREE.CT_PARAMETRI)
+*/
+
+
+CREATE VOLATILE TABLE VTB_POSSESSO_PRODOTTI_SV AS
+(SELECT ID_PERIODO_TEMPORALE, ROW_NUMBER () over ( ORDER BY ID_PERIODO_TEMPORALE  DESC) AS ORDINAMENTO
+FROM  EBIL_AREE.CT_POSSESSO_PRODOTTI
+GROUP BY 1)
+WITH DATA PRIMARY INDEX (ID_PERIODO_TEMPORALE) ON COMMIT PRESERVE ROWS;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+DELETE EBIL_AREE.CT_POSSESSO_PRODOTTI
+WHERE ID_PERIODO_TEMPORALE IN ( SELECT ID_PERIODO_TEMPORALE 
+FROM VTB_POSSESSO_PRODOTTI_SV
+WHERE ORDINAMENTO >25);
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+----------CT PATRIMONIALE ----------
+
+BT
+
+;DELETE EBIL_AREE.CT_PATRIMONIALE
+WHERE ID_PERIODO_TEMPORALE= (SELECT ID_PERIODO_TEMPORALE FROM EBIL_AREE.CT_PARAMETRI)
+
+;INSERT INTO EBIL_AREE.CT_PATRIMONIALE 
+	select
+		P.ID_CLIENTE_BIC,
+		P.ID_PERIODO_TEMPORALE,
+		coalesce(A.FASCIA,0) as FASCIA,
+		coalesce(A.CC_U,0) as CC_U, 
+		coalesce(A.CC_P,0) as CC_P, 
+		coalesce(A.CC_S,0) as CC_S, 
+		coalesce(A.LIB_U,0) as LIB_U,
+		coalesce(A.LIB_P,0) as LIB_P,
+		coalesce(A.LIB_S,0) as LIB_S,
+		coalesce(A.BPF_CART_U,0) as BPF_CART_U, 
+		coalesce(A.BPF_CART_P,0) as BPF_CART_P, 
+		coalesce(A.BPF_CART_S,0) as BPF_CART_S, 
+		coalesce(A.BPF_DEM_U,0) as BPF_DEM_U, 
+		coalesce(A.BPF_DEM_P,0) as BPF_DEM_P,
+		coalesce(A.BPF_DEM_S,0) as BPF_DEM_S, 
+		coalesce(A.F_U,0) as F_U, 
+		coalesce(A.F_P,0) as F_P,
+		coalesce(A.F_S,0) as F_S,
+		coalesce(A.AZ_U,0) as AZ_U, 
+		coalesce(A.AZ_P,0) as AZ_P, 
+		coalesce(A.AZ_S,0) as AZ_S,
+		coalesce(A.OB_U,0) as OB_U,
+		coalesce(A.OB_P,0) as OB_P,
+		coalesce(A.OB_S,0) as OB_S,
+		coalesce(A.TDS_U,0) as TDS_U,
+		coalesce(A.TDS_P,0) as TDS_P,
+		coalesce(A.TDS_S,0) as TDS_S,
+		coalesce(A.CE_U,0) as CE_U,
+		coalesce(A.CE_P,0) as CE_P,
+		coalesce(A.CE_S,0) as CE_S,
+		coalesce(A.ALTRO_U,0) as ALTRO_U,
+		coalesce(A.ALTRO_P,0) as ALTRO_P,
+		coalesce(A.ALTRO_S,0) as ALTRO_S, 
+		coalesce(A.RAMO_I_U,0) as RAMO_I_U, 
+		coalesce(A.RAMO_III_U,0) as RAMO_III_U, 
+		coalesce(A.RAMO_IV_U,0) as RAMO_IV_U,
+		coalesce(A.MULTIRAMO_U,0) as MULTIRAMO_U,
+		coalesce(A.PREV_U,0) as PREV_U,
+		coalesce(A.PERSONA_U,0) as PERSONA_U,
+		coalesce(A.PPAY_U,0) as PPAY_U,
+		coalesce(A.EVO_U,0) as EVO_U 
+	from EBIL_AREE.V_CT_PERIMETRO as P  
+	left join PATRIMONIALE as a on P.ID_CLIENTE_BIC=A.ID_CLIENTE_BIC
+	where P.id_periodo_temporale in (SELECT ID_PERIODO_TEMPORALE FROM EBIL_AREE.CT_PARAMETRI)
+
+	;ET;
+	
+CREATE VOLATILE TABLE VTB_PATRIMONIALE_SV AS
+(SELECT ID_PERIODO_TEMPORALE, ROW_NUMBER () over ( ORDER BY ID_PERIODO_TEMPORALE  DESC) AS ORDINAMENTO
+FROM  EBIL_AREE.CT_PATRIMONIALE
+GROUP BY 1)
+WITH DATA PRIMARY INDEX (ID_PERIODO_TEMPORALE) ON COMMIT PRESERVE ROWS;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+DELETE EBIL_AREE.CT_PATRIMONIALE
+WHERE ID_PERIODO_TEMPORALE IN ( SELECT ID_PERIODO_TEMPORALE 
+FROM VTB_PATRIMONIALE_SV
+WHERE ORDINAMENTO >25);
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+	
+

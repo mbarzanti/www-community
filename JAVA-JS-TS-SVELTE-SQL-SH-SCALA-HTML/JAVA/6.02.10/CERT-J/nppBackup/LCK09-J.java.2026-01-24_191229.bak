@@ -1,0 +1,53 @@
+/*
+NNoncompliant Code Example (Deferring a Thread)
+This noncompliant code example defines a utility method that accepts a time argument:
+
+Because the method is synchronized, when the thread is suspended, other threads cannot use the synchronized methods of the class. The current object's monitor continues to be held because the Thread.sleep() method lacks synchronization semantics.
+*/
+
+public synchronized void doSomething(long time)
+                         throws InterruptedException {
+  // ...
+  Thread.sleep(time);
+}
+
+/*
+Noncompliant Code Example (Network I/O)
+This noncompliant code example defines a sendPage() method that sends a Page object from a server to a client. The method is synchronized to protect the pageBuff array when multiple threads request concurrent access.
+
+Calling writeObject() within the synchronized sendPage() method can result in delays and deadlock-like conditions in high-latency networks or when network connections are inherently lossy.
+*/
+
+// Class Page is defined separately. 
+// It stores and returns the Page name via getName()
+Page[] pageBuff = new Page[MAX_PAGE_SIZE];
+
+public synchronized boolean sendPage(Socket socket, String pageName) 
+                                     throws IOException {
+  // Get the output stream to write the Page to
+  ObjectOutputStream out 
+      = new ObjectOutputStream(socket.getOutputStream());
+
+  // Find the Page requested by the client
+  // (this operation requires synchronization)
+  Page targetPage = null;
+  for (Page p : pageBuff) {
+    if (p.getName().compareTo(pageName) == 0) {
+      targetPage = p;
+    }
+  }
+
+  // Requested Page does not exist
+  if (targetPage == null) {
+    return false;
+  }
+
+  // Send the Page to the client
+  // (does not require any synchronization)
+  out.writeObject(targetPage);
+
+  out.flush();
+  out.close();
+  return true;
+}
+

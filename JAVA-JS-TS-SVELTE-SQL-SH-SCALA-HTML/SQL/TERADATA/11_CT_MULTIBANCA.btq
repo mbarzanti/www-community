@@ -1,0 +1,757 @@
+-----------------------------------------------------------------------------------------
+--				CREAZIONE VARIABILI CT MULTIBANCA 				                       --
+-----------------------------------------------------------------------------------------
+
+/*
+  Tabella: EBIL_AREE.CT_MULTIBANCA
+  Regime: Delta Mensile
+  Gdl: Teradata
+  Progetto: Operazionalizzazione CT
+  */  
+  
+.SET WIDTH 240;
+.SET ERROROUT STDOUT;
+ 
+-- /data/DWH/BIG_DATA/WORK/MULTIBANCA/CT_PARAL
+-- Variabili relative ai vaglia (FL_AUTOVAGLIA ed N_VAGLIA_CIRCOLARI_VZ_VK)
+create volatile table VAGLIA as(
+	select cli.ID_CLIENTE_BIC,
+		count(*) as N_VAGLIA_CIRCOLARI_VZ_VK,
+		max(case when trim(upper(vt.NOME_MIT))=trim(upper(vt.NOME_BEN)) and trim(upper(vt.COGNOME_MIT))=trim(upper(vt.COGNOME_BEN))
+			then 1 else 0 end) as FL_AUTOVAGLIA
+	from ebil_aree.CT_PARAMETRI as P
+	join V_EDW_DW_BP.PAG_VAGLIA_TRANSAZIONI_ST as vt
+		on vt.DATA_STATO between ADD_MONTHS(P.DATA_AGGIORNAMENTO +1, -1 ) and P.DATA_AGGIORNAMENTO 
+			and vt.STATO_VAGLIA in ('VZ','VK','VI') and vt.COD_FISC is not null ----Non piu solo vt.STATO_VAGLIA in ('VZ','VK') perchè in disuso
+	join V_EDW_DW_BP.PAG_VAGLIA_RAPPORTO_ST as vr
+		on vr.SK_RAPPORTO=vt.SK_RAPPORTO and vr.TIPO_VAGLIA='T'
+	join EDWAE_VM.CLIENTE as cli
+		on p.DATA_AGGIORNAMENTO between cli.DT_INI_VAL and cli.DT_FIN_VAL and cli.COD_FISCALE=vt.COD_FISC
+	group by 1
+)with data primary index (id_cliente_bic) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+-- estrazione tabelle dei bonifici SEPAD e NAZ
+create volatile table TEMP_SEPAD as(
+	select sepad.*
+	from ebil_aree.ct_parametri as P -- PATCH come da mail Brunelli del 2/5/2019: inserita la join con la parametri
+	join V_EDW_DW_BP.PAG_BON_SEPAD_ST as sepad
+		on sepad.DATA_ACQ between ADD_MONTHS(P.DATA_AGGIORNAMENTO +1, -1 ) and P.DATA_AGGIORNAMENTO 
+			and trim(sepad.IND_BONIFICO) in ('E','U','PO')
+			and (trim(sepad.TIPO_RAP_CRE) in ('CC','PP','CA','DR') or trim(sepad.TIPO_RAP_DEB) in ('CC','PP','CA','DR'))
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table TEMP_NAZ as(
+	select naz.*
+	from ebil_aree.ct_parametri as p
+	join V_EDW_DW_BP.PAG_BON_NAZ_ST as naz
+		on naz.DT_ACQ between ADD_MONTHS(P.DATA_AGGIORNAMENTO +1, -1 ) and P.DATA_AGGIORNAMENTO 
+			and trim(naz.CD_TIPO_REGOLAM) in ('AIS','NIC','NCR','NCF','NIL')
+			and ((ABI_BEN='07601' and NR_RAPP_BEN is not null) or (ABI_ORD='07601' and NR_RAPP_ORD is not null))
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- bonifici SEPAD in uscita da CC
+-- estrazione di numero conto e destinatario dei bonifici
+create volatile table TEMP_SEPAD_CC_U_0 as(
+	select	distinct upper(bon.RAG_SOC_BEN) as ESTERNO,bon.NUM_RAP_CLI_DEB as NR_CONTO
+	from TEMP_SEPAD as bon
+	where bon.IND_BONIFICO in ('U') and bon.TIPO_RAP_DEB='CC'
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- dal numero conto si passa al PK_RAPPORTO tramite la rapporto conto
+create volatile table TEMP_SEPAD_CC_U as(
+	select	distinct bon.ESTERNO,rap_cc.PK_RAPPORTO
+	from TEMP_SEPAD_CC_U_0 as bon
+	join EBIL_ANAG_V.V_AN_RAPPORTO_CONTO as rap_cc
+		on rap_cc.NR_RAPPORTO=bon.NR_CONTO
+	where ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between rap_cc.DT_INI_VAL and rap_cc.DT_FIN_VAL
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- dal PK_RAPPORTO si risale all'NDG del cliente tramite la rapporto prodotto cliente
+create volatile table TEMP_SEPAD_CC_U_2 as(
+	select distinct bon.ESTERNO,assoc.CD_CLIENTE_SORGENTE
+	from TEMP_SEPAD_CC_U as bon
+	join EBIL_ANAG_V.V_ASSOC_RAPP_PROD_CLIENTE as assoc
+		on bon.PK_RAPPORTO=assoc.FK_RAPPORTO
+	where assoc.CD_TIPO_RAPP='CC' and assoc.FL_VALIDITA='1' and assoc.CD_CLIENTE_SORGENTE<>'000000000000'
+		and ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between assoc.DT_INIZIO_VALIDITA and assoc.DT_FINE_VALIDITA
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- dall'NDG del cliente si ottiene il BIC
+create volatile table TEMP_SEPAD_CC_U_3 as(
+	sel distinct bon.ESTERNO,ndg.ID_CLIENTE_BIC
+	from TEMP_SEPAD_CC_U_2 as bon
+	join EBIL_AREE.NDG_BIC as ndg
+		on bon.CD_CLIENTE_SORGENTE=ndg.NDG
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- infine si aggancia il BIC all'anagrafica clienti per ottenere nome e cognome e poter selezionare gli autobonifici
+create volatile table SEPAD_CC_U as(
+	sel distinct bon.ID_CLIENTE_BIC,
+		case
+			when (ESTERNO like '%' || upper(trim(cli.COGNOME) || ' ' || trim(cli.NOME)) || '%')
+				or (ESTERNO like '%' || upper(trim(cli.NOME) || ' ' || trim(cli.COGNOME) ) || '%' ) 
+				or (ESTERNO like ('%GIROCONTI%'))
+				or (ESTERNO like ('%GIROFONDO%'))
+				or (ESTERNO like ('%GIROFONDI%'))
+				or (ESTERNO like ('%TRASFERIMENTO FONDI%'))
+				or (ESTERNO like ('%TRASFERIMENTO FONDO%'))
+				or (ESTERNO like ('%TRASFERIMENTI FONDI%'))
+				or (ESTERNO like ('%TRASFERIMENTI FONDO%')) then 1
+			else 0
+		end as FL_AUTOBONIFICO
+	from TEMP_SEPAD_CC_U_3 as bon
+	join EDWAE_VM.CLIENTE as cli
+		on cli.ID_CLIENTE_BIC=bon.ID_CLIENTE_BIC
+	where cli.NATURA_GIURIDICA='PERSONA FISICA' 
+		and ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between cli.DT_INI_VAL and cli.DT_FIN_VAL
+		and FL_AUTOBONIFICO=1
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- bonifici SEPAD in uscita da EVO
+-- estrazione del destinatario e dell'iban della evo
+create volatile table TEMP_SEPAD_CA_U_0 as(
+	select	distinct upper(bon.RAG_SOC_BEN) as ESTERNO,bon.IBAN_ORD as IBAN
+	from TEMP_SEPAD as bon
+	where bon.IND_BONIFICO in ('U') and bon.TIPO_RAP_DEB in ('CA','PP')
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- estrazione dell'ID_RAPPORTO (tramite il numero di carta), agganciato in base all'IBAN
+create volatile table TEMP_SEPAD_CA_U as(
+	select distinct bon.ESTERNO,'005'||anag.NR_CARTA as ID_RAPPORTO
+	from TEMP_SEPAD_CA_U_0 as bon
+	join V_EDW_DW_BP.MON_ANAGRCARTA_ST as anag
+		on anag.CD_IBAN=bon.IBAN
+	where ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between anag.DT_INI_VAL and anag.DT_FIN_VAL
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- passaggio dall'ID_RAPPORTO al BIC
+create volatile table TEMP_SEPAD_CA_U_2 as(
+	sel distinct bon.ESTERNO, assoc.ID_CLIENTE_BIC
+	from TEMP_SEPAD_CA_U as bon
+	join EDWAE_VM.ASSOC_RAPPORTO_CLIENTE as assoc
+		on bon.ID_RAPPORTO=assoc.ID_RAPPORTO
+	where ID_CLIENTE_CRM='0'
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- aggancio con l'anagrafica per ottenere nome e cognome e selezionare gli autobonifici
+create volatile table SEPAD_CA_U as(
+	sel distinct bon.ID_CLIENTE_BIC,
+		case
+			when (ESTERNO like '%' || upper(trim(cli.COGNOME) || ' ' || trim(cli.NOME)) || '%')
+				or (ESTERNO like '%' || upper(trim(cli.NOME) || ' ' || trim(cli.COGNOME) ) || '%' ) 
+				or (ESTERNO like ('%GIROCONTI%'))
+				or (ESTERNO like ('%GIROFONDO%'))
+				or (ESTERNO like ('%GIROFONDI%'))
+				or (ESTERNO like ('%TRASFERIMENTO FONDI%'))
+				or (ESTERNO like ('%TRASFERIMENTO FONDO%'))
+				or (ESTERNO like ('%TRASFERIMENTI FONDI%'))
+				or (ESTERNO like ('%TRASFERIMENTI FONDO%')) then 1
+			else 0
+		end as FL_AUTOBONIFICO
+	from TEMP_SEPAD_CA_U_2 as bon
+	join EDWAE_VM.CLIENTE as cli
+		on cli.ID_CLIENTE_BIC=bon.ID_CLIENTE_BIC
+	where cli.NATURA_GIURIDICA='PERSONA FISICA' 
+		and ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between cli.DT_INI_VAL and cli.DT_FIN_VAL
+		and FL_AUTOBONIFICO=1
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- bonifici NAZ in uscita da CC
+-- estrazione del destinatario e del numero di conto
+create volatile table TEMP_NAZ_CC_U_0 as(
+	select distinct upper(bon.ANAG_BEN) as ESTERNO,bon.NR_RAPP_ORD as NR_CONTO
+	from TEMP_NAZ as bon
+	where bon.ABI_ORD='07601' and bon.ABI_BEN<>'07601' and trim(bon.CD_TIPO_REGOLAM) in ('AIS','NIC','NCF')
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- passaggio dal numero di conto al PK_RAPPORTO
+create volatile table TEMP_NAZ_CC_U as(
+	select distinct bon.ESTERNO,rap_cc.PK_RAPPORTO
+	from TEMP_NAZ_CC_U_0 as bon
+	join EBIL_ANAG_V.V_AN_RAPPORTO_CONTO as rap_cc
+		on rap_cc.NR_RAPPORTO=bon.NR_CONTO
+	where ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between rap_cc.DT_INI_VAL and rap_cc.DT_FIN_VAL
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- passaggio dal PK_RAPPORTO all'NDG
+create volatile table TEMP_NAZ_CC_U_2 as(
+	select distinct bon.ESTERNO,assoc.CD_CLIENTE_SORGENTE
+	from TEMP_NAZ_CC_U as bon
+	join EBIL_ANAG_V.V_ASSOC_RAPP_PROD_CLIENTE as assoc
+		on bon.PK_RAPPORTO=assoc.FK_RAPPORTO
+	where assoc.CD_TIPO_RAPP='CC' and assoc.FL_VALIDITA='1' and assoc.CD_CLIENTE_SORGENTE<>'000000000000'
+		and ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between assoc.DT_INIZIO_VALIDITA and assoc.DT_FINE_VALIDITA
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- passaggio dall'NDG al BIC
+create volatile table TEMP_NAZ_CC_U_3 as(
+	sel distinct bon.ESTERNO,ndg.ID_CLIENTE_BIC
+	from TEMP_NAZ_CC_U_2 as bon
+	join EBIL_AREE.NDG_BIC as ndg
+		on bon.CD_CLIENTE_SORGENTE=ndg.NDG
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- aggancio con l'anagrafica clienti per estrazione di nome e cognome del cliente e selezione degli autobonifici
+create volatile table NAZ_CC_U as(
+	sel distinct bon.ID_CLIENTE_BIC,
+		case
+			when (ESTERNO like '%' || upper(trim(cli.COGNOME) || ' ' || trim(cli.NOME)) || '%')
+				or (ESTERNO like '%' || upper(trim(cli.NOME) || ' ' || trim(cli.COGNOME) ) || '%' ) 
+				or (ESTERNO like ('%GIROCONTI%'))
+				or (ESTERNO like ('%GIROFONDO%'))
+				or (ESTERNO like ('%GIROFONDI%'))
+				or (ESTERNO like ('%TRASFERIMENTO FONDI%'))
+				or (ESTERNO like ('%TRASFERIMENTO FONDO%'))
+				or (ESTERNO like ('%TRASFERIMENTI FONDI%'))
+				or (ESTERNO like ('%TRASFERIMENTI FONDO%')) then 1
+			else 0
+		end as FL_AUTOBONIFICO
+	from TEMP_NAZ_CC_U_3 as bon
+	join EDWAE_VM.CLIENTE as cli
+		on cli.ID_CLIENTE_BIC=bon.ID_CLIENTE_BIC
+	where cli.NATURA_GIURIDICA='PERSONA FISICA' 
+		and ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between cli.DT_INI_VAL and cli.DT_FIN_VAL
+		and FL_AUTOBONIFICO=1
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- SINTESI AUTOBONIFICI IN USCITA
+create volatile table FL_AUTOBONIFICO_U as(
+	select distinct ID_CLIENTE_BIC,1 as FL_AUTOBONIFICO_U
+	from(
+		select ID_CLIENTE_BIC from SEPAD_CC_U
+		union all
+		select ID_CLIENTE_BIC from SEPAD_CA_U
+		union all
+		select ID_CLIENTE_BIC from NAZ_CC_U
+	) as a
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- bonifici NAZ in entrata su CC
+-- estrazione dell'ordinante e del numero di conto
+create volatile table TEMP_NAZ_CC_E_0 as(
+	select distinct upper(bon.ANAG_ORD) as ESTERNO,bon.NR_RAPP_BEN as NR_CONTO
+	from TEMP_NAZ as bon
+	where bon.ABI_BEN='07601' and bon.ABI_ORD<>'07601' and trim(bon.CD_TIPO_REGOLAM) in ('AIS','NIC','NCF')
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- dal numero di conto si ottiene il PK_RAPPORTO
+create volatile table TEMP_NAZ_CC_E as(
+	select distinct bon.ESTERNO,rap_cc.PK_RAPPORTO
+	from TEMP_NAZ_CC_E_0 as bon
+	join EBIL_ANAG_V.V_AN_RAPPORTO_CONTO as rap_cc
+		on rap_cc.NR_RAPPORTO=bon.NR_CONTO
+	where ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between rap_cc.DT_INI_VAL and rap_cc.DT_FIN_VAL
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- dal PK_RAPPORTO si ottiene l'NDG
+create volatile table TEMP_NAZ_CC_E_2 as(
+	select distinct bon.ESTERNO,assoc.CD_CLIENTE_SORGENTE
+	from TEMP_NAZ_CC_E as bon
+	join EBIL_ANAG_V.V_ASSOC_RAPP_PROD_CLIENTE as assoc
+		on bon.PK_RAPPORTO=assoc.FK_RAPPORTO
+	where assoc.CD_TIPO_RAPP='CC' and assoc.FL_VALIDITA='1' and assoc.CD_CLIENTE_SORGENTE<>'000000000000'
+		and ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between assoc.DT_INIZIO_VALIDITA and assoc.DT_FINE_VALIDITA
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- dall'NDG al BIC
+create volatile table TEMP_NAZ_CC_E_3 as(
+	sel distinct bon.ESTERNO,ndg.ID_CLIENTE_BIC
+	from TEMP_NAZ_CC_E_2 as bon
+	join EBIL_AREE.NDG_BIC as ndg
+		on bon.CD_CLIENTE_SORGENTE=ndg.NDG
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- aggancio con l'anagrafica cliente per ottenere nome e cognome e quindi selezionare gli autobonifici
+create volatile table NAZ_CC_E as(
+	sel distinct bon.ID_CLIENTE_BIC,
+		case
+			when (ESTERNO like '%' || upper(trim(cli.COGNOME) || ' ' || trim(cli.NOME)) || '%')
+				or (ESTERNO like '%' || upper(trim(cli.NOME) || ' ' || trim(cli.COGNOME) ) || '%' ) 
+				or (ESTERNO like ('%GIROCONTI%'))
+				or (ESTERNO like ('%GIROFONDO%'))
+				or (ESTERNO like ('%GIROFONDI%'))
+				or (ESTERNO like ('%TRASFERIMENTO FONDI%'))
+				or (ESTERNO like ('%TRASFERIMENTO FONDO%'))
+				or (ESTERNO like ('%TRASFERIMENTI FONDI%'))
+				or (ESTERNO like ('%TRASFERIMENTI FONDO%')) then 1
+			else 0
+		end as FL_AUTOBONIFICO
+	from TEMP_NAZ_CC_E_3 as bon
+	join EDWAE_VM.CLIENTE as cli
+		on cli.ID_CLIENTE_BIC=bon.ID_CLIENTE_BIC
+	where cli.NATURA_GIURIDICA='PERSONA FISICA' 
+		and ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between cli.DT_INI_VAL and cli.DT_FIN_VAL
+		and FL_AUTOBONIFICO=1
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- bonifici NAZ in entrata su EVO
+-- estrazione dell'ordinante e del numero di carta
+create volatile table TEMP_NAZ_CA_E_0 as(
+	select distinct upper(bon.ANAG_ORD) as ESTERNO,bon.NR_RAPP_BEN as NR_CARTA
+	from TEMP_NAZ as bon
+	where bon.ABI_BEN='07601' and bon.ABI_ORD<>'07601' and trim(bon.CD_TIPO_REGOLAM) in ('NCR')
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- dall numero di carta all'ID_RAPPORTO
+create volatile table TEMP_NAZ_CA_E as(
+	select distinct bon.ESTERNO,'005'||anag.NR_CARTA as ID_RAPPORTO
+	from TEMP_NAZ_CA_E_0 as bon
+	join V_EDW_DW_BP.MON_ANAGRCARTA_ST as anag
+		on substring(anag.CD_IBAN from 16 for 12)=bon.NR_CARTA
+	where ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between anag.DT_INI_VAL and anag.DT_FIN_VAL
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+--dall'ID_RAPPORTO al BIC
+create volatile table TEMP_NAZ_CA_E_2 as(
+	sel distinct bon.ESTERNO, assoc.ID_CLIENTE_BIC
+	from TEMP_NAZ_CA_E as bon
+	join EDWAE_VM.ASSOC_RAPPORTO_CLIENTE as assoc
+		on bon.ID_RAPPORTO=assoc.ID_RAPPORTO
+	where ID_CLIENTE_CRM='0'
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- aggancio con l'anagrafica cliente per estrarre nome e cognome e poter selezionare gli autobonifici
+create volatile table NAZ_CA_E as(
+	sel distinct bon.ID_CLIENTE_BIC,
+		case
+			when (ESTERNO like '%' || upper(trim(cli.COGNOME) || ' ' || trim(cli.NOME)) || '%')
+				or (ESTERNO like '%' || upper(trim(cli.NOME) || ' ' || trim(cli.COGNOME) ) || '%' ) 
+				or (ESTERNO like ('%GIROCONTI%'))
+				or (ESTERNO like ('%GIROFONDO%'))
+				or (ESTERNO like ('%GIROFONDI%'))
+				or (ESTERNO like ('%TRASFERIMENTO FONDI%'))
+				or (ESTERNO like ('%TRASFERIMENTO FONDO%'))
+				or (ESTERNO like ('%TRASFERIMENTI FONDI%'))
+				or (ESTERNO like ('%TRASFERIMENTI FONDO%')) then 1
+			else 0
+		end as FL_AUTOBONIFICO
+	from TEMP_NAZ_CA_E_2 as bon
+	join EDWAE_VM.CLIENTE as cli
+		on cli.ID_CLIENTE_BIC=bon.ID_CLIENTE_BIC
+	where cli.NATURA_GIURIDICA='PERSONA FISICA' 
+		and ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between cli.DT_INI_VAL and cli.DT_FIN_VAL
+		and FL_AUTOBONIFICO=1
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- bonifici SEPAD in entrata su libretto
+-- estrazione del numero di libretto (l'aggancio con l'ordinante viene fatto successivamente, causa lentezza della query)
+create volatile table TEMP_SEPAD_LIB_E_0 as(
+	select distinct bon.NUM_RAP_CLI_CRE as NR_LIBRETTO
+	from TEMP_SEPAD as bon
+	where bon.IND_BONIFICO in ('E') and bon.TIPO_RAP_CRE='DR'
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- dal numero di libretto al PK_RAPPORTO
+create volatile table TEMP_SEPAD_LIB_E as(
+	select distinct rap_lib.NR_LIBRETTO,rap_lib.PK_RAPPORTO
+	from EBIL_ANAG_V.V_AN_RAPPORTO_LIBRETTO as rap_lib
+	where ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between rap_lib.DT_INI_VAL and rap_lib.DT_FIN_VAL
+		and rap_lib.NR_LIBRETTO in (select NR_LIBRETTO from TEMP_SEPAD_LIB_E_0)
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- dal PK_RAPPORTO all'NDG
+create volatile table TEMP_SEPAD_LIB_E_2 as(
+	select distinct bon.NR_LIBRETTO,assoc.CD_CLIENTE_SORGENTE
+	from TEMP_SEPAD_LIB_E as bon
+	join EBIL_ANAG_V.V_ASSOC_RAPP_PROD_CLIENTE as assoc
+		on bon.PK_RAPPORTO=assoc.FK_RAPPORTO
+	where assoc.CD_TIPO_RAPP='DR' and assoc.FL_VALIDITA='1' and assoc.CD_CLIENTE_SORGENTE<>'000000000000'
+		and ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between assoc.DT_INIZIO_VALIDITA and assoc.DT_FINE_VALIDITA
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- dall'NDG al BIC
+create volatile table TEMP_SEPAD_LIB_E_3 as(
+	sel distinct bon.NR_LIBRETTO,ndg.ID_CLIENTE_BIC
+	from TEMP_SEPAD_LIB_E_2 as bon
+	join EBIL_AREE.NDG_BIC as ndg
+		on bon.CD_CLIENTE_SORGENTE=ndg.NDG
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- aggancio con l'anagrafica clienti per estrarre nome e cognome
+create volatile table TEMP_SEPAD_LIB_E_4 as(
+	sel distinct bon.ID_CLIENTE_BIC,bon.NR_LIBRETTO,cli.NOME,cli.COGNOME
+	from TEMP_SEPAD_LIB_E_3 as bon
+	join EDWAE_VM.CLIENTE as cli
+		on cli.ID_CLIENTE_BIC=bon.ID_CLIENTE_BIC
+	where cli.NATURA_GIURIDICA='PERSONA FISICA' 
+		and ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between cli.DT_INI_VAL and cli.DT_FIN_VAL
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- aggancio con la tabella dei bonifici per confrontare nome e cognome con l'ordinante ed individuare gli autobonifici
+create volatile table SEPAD_LIB_E as(
+	select distinct cli.ID_CLIENTE_BIC
+	from TEMP_SEPAD_LIB_E_4 as cli
+	join TEMP_SEPAD as bon
+		on cli.NR_LIBRETTO=bon.NUM_RAP_CLI_CRE
+			and (
+				(upper(bon.RAG_SOC_ORD) like '%' || upper(trim(cli.COGNOME) || ' ' || trim(cli.NOME)) || '%')
+					or (upper(bon.RAG_SOC_ORD) like '%' || upper(trim(cli.NOME) || ' ' || trim(cli.COGNOME) ) || '%') 
+					or (upper(bon.RAG_SOC_ORD) like ('%GIROCONTI%'))
+					or (upper(bon.RAG_SOC_ORD) like ('%GIROFONDO%'))
+					or (upper(bon.RAG_SOC_ORD) like ('%GIROFONDI%'))
+					or (upper(bon.RAG_SOC_ORD) like ('%TRASFERIMENTO FONDI%'))
+					or (upper(bon.RAG_SOC_ORD) like ('%TRASFERIMENTO FONDO%'))
+					or (upper(bon.RAG_SOC_ORD) like ('%TRASFERIMENTI FONDI%'))
+					or (upper(bon.RAG_SOC_ORD) like ('%TRASFERIMENTI FONDO%'))
+			)
+	where bon.IND_BONIFICO in ('E') and bon.TIPO_RAP_CRE='DR'
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- bonici SEPAD in entrata su CC
+-- estrazione del numero di conto (l'aggancio con l'ordinante viene fatto in seguito causa lentezza della query)
+create volatile table TEMP_SEPAD_CC_E_0 as(
+	select distinct bon.NUM_RAP_CLI_CRE as NR_CONTO
+	from TEMP_SEPAD as bon
+	where bon.IND_BONIFICO in ('E') and bon.TIPO_RAP_CRE='CC'
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- da numero conto a PK_RAPPORTO
+create volatile table TEMP_SEPAD_CC_E as(
+	select distinct rap_cc.NR_RAPPORTO as NR_CONTO,rap_cc.PK_RAPPORTO
+	from EBIL_ANAG_V.V_AN_RAPPORTO_CONTO as rap_cc
+	where ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between rap_cc.DT_INI_VAL and rap_cc.DT_FIN_VAL
+		and rap_cc.NR_RAPPORTO in (select NR_CONTO from TEMP_SEPAD_CC_E_0)
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- da PK_RAPPORTO a NDG
+create volatile table TEMP_SEPAD_CC_E_2 as(
+	select distinct bon.NR_CONTO,assoc.CD_CLIENTE_SORGENTE
+	from TEMP_SEPAD_CC_E as bon
+	join EBIL_ANAG_V.V_ASSOC_RAPP_PROD_CLIENTE as assoc
+		on bon.PK_RAPPORTO=assoc.FK_RAPPORTO
+	where assoc.CD_TIPO_RAPP='CC' and assoc.FL_VALIDITA='1' and assoc.CD_CLIENTE_SORGENTE<>'000000000000'
+		and ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between assoc.DT_INIZIO_VALIDITA and assoc.DT_FINE_VALIDITA
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- da NDG a BIC
+create volatile table TEMP_SEPAD_CC_E_3 as(
+	sel distinct bon.NR_CONTO,ndg.ID_CLIENTE_BIC
+	from TEMP_SEPAD_CC_E_2 as bon
+	join EBIL_AREE.NDG_BIC as ndg
+		on bon.CD_CLIENTE_SORGENTE=ndg.NDG
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- aggancio con l'anagrafica clienti per ottenere nome e cognome
+create volatile table TEMP_SEPAD_CC_E_4 as(
+	sel distinct bon.ID_CLIENTE_BIC,bon.NR_CONTO,cli.NOME,cli.COGNOME
+	from TEMP_SEPAD_CC_E_3 as bon
+	join EDWAE_VM.CLIENTE as cli
+		on cli.ID_CLIENTE_BIC=bon.ID_CLIENTE_BIC
+	where cli.NATURA_GIURIDICA='PERSONA FISICA' 
+		and ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between cli.DT_INI_VAL and cli.DT_FIN_VAL
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- aggancio con l'ordinante per selezionare gli autobonifici
+create volatile table SEPAD_CC_E as(
+	select distinct cli.ID_CLIENTE_BIC
+	from TEMP_SEPAD_CC_E_4 as cli
+	join TEMP_SEPAD as bon
+		on cli.NR_CONTO=bon.NUM_RAP_CLI_CRE
+			and (
+				(upper(bon.RAG_SOC_ORD) like '%' || upper(trim(cli.COGNOME) || ' ' || trim(cli.NOME)) || '%')
+					or (upper(bon.RAG_SOC_ORD) like '%' || upper(trim(cli.NOME) || ' ' || trim(cli.COGNOME) ) || '%') 
+					or (upper(bon.RAG_SOC_ORD) like ('%GIROCONTI%'))
+					or (upper(bon.RAG_SOC_ORD) like ('%GIROFONDO%'))
+					or (upper(bon.RAG_SOC_ORD) like ('%GIROFONDI%'))
+					or (upper(bon.RAG_SOC_ORD) like ('%TRASFERIMENTO FONDI%'))
+					or (upper(bon.RAG_SOC_ORD) like ('%TRASFERIMENTO FONDO%'))
+					or (upper(bon.RAG_SOC_ORD) like ('%TRASFERIMENTI FONDI%'))
+					or (upper(bon.RAG_SOC_ORD) like ('%TRASFERIMENTI FONDO%'))
+			)
+	where bon.IND_BONIFICO in ('E') and bon.TIPO_RAP_CRE='CC'
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- bonifici SEPAD in entrata su EVO
+-- estrazione dell'iban (l'aggancio con l'ordinante viene fatto in seguito causa lentezza della query)
+create volatile table TEMP_SEPAD_CA_E_0 as(
+	select	distinct bon.IBAN_BEN as IBAN
+	from TEMP_SEPAD as bon
+	where bon.IND_BONIFICO in ('E') and bon.TIPO_RAP_CRE in ('CA','PP')
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- dall'iban al numero di carta e quindi all'ID_RAPPORTO
+create volatile table TEMP_SEPAD_CA_E as(
+	select distinct bon.IBAN,'005'||anag.NR_CARTA as ID_RAPPORTO
+	from TEMP_SEPAD_CA_E_0 as bon
+	join V_EDW_DW_BP.MON_ANAGRCARTA_ST as anag
+		on anag.CD_IBAN=bon.IBAN
+	where ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between anag.DT_INI_VAL and anag.DT_FIN_VAL
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- dall'ID_RAPPORTO al BIC
+create volatile table TEMP_SEPAD_CA_E_2 as(
+	sel distinct bon.IBAN, assoc.ID_CLIENTE_BIC
+	from TEMP_SEPAD_CA_E as bon
+	join EDWAE_VM.ASSOC_RAPPORTO_CLIENTE as assoc
+		on bon.ID_RAPPORTO=assoc.ID_RAPPORTO
+	where ID_CLIENTE_CRM='0'
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- aggancio con l'anagrafica cliente per estarre nome e cognome
+create volatile table TEMP_SEPAD_CA_E_3 as(
+	sel distinct bon.ID_CLIENTE_BIC,bon.IBAN,cli.NOME,cli.COGNOME
+	from TEMP_SEPAD_CA_E_2 as bon
+	join EDWAE_VM.CLIENTE as cli
+		on cli.ID_CLIENTE_BIC=bon.ID_CLIENTE_BIC
+	where cli.NATURA_GIURIDICA='PERSONA FISICA' 
+		and ebil_aree.ct_parametri.DATA_AGGIORNAMENTO between cli.DT_INI_VAL and cli.DT_FIN_VAL
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- aggancio con i bonifici per prendere l'ordinante ed indiciduare gli autobonifici
+create volatile table SEPAD_CA_E as(
+	select distinct cli.ID_CLIENTE_BIC
+	from TEMP_SEPAD_CA_E_3 as cli
+	join TEMP_SEPAD as bon
+		on cli.IBAN=bon.IBAN_BEN
+			and (
+				(upper(bon.RAG_SOC_ORD) like '%' || upper(trim(cli.COGNOME) || ' ' || trim(cli.NOME)) || '%')
+					or (upper(bon.RAG_SOC_ORD) like '%' || upper(trim(cli.NOME) || ' ' || trim(cli.COGNOME) ) || '%') 
+					or (upper(bon.RAG_SOC_ORD) like ('%GIROCONTI%'))
+					or (upper(bon.RAG_SOC_ORD) like ('%GIROFONDO%'))
+					or (upper(bon.RAG_SOC_ORD) like ('%GIROFONDI%'))
+					or (upper(bon.RAG_SOC_ORD) like ('%TRASFERIMENTO FONDI%'))
+					or (upper(bon.RAG_SOC_ORD) like ('%TRASFERIMENTO FONDO%'))
+					or (upper(bon.RAG_SOC_ORD) like ('%TRASFERIMENTI FONDI%'))
+					or (upper(bon.RAG_SOC_ORD) like ('%TRASFERIMENTI FONDO%'))
+			)
+	where bon.IND_BONIFICO in ('E') and bon.TIPO_RAP_CRE in ('CA','PP')
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+-- SINTESI AUTOBONIFICI IN ENTRATA
+create volatile table FL_AUTOBONIFICO_E as(
+	select distinct ID_CLIENTE_BIC,1 as FL_AUTOBONIFICO_E
+	from(
+		select ID_CLIENTE_BIC from SEPAD_CC_E
+		union all
+		select ID_CLIENTE_BIC from SEPAD_CA_E
+		union all
+		select ID_CLIENTE_BIC from SEPAD_LIB_E
+		union all
+		select ID_CLIENTE_BIC from NAZ_CC_E
+		union all
+		select ID_CLIENTE_BIC from NAZ_CA_E
+	) as a
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table TEMP_SEPAD;
+drop table TEMP_NAZ;
+drop table TEMP_SEPAD_CC_U_0;
+drop table TEMP_SEPAD_CC_U;
+drop table TEMP_SEPAD_CC_U_2;
+drop table TEMP_SEPAD_CC_U_3;
+drop table SEPAD_CC_U;
+drop table TEMP_SEPAD_CA_U_0;
+drop table TEMP_SEPAD_CA_U;
+drop table TEMP_SEPAD_CA_U_2;
+drop table SEPAD_CA_U;
+drop table TEMP_NAZ_CC_U_0;
+drop table TEMP_NAZ_CC_U;
+drop table TEMP_NAZ_CC_U_2;
+drop table TEMP_NAZ_CC_U_3;
+drop table NAZ_CC_U;
+drop table TEMP_NAZ_CC_E_0;
+drop table TEMP_NAZ_CC_E;
+drop table TEMP_NAZ_CC_E_2;
+drop table TEMP_NAZ_CC_E_3;
+drop table NAZ_CC_E;
+drop table TEMP_NAZ_CA_E_0;
+drop table TEMP_NAZ_CA_E;
+drop table TEMP_NAZ_CA_E_2;
+drop table NAZ_CA_E;
+drop table TEMP_SEPAD_LIB_E_0;
+drop table TEMP_SEPAD_LIB_E;
+drop table TEMP_SEPAD_LIB_E_2;
+drop table TEMP_SEPAD_LIB_E_3;
+drop table TEMP_SEPAD_LIB_E_4;
+drop table SEPAD_LIB_E;
+drop table TEMP_SEPAD_CC_E_0;
+drop table TEMP_SEPAD_CC_E;
+drop table TEMP_SEPAD_CC_E_2;
+drop table TEMP_SEPAD_CC_E_3;
+drop table TEMP_SEPAD_CC_E_4;
+drop table SEPAD_CC_E;
+drop table TEMP_SEPAD_CA_E_0;
+drop table TEMP_SEPAD_CA_E;
+drop table TEMP_SEPAD_CA_E_2;
+drop table TEMP_SEPAD_CA_E_3;
+drop table SEPAD_CA_E;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+-- SDP
+create volatile table GM_00_02_SDP_FASI as(
+	select distinct a.CD_FRAZ,a.DT_CONT,a.NR_PRG_REL,a.CD_TERM,a.CD_OPERAT
+	from V_EDW_DW_SDP.EDW_TDD_TBGIOOPER as a, ebil_aree.CT_PARAMETRI as b
+	where a.DT_CONT>add_months(b.DATA_AGGIORNAMENTO,-1 ) and a.DT_CONT<=b.DATA_AGGIORNAMENTO -- PATCH come da mail Brunelli del 2/5/2019: cambiati i -6 mesi in -1
+	and trim (a.CD_OPER) in ('BYBN','PMBN','PMCT','VEYV') 
+	and a.NR_PRG_REL<>0
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table GM_00_02_SDP_IDPR_1 as(
+	select *
+	from V_EDW_DW_SDP.EDW_TDD_TBGIOOPER as a, ebil_aree.CT_PARAMETRI as b
+	where a.DT_CONT>add_months(b.DATA_AGGIORNAMENTO,-1) and a.DT_CONT<=b.DATA_AGGIORNAMENTO -- PATCH come da mail Brunelli del 2/5/2019: cambiati i -3 mesi in -1
+	and trim(a.CD_OPER)='IDPR' 
+	and a.NR_PRG_REL<>0
+) with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+collect statistics column(CD_FRAZ) on GM_00_02_SDP_IDPR_1;
+collect statistics column(DT_CONT) on GM_00_02_SDP_IDPR_1;
+collect statistics column(NR_PRG_REL) on GM_00_02_SDP_IDPR_1;
+collect statistics column(CD_TERM) on GM_00_02_SDP_IDPR_1;
+collect statistics column(CD_OPERAT) on GM_00_02_SDP_IDPR_1;
+
+
+collect statistics column(CD_FRAZ) on GM_00_02_SDP_FASI;
+collect statistics column(DT_CONT) on GM_00_02_SDP_FASI;
+collect statistics column(NR_PRG_REL) on GM_00_02_SDP_FASI;
+collect statistics column(CD_TERM) on GM_00_02_SDP_FASI;
+collect statistics column(CD_OPERAT) on GM_00_02_SDP_FASI;
+
+create volatile table GM_00_02_SDP_1TMP as(
+	select b.VAL_FORM_TEC2 as COD_FISCALE,b.DT_CONT as DATA_CONT
+	from GM_00_02_SDP_FASI as a 
+	inner join GM_00_02_SDP_IDPR_1 as b
+	 on a.CD_FRAZ=b.CD_FRAZ and a.DT_CONT=b.DT_CONT and a.NR_PRG_REL=b.NR_PRG_REL and a.CD_TERM=b.CD_TERM
+	 	and a.CD_OPERAT=b.CD_OPERAT
+	group by 1, 2
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+
+
+create volatile table GM_00_02_SDP_2 as(
+	select cl.ID_CLIENTE_BIC,cf.DATA_CONT
+	from(select a.COD_FISCALE as CF,a.DATA_CONT from GM_00_02_SDP_1TMP as a, ebil_aree.CT_PARAMETRI as b) as cf -- PATCH come da mail Brunelli del 2/5/2019: cambiato GM_00_02_SDP in GM_00_02_SDP_1TMP, perché la union precedente non viene più fatta
+	left join(
+		select a.ID_CLIENTE_BIC,a.COD_FISCALE
+		from EDWAE_VM.CLIENTE as a, ebil_aree.CT_PARAMETRI as b
+		where b.DATA_AGGIORNAMENTO between a.DT_INI_VAL and a.DT_FIN_VAL
+		group by 1,2
+	) as cl on cf.CF=cl.COD_FISCALE
+	group by 1 , 2 
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table gm_00_02_sdp_outbic_tmp as(
+	select aa.ID_CLIENTE_BIC,1 as SDP,count(*) as N_SDB,min(aa.DATA_CONT) as MIN_DATA_TRAN,
+		max(aa.DATA_CONT) as MAX_DATA_TRAN
+	from(
+		select a.* 
+		from(
+			select a.ID_CLIENTE_BIC,a.DATA_CONT
+			from(select * from GM_00_02_SDP_2) as a
+			join(select * from EBIL_AREE.CT_PERIMETRO) as b
+				on a.ID_CLIENTE_BIC=b.ID_CLIENTE_BIC
+		) as a, ebil_aree.CT_PARAMETRI as b
+	) as aa
+	group by 1 
+)with data on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+BT
+;DELETE EBIL_AREE.CT_MULTIBANCA
+WHERE ID_PERIODO_TEMPORALE= (SELECT ID_PERIODO_TEMPORALE FROM EBIL_AREE.CT_PARAMETRI)
+
+
+;INSERT INTO EBIL_AREE.CT_MULTIBANCA
+	select p.ID_CLIENTE_BIC,
+	       p.ID_PERIODO_TEMPORALE,
+		coalesce(v.FL_AUTOVAGLIA,0) as FL_AUTO_VAGLIA,
+		coalesce(v.N_VAGLIA_CIRCOLARI_VZ_VK,0) as N_VAGLIA_CIRCOLARI_VZ_VK,
+		coalesce(abe.FL_AUTOBONIFICO_E,0) as FL_AUTOBONIF_E,
+		coalesce(abu.FL_AUTOBONIFICO_U,0) as FL_AUTOBONIF_U,
+		coalesce(sdp.SDP,0) as SDP
+	from EBIL_AREE.V_CT_PERIMETRO as p
+	left join VAGLIA as v
+		on p.ID_CLIENTE_BIC=v.ID_CLIENTE_BIC
+	left join (select * from FL_AUTOBONIFICO_E) as abe
+		on p.ID_CLIENTE_BIC=abe.ID_CLIENTE_BIC
+	left join (select * from FL_AUTOBONIFICO_U) as abu
+		on p.ID_CLIENTE_BIC=abu.ID_CLIENTE_BIC
+	left join gm_00_02_sdp_outbic_tmp as sdp
+		on p.ID_CLIENTE_BIC=sdp.ID_CLIENTE_BIC
+		WHERE ID_PERIODO_TEMPORALE= (SELECT ID_PERIODO_TEMPORALE FROM EBIL_AREE.CT_PARAMETRI)
+;ET;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table VAGLIA;
+drop table FL_AUTOBONIFICO_E;
+drop table FL_AUTOBONIFICO_U;
+drop table GM_00_02_SDP_FASI;
+drop table GM_00_02_SDP_IDPR_1;
+drop table GM_00_02_SDP_1TMP;
+--drop table GM_00_02_SDP_2TMP;
+--drop table GM_00_02_SDP;
+drop table GM_00_02_SDP_2;
+drop table gm_00_02_sdp_outbic_tmp;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+CREATE VOLATILE TABLE VTB_MULTIBANCA_SV AS
+(SELECT ID_PERIODO_TEMPORALE, ROW_NUMBER () over ( ORDER BY ID_PERIODO_TEMPORALE  DESC) AS ORDINAMENTO
+FROM  EBIL_AREE.CT_MULTIBANCA
+GROUP BY 1)
+WITH DATA PRIMARY INDEX (ID_PERIODO_TEMPORALE) ON COMMIT PRESERVE ROWS;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+DELETE EBIL_AREE.CT_MULTIBANCA
+WHERE ID_PERIODO_TEMPORALE IN ( SELECT ID_PERIODO_TEMPORALE 
+FROM VTB_MULTIBANCA_SV
+WHERE ORDINAMENTO >25);
+.IF ERRORCODE > 0 THEN .QUIT 16;
+

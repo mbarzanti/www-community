@@ -1,0 +1,34 @@
+/*
+Noncompliant Code Example (Boolean Lock Object)
+This noncompliant code example synchronizes on a Boolean lock object.
+
+The Boolean type is unsuitable for locking purposes because it allows only two values: true and false. Boolean literals containing the same value share unique instances of the Boolean class in the Java Virtual Machine (JVM). In this example, initialized refers to the instance corresponding to the value Boolean.FALSE. If any other code were to inadvertently synchronize on a Boolean literal with this value, the lock instance would be reused and the system could become unresponsive or could deadlock.
+*/
+
+private final Boolean initialized = Boolean.FALSE;
+
+public void doSomething() {
+  synchronized (initialized) {
+    // ...
+  }
+}
+
+
+/*
+Noncompliant Code Example (Boxed Primitive)
+This noncompliant code example locks on a boxed Integer object.
+
+Boxed types may use the same instance for a range of integer values; consequently, they suffer from the same reuse problem as Boolean constants. The wrapper object are reused when the value can be represented as a byte; JVM implementations are also permitted to reuse wrapper objects for larger ranges of values. While use of the intrinsic lock associated with the boxed Integer wrapper object is insecure; instances of the Integer object constructed using the new operator (new Integer(value)) are unique and not reused. In general, locks on any data type that contains a boxed value are insecure.
+*/
+private int count = 0;
+private final Integer Lock = count; // Boxed primitive Lock is shared
+
+public void doSomething() {
+  synchronized (Lock) {
+    count++;
+    // ...
+  }
+}
+
+
+

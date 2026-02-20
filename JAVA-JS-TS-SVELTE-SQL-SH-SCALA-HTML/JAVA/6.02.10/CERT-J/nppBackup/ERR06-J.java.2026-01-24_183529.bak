@@ -1,0 +1,63 @@
+/*
+Noncompliant Code Example (Class.newInstance())
+This noncompliant code example throws undeclared checked exceptions. The undeclaredThrow() method takes a Throwable argument and invokes a function that will throw the argument without declaring it. Although undeclaredThrow() catches any exceptions the function declares that it might throw, it nevertheless throws the argument it is given without regard to whether the argument is one of the declared exceptions. This noncompliant code example also violates ERR07-J. Do not throw RuntimeException, Exception, or Throwable. However, because of exception ERR08-J-EX0, it does not violate ERR08-J. Do not catch NullPointerException or any of its ancestors.
+Any checked exception thrown by the default constructor of java.lang.Class.newInstance() is propagated to the caller even though Class.newInstance() declares that it throws only InstantiationException and IllegalAccessException. This noncompliant code example demonstrates one way to use Class.newInstance() to throw arbitrary checked and unchecked exceptions:
+*/
+
+
+public class NewInstance {
+  private static Throwable throwable;
+
+  private NewInstance() throws Throwable {
+    throw throwable;
+  }
+
+  public static synchronized void undeclaredThrow(Throwable throwable) {
+    // These exceptions should not be passed
+    if (throwable instanceof IllegalAccessException ||
+        throwable instanceof InstantiationException) {
+      // Unchecked, no declaration required
+      throw new IllegalArgumentException(); 
+    }
+
+    NewInstance.throwable = throwable;
+    try {
+      // Next line throws the Throwable argument passed in above,
+      // even though the throws clause of class.newInstance fails
+      // to declare that this may happen
+      NewInstance.class.newInstance();
+    } catch (InstantiationException e) { /* Unreachable */
+    } catch (IllegalAccessException e) { /* Unreachable */
+    } finally { // Avoid memory leak
+      NewInstance.throwable = null;
+    }
+  }
+}
+
+public class UndeclaredException {
+  public static void main(String[] args) {   
+    // No declared checked exceptions
+    NewInstance.undeclaredThrow(
+        new Exception("Any checked exception"));
+  }
+}
+/*
+Noncompliant Code Example (Class.newInstance() Workarounds)
+When the programmer wishes to catch and handle the possible undeclared checked exceptions, the compiler refuses to believe that any can be thrown in the particular context. This noncompliant code example attempts to catch undeclared checked exceptions thrown by Class.newInstance(). It catches Exception and dynamically checks whether the caught exception is an instance of the possible checked exception (carefully rethrowing all other exceptions).
+
+*/
+
+public static void main(String[] args) {
+  try {
+    NewInstance.undeclaredThrow(
+        new IOException("Any checked exception"));
+  } catch (Throwable e) {
+    if (e instanceof IOException) {
+      System.out.println("IOException occurred");
+    } else if (e instanceof RuntimeException) {
+      throw (RuntimeException) e;
+    } else {
+      // Forward to handler
+    }
+  }
+}

@@ -1,0 +1,29 @@
+/*
+Noncompliant Code Example
+The isCapitalized() method in this noncompliant code example accepts a string and returns true when the string consists of a capital letter followed by lowercase letters. The method also throws a RuntimeException when passed a null string argument.
+
+A calling method must also violate ERR08-J. Do not catch NullPointerException or any of its ancestors to determine whether the RuntimeException was thrown.
+*/
+
+
+boolean isCapitalized(String s) {
+  if (s == null) {
+    throw new RuntimeException("Null String");
+  }
+  if (s.equals("")) {
+    return true;
+  }
+  String first = s.substring(0, 1);
+  String rest = s.substring(1);
+  return (first.equals(first.toUpperCase()) &&
+          rest.equals(rest.toLowerCase()));
+}
+/*
+Noncompliant Code Example
+This noncompliant code example specifies the Exception class in the throws clause of the method declaration for the doSomething() method:
+*/
+
+
+private void doSomething() throws Exception {
+  //...
+}

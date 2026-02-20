@@ -1,0 +1,136 @@
+CREATE OR REPLACE PROCEDURE UPDATE_SUSPECT_GROUP_ID() 
+RETURNS CHARACTER VARYING(ANY) EXECUTE AS CALLER
+LANGUAGE NZPLSQL AS
+BEGIN_PROC
+
+	DECLARE
+	
+		VAL BIGINT := 100000000000000;
+		
+		BEGIN
+			
+			RAISE NOTICE 'lets start';
+			
+			FOR r IN 1..10 LOOP
+				select --VIOLAZ
+				suspect_id as suspect_id
+				from apollo_customer_analysis.ASHKUMAR.REFINED_SUSPECT
+				
+			END LOOP;
+			LOOP
+				RAISE NOTICE 'val: %',r.suspect_id;
+			END LOOP;
+			
+			WHILE t <= 10 loop
+				EXECUTE IMMEDIATE  'select * from TABLE1';  --OK
+				t := t + 1;
+			END LOOP;
+			
+			WHILE t <= 10 loop
+				drop table the_results if exists;
+				vSQL := 'CREATE TABLE THE_RESULTS AS SELECT COL1 "SOME TEXT ' || whichyear || '" FROM TABLE_A;';
+				execute immediate vSQL; --OK
+			END LOOP;
+
+			LOOP
+				-- VIOLAZ
+				SELECT * FROM TABLE2 WHERE ID=count;
+				EXIT WHEN count > 0;
+			END LOOP;
+		END;
+
+	job_title,
+		LISTAGG(
+			first_name,
+			','
+		) WITHIN GROUP(
+		ORDER BY
+			first_name
+		) AS employees
+	FROM
+		employees
+	GROUP BY
+		job_title
+	ORDER BY
+		job_title;
+		
+	SELECT REPLACE('abc', 'a', '1') AS STR; --OK
+	SELECT TOOLKIT.SQLEXT.REPLACE('abc', 'a', '1') AS STR; --OK
+
+	CREATE external TABLE '/tmp/test_export.txt' USING (delimiter '^') AS --VIOLAZ
+	SELECT *
+	FROM test_export;
+	
+	CREATE external TABLE 'c:\test_export.txt' USING (delimiter '^' remotesource odbc) AS  --VIOLAZ
+	SELECT *
+	FROM test_export;
+	
+	EXECUTE IMMEDIATE  'select * from TABLE1';  --VIOLAZ
+
+	EXECUTE IMMEDIATE  SELECT * INTO :FIRSTNAME, :LASTNAME, :EMPNO, :SALARY
+		 FROM EMP
+		 WHERE EMPNO = '528671'
+		 FOR UPDATE; –VIOLAZ
+		
+	CREATE TEMP TABLE temp_table1 AS  –VIOLAZ
+	(
+	 -- statement to fill the data
+	) DISTRIBUTE ON RANDOM;
+	
+	CREATE TABLE NETEZZA_TABLE_NAME ( 
+		 BYTEINT_COLUMN BYTEINT, –VIOLAZ
+		 SMALLINT_COLUMN SMALLINT, 
+		 INTEGER_COLUMN INTEGER, –VIOLAZ
+		 BIGINT_COLUMN BIGINT,
+		 BOOLEAN_COLUMN BOOLEAN, –VIOLAZ
+		 CHAR_COLUMN CHARACTER(2), –VIOLAZ
+		 VARCHAR_COLUMN CHARACTER VARYING(10),
+		 NCHAR_COLUMN NATIONAL CHARACTER(10),
+		 DATE_COLUMN DATE,  –VIOLAZ
+		 TIME_COLUMN TIME, –VIOLAZ
+		 TIME_WITH_TIME_ZONE_COLUMN TIME WITH TIME ZONE, –VIOLAZ
+		 TIMESTAMP_COLUMN TIMESTAMP, –VIOLAZ
+		 INTERVAL_COLUMN INTERVAL, –VIOLAZ
+		 DOUBLE_PRECISION_COLUMN DOUBLE PRECISION, –VIOLAZ
+		 FLOAT_COLUMN DOUBLE PRECISION, –VIOLAZ
+		 NUMERIC_COLUMN NUMERIC(18,0), –VIOLAZ
+		 NVARCHAR_COLUMN NATIONAL CHARACTER VARYING(10), –VIOLAZ
+		 REAL_COLUMN REAL,
+		 ST_GEOMETRY_COLUMN ST_GEOMETRY(10), –VIOLAZ
+		 VARBINARY_COLUMN BINARY VARYING(10), –VIOLAZ
+		 DECIMAL_COLUMN DECIMAL(16,2),
+		 FLOAT_COLUMN FLOAT(6),
+		 MONEY_COLUMN MONEY
+	) DISTRIBUTE ON (BIGINT_COLUMN) |[ DISTRIBUTE ON RANDOM] ;
+
+	CREATE TABLE <tablename> (col1 int, col2 int, col3 int)
+	DISTRIBUTE ON RANDOM
+	ORGANIZE ON (<col>) ; –VIOLAZ
+
+
+	ALTER VIEWS ON customer MATERIALIZE SUSPEND;
+	CREATE OR REPLACE MATERIALIZED VIEW weather_v AS SELECTcity, temp_lo, temp_hi FROM weather ORDER BY city;
+	CREATE MATERIALIZED VIEW;
+
+	SELECT
+		SUBSTR(model, 1, STRPOS(model, ';')-1) AS model_clean
+	FROM table1;
+		
+	SELECT age(to_date('10-22-2003','MM-DD-YYYY'),to_date('07-06-2002','MM-DD-YYYY');
+	
+	select now();
+	select add_months(now(),1);
+
+	CREATE SEQUENCE sequence1 as integer
+	START WITH 1 
+	increment by 1
+	minvalue 1 
+	maxvalue 300 
+	no cycle;
+	
+	INSERT INTO T2
+    VALUES -- VIOLAZ Insert Without Column List
+    (64,'Color',945,'Green',2),
+    (65,'Color',232,'Blue',7)
+
+END_PROC;

@@ -1,0 +1,17 @@
+/*
+Noncompliant Code Example (Integer Narrowing)
+In this noncompliant code example, a value of type int is converted to a value of type byte without range checking:
+*/
+
+
+class CastAway {
+  public static void main(String[] args) {
+    int i = 128;
+    workWith(i);
+  }
+
+  public static void workWith(int i) {
+    byte b = (byte) i;  // b has value -128
+    // Work with b
+  }
+}

@@ -1,0 +1,109 @@
+DELETE FROM MON_CHK.VEI_DETTAGLIO_OGGETTI_INIZIATIVA WHERE INIZIATIVA = '124456';
+
+DROP PROCEDURE MON_DATAMART.INSERT_PCL433_MM;
+DROP PROCEDURE MON_DATAMART.INSERT_PCL433_WW;
+DROP PROCEDURE MON_DATAMART.INSERT_PCL434_MM;
+DROP PROCEDURE MON_DATAMART.INSERT_PCL434_WW;
+
+DROP PROCEDURE MON_DATAMART.INSERT_FT_IND_MONTH_PMR;
+DROP PROCEDURE MON_DATAMART.INSERT_FT_IND_WEEK_PMR;
+
+DROP TABLE MON_DATAMART.FT_IND_MONTH_PMR;
+DROP TABLE MON_DATAMART.FT_IND_WEEK_PMR;
+DROP TABLE MON_DATAMART.PCL_KPI_CRUSCOTTO_PP_IND;
+
+DELETE FROM MON_DATAMART.PCL_CONF_SEMAFORO WHERE NOME_FLUSSO = 'PCL_433_WW';
+DELETE FROM MON_DATAMART.PCL_CONF_SEMAFORO WHERE NOME_FLUSSO = 'PCL_434_WW';
+DELETE FROM MON_DATAMART.PCL_CONF_SEMAFORO WHERE NOME_FLUSSO = 'PCL_433_MM';
+DELETE FROM MON_DATAMART.PCL_CONF_SEMAFORO WHERE NOME_FLUSSO = 'PCL_434_MM';
+
+DELETE from MON_DATAMART.LOG_CARICAMENTO WHERE PROGR_PROC = '033';
+DELETE from MON_DATAMART.LOG_CARICAMENTO WHERE PROGR_PROC = '034';
+DELETE from MON_DATAMART.CONFIG_CARICAMENTO WHERE PROGR_PROC = '033';
+DELETE from MON_DATAMART.CONFIG_CARICAMENTO WHERE PROGR_PROC = '034';
+
+DELETE FROM MON_DATAMART.TABLEAU_CONFIG_FLUSSO WHERE FLUSSO = 'PCL_433';
+DELETE FROM MON_DATAMART.TABLEAU_CONFIG_FLUSSO WHERE FLUSSO = 'PCL_434';
+DELETE FROM MON_DATAMART.TABLEAU_ESECUZIONE_FLUSSO WHERE FLUSSO = 'PCL_433';
+DELETE FROM MON_DATAMART.TABLEAU_ESECUZIONE_FLUSSO WHERE FLUSSO = 'PCL_434';
+
+DELETE FROM MON_DATAMART.CONFIG_KPI WHERE NUMERO_KPI = 'PCL_433_WW';
+DELETE FROM MON_DATAMART.CONFIG_KPI WHERE NUMERO_KPI = 'PCL_434_WW';
+DELETE FROM MON_DATAMART.CONFIG_KPI WHERE NUMERO_KPI = 'PCL_433_MM';
+DELETE FROM MON_DATAMART.CONFIG_KPI WHERE NUMERO_KPI = 'PCL_434_MM';
+
+DELETE FROM MON_DATAMART.IND_PCL_ANAG_MACROPRODOTTO WHERE CODICE_FLUSSO = 'PCL_433';
+DELETE FROM MON_DATAMART.IND_PCL_ANAG_MACROPRODOTTO WHERE CODICE_FLUSSO = 'PCL_434';
+
+--mon_chk
+DELETE FROM MON_CHK.VEI_DETTAGLIO_OGGETTI_INIZIATIVA WHERE INIZIATIVA = '124456';
+
+--------------
+
+/* UNINSTALL CONFIG */
+
+-- TABLEAU_ANAG_PRODOTTI_PACCHI
+DELETE FROM "MON_DATAMART"."TABLEAU_ANAG_PRODOTTI_PACCHI" WHERE "CLASSE" = 'PCL_300' 
+                                                            AND "ID_PRODOTTO" IN ( 'PKX', 'CKX', 'PBE', 'CBE', 
+                                                                                   'MBE', 'MBEF', 'SESP', 'SESPF',
+                                                                                   'XLA', 'XLAF', 'XLP', 'XLPF' ) ;
+
+DELETE FROM "MON_DATAMART"."TABLEAU_ANAG_PRODOTTI_PACCHI" WHERE "CLASSE" = 'PCL_300_NXV' 
+                                                            AND "ID_PRODOTTO" IN ( 'PKX', 'CKX', 'SESP', 'SESPF',
+                                                                                   'XLA', 'XLAF', 'XLP', 'XLPF' ) ;
+																				
+UPDATE "MON_DATAMART"."TABLEAU_ANAG_PRODOTTI_PACCHI" 
+	SET "DATA_FINE_VALIDITA" = '9999-12-31'
+	WHERE "CLASSE" IN ( 'PCL_301',  'PCL_301_NXV' )
+	  AND "MACRO_PRODOTTO" = 'Postedelivery standard'
+	  AND "DATA_INIZIO_VALIDITA" != '1900-01-01'
+;
+																				   
+DELETE FROM "MON_DATAMART"."TABLEAU_ANAG_PRODOTTI_PACCHI" WHERE "CLASSE" = 'PCL_302' 
+                                                            AND "ID_PRODOTTO" IN ( 'PKX', 'CKX', 'PBE', 'CBE', 
+                                                                                   'MBE', 'MBEF', 'SESP', 'SESPF',
+                                                                                   'XLA', 'XLAF', 'XLP', 'XLPF' ) ;
+
+DELETE FROM "MON_DATAMART"."TABLEAU_ANAG_PRODOTTI_PACCHI" WHERE "CLASSE" = 'PCL_302_NXV' 
+                                                            AND "ID_PRODOTTO" IN ( 'PKX', 'CKX', 'SESP', 'SESPF',
+                                                                                   'XLA', 'XLAF', 'XLP', 'XLPF' ) ;
+
+UPDATE "MON_DATAMART"."TABLEAU_ANAG_PRODOTTI_PACCHI" 
+	SET "DATA_FINE_VALIDITA" = '9999-12-31'
+	WHERE "CLASSE" IN ( 'PCL_302',  'PCL_302_NXV' )
+	  AND "MACRO_PRODOTTO" = 'Postedelivery standard'
+	  AND "DATA_INIZIO_VALIDITA" != '1900-01-01'
+;
+																				   
+DELETE FROM "MON_DATAMART"."TABLEAU_ANAG_PRODOTTI_PACCHI" WHERE "CLASSE" = 'PCL_303' 
+                                                            AND "ID_PRODOTTO" IN ( 'PKX', 'CKX', 'PBE', 'CBE', 
+                                                                                   'MBE', 'MBEF', 'SESP', 'SESPF',
+                                                                                   'XLA', 'XLAF', 'XLP', 'XLPF' ) ;
+
+DELETE FROM "MON_DATAMART"."TABLEAU_ANAG_PRODOTTI_PACCHI" WHERE "CLASSE" = 'PCL_303_NXV' 
+                                                            AND "ID_PRODOTTO" IN ( 'PKX', 'CKX', 'SESP', 'SESPF',
+                                                                                   'XLA', 'XLAF', 'XLP', 'XLPF' ) ;
+																				   
+UPDATE "MON_DATAMART"."TABLEAU_ANAG_PRODOTTI_PACCHI" 
+	SET "DATA_FINE_VALIDITA" = '9999-12-31'
+	WHERE "CLASSE" IN ( 'PCL_303',  'PCL_303_NXV' )
+	  AND "MACRO_PRODOTTO" = 'Postedelivery standard'
+	  AND "DATA_INIZIO_VALIDITA" != '1900-01-01'
+;
+
+-- PE2E_PCL_ANAG_MACROPRODOTTO
+DELETE FROM "MON_ANAG"."PE2E_PCL_ANAG_MACROPRODOTTO" WHERE "FLUSSO" IN ( 'PCL_200', 'PCL_200_NXV' )
+                                                       AND "ID_MACROPRODOTTO" IN ( 1, 2, 3, 4, 5, 6, 7, 9, 16 ) ;
+                                                                            
+DELETE FROM "MON_ANAG"."PE2E_PCL_ANAG_MACROPRODOTTO" WHERE "FLUSSO" IN ( 'PCL_215', 'PCL_215_NXV' )
+                                                       AND "ID_MACROPRODOTTO" IN ( 1, 2, 3, 4, 5, 6, 7, 9, 16 ) ;
+													   
+DELETE FROM "MON_ANAG"."PE2E_PCL_ANAG_MACROPRODOTTO" WHERE "FLUSSO" IN ( 'PCL_221', 'PCL_206', 'PCL_206_NXV', 'PCL_209', 'PCL_212' )
+                                                       AND "ID_MACROPRODOTTO" = 5 ;
+												
+DELETE FROM "MON_ANAG"."PE2E_PCL_ANAG_MACROPRODOTTO" WHERE "FLUSSO" = 'PCL_232'
+                                                       AND "ID_MACROPRODOTTO" IN ( 5, 9 ) ;
+													   
+-- PCL_ANAG_MACROPRODOTTO
+DELETE FROM "MON_ANAG"."PCL_ANAG_MACROPRODOTTO" WHERE "FLUSSO" IN ( 'PCL_203', 'PCL_204', 'PCL_227' )
+                                                  AND "ID_MACROPRODOTTO" IN ( 5, 12 ) ;

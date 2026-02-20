@@ -1,0 +1,1411 @@
+ 
+  
+.SET WIDTH 240;
+.SET ERROROUT STDOUT;
+
+
+
+create volatile table CARTE_ESCLUSE (
+	TIPO_CARTE varchar(3))on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;	
+	
+	
+insert into CARTE_ESCLUSE values ('09'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('40'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('58'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('A1'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('A2'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('A3'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('A4'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('CL'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('CP'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('GO'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('BC'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('CI'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('85'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('32'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('89'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('13'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('18'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('37'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('76'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('77'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('60'); 	
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+insert into CARTE_ESCLUSE values ('38'); 
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table BE_ANAGR_CARTA as(
+	select distinct ana.NR_CARTA
+		, ana.CD_FISCALE
+		, ana.CD_SOTTOTIPO_CARTA
+		, case 
+			when ana.CD_TIPO_CARTA = '16' and ana.CD_SOTTOTIPO_CARTA not in ('86','89','13','18','37','38','60','76','77') then 'CARTA_PREPAGATA'
+			when ana.CD_TIPO_CARTA = '16' and ana.CD_SOTTOTIPO_CARTA = '86' then 'EVOLUTION'
+			when ana.CD_TIPO_CARTA = '16' and ana.CD_SOTTOTIPO_CARTA in ('89','13','18','37','38','60','76','77') then 'PREPAGATA_IBAN' 
+			when ana.CD_TIPO_CARTA = '01' and ana.CD_SOTTOTIPO_CARTA not in ('58', '40', '09') then 'CARTA_DEBITO' 
+			when ana.CD_TIPO_CARTA = '01' and ana.CD_SOTTOTIPO_CARTA in ('58', '40', '09') then 'CARTA_LIBRETTO'  
+			else 'CARTA_CREDITO' 
+		end as TIPO_CARTA
+		, case when ana.CD_SOTTOTIPO_CARTA in ('86','89','37','77') then right(ana.CD_IBAN,12) end as NR_RAPPORTO
+	from EBIL_AREE.CT_PARAMETRI as p
+	join V_EDW_DW_BP.MON_ANAGRCARTA_ST as ana
+	on p.DATA_AGGIORNAMENTO between ana.DT_INI_VAL and ana.DT_FIN_VAL 
+		and ana.CD_FISCALE is not null and ana.CD_TIPO_CARTA <> '*'
+		and ana.CD_FISCALE <> 'PREPAG' 
+		and (ana.DT_ESTINZIONE is null or ana.DT_ESTINZIONE>=add_months(p.DATA_AGGIORNAMENTO+1,-1))
+		and (ana.DT_SCADENZA is null or ana.DT_SCADENZA>=add_months(p.DATA_AGGIORNAMENTO+1,-1))
+		and ((ana.DT_BLOCCO is null or ana.DT_BLOCCO>add_months(p.DATA_AGGIORNAMENTO+1,-1)) 
+			or (ana.DT_SBLOCCO>ana.DT_BLOCCO and ana.DT_SBLOCCO<=p.DATA_AGGIORNAMENTO))
+		and ana.DT_ATTIVAZIONE<=p.DATA_AGGIORNAMENTO
+		and ana.CD_SOTTOTIPO_CARTA not in (sel TIPO_CARTE from CARTE_ESCLUSE)
+)with data primary index(NR_CARTA, CD_FISCALE, TIPO_CARTA, CD_SOTTOTIPO_CARTA, NR_RAPPORTO) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table BE_CLIENTE as(
+	select distinct cli.COD_FISCALE
+		, cli.ID_CLIENTE_BIC
+	from EBIL_AREE.CT_PARAMETRI as p
+	join EDWAE_VM.CLIENTE as cli
+	on p.DATA_AGGIORNAMENTO between cli.DT_INI_VAL and cli.DT_FIN_VAL 
+		and cli.NATURA_GIURIDICA='PERSONA FISICA'
+)with data primary index(COD_FISCALE, ID_CLIENTE_BIC) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table BIC_CARTA as(
+	select distinct ana.NR_CARTA
+		, ana.TIPO_CARTA
+		, ana.CD_SOTTOTIPO_CARTA
+		, ana.NR_RAPPORTO
+		, cli.COD_FISCALE
+		, max(cli.ID_CLIENTE_BIC) as ID_CLIENTE_BIC
+	from BE_ANAGR_CARTA as ana
+	join BE_CLIENTE as cli
+	on ana.CD_FISCALE=cli.COD_FISCALE
+	group by 1,2,3,4,5
+)with data primary index(NR_CARTA, ID_CLIENTE_BIC, TIPO_CARTA, CD_SOTTOTIPO_CARTA, NR_RAPPORTO, COD_FISCALE)on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table BONIFICI_SEPA as(
+	select
+		a.RIFER_VTPIE
+		, a.IND_BONIFICO
+		, case 
+			when a.CAUSALE_CONT='27' then 'STIPENDIO_PENSIONE'
+			when (a.IND_BONIFICO = 'PO' and (a.TIPO_RAP_CRE='CC' OR a.TIPO_RAP_DEB='CC')) then 'POSTAGIRO_DA_A_CONTO'
+			when a.IND_BONIFICO = 'PO' then 'POSTAGIRO_DA_A_EVOLUTION' 
+			else 'BONIFICO' 
+		end as TIPO_BON
+		, case 
+			when a.CANALE in ('APP', 'APPBP', 'APPPP', 'APPPM') then 'APP'
+			when a.CANALE in ('CBI_A', 'CBI_M', 'CBI_P', 'BPIOL', 'CLICK', 'PPAY', 'BPOL') then 'WEB_POSTE'
+			when a.CANALE in ('PMOBI') then 'DIGITAL'
+			when a.CANALE = 'SDP' then 'UP'
+			else 'CENTRO' 
+		end as TIPO_CANALE
+		, a.NUM_RAP_CLI_CRE, a.NUM_RAP_CLI_DEB, a.TIPO_RAP_CRE, a.TIPO_RAP_DEB
+		, a.RAG_SOC_BEN, a.RAG_SOC_ORD, a.INF_CLIENTE, a.DATA_CONT, a.CONTRO_EUR, a.CANALE 
+	from V_EDW_DW_BP.PAG_BON_SEPAD_ST as a 
+	join EBIL_AREE.CT_PARAMETRI as p on 1=1
+	where a.DATA_CONT between add_months(p.DATA_AGGIORNAMENTO+1,-1) and p.DATA_AGGIORNAMENTO
+		and ((a.TIPO_RAP_CRE='PP' and a.NUM_RAP_CLI_CRE<>'000000000000' and a.NUM_RAP_CLI_CRE is not null)
+			or (a.TIPO_RAP_DEB='PP' and a.NUM_RAP_CLI_DEB<>'000000000000' and a.NUM_RAP_CLI_DEB is not null))
+		and a.RIFER_VTPIE not in (select RIFER_ORI_VTPIE from V_EDW_DW_BP.PAG_BON_SEPAD_ST   
+			where IND_BONIFICO= 'SU' and RIFER_ORI_VTPIE is not null) 
+		and a.IND_BONIFICO in ('E','U','PO')
+)with data primary index(RIFER_VTPIE, NUM_RAP_CLI_CRE, NUM_RAP_CLI_DEB) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table BONIFICI_ESTERI as (
+	select 
+		cast(a.NUM_OPERAZ_ESTERO as varchar(18)) as NUM_OPERAZ_ESTERO 
+		, a.TIPO_BONIFICO 
+		, 'BONIFICO' as TIPO_BON 
+		, case when a.CANALE in ('BPOL','CBIM','CBIP','BPIOL','CBIA','POIT') then 'WEB_POSTE'
+			else 'CENTRO' 
+		end as TIPO_CANALE 
+		, case when a.TIPO_BONIFICO='E' then trim(right(trim(a.IBAN_BENEFICIARIO), 12)) end as NUM_RAP_CLI_CRE
+		, case when a.TIPO_BONIFICO='U' then trim(right(trim(a.IBAN_ORDINANTE), 12)) end as NUM_RAP_CLI_DEB
+		, case when a.TIPO_BONIFICO='E' then 'PP' end as TIPO_RAP_CRE
+		, case when a.TIPO_BONIFICO='U' then 'PP' end as TIPO_RAP_DEB
+		, a.RAG_SOCIALE_BENEF
+		, a.RAG_SOCIALE_ORDIN
+		, a.NOTE_BONIFICO
+		, a.DATA_CONTABILE
+		, a.CONTR_ORDINE 
+		, a.CANALE
+	from V_EDW_DW_BP.PAG_BON_ESTPPAY_ST as a
+	join EBIL_AREE.CT_PARAMETRI as p on 1=1
+	where a.DATA_CONTABILE between add_months(p.DATA_AGGIORNAMENTO+1,-1) and p.DATA_AGGIORNAMENTO
+		and a.INDICATORE_STORNO = 'N' 
+		and a.STRUMENTO_REGOLAMENTO='PP'
+)with data primary index(NUM_OPERAZ_ESTERO, NUM_RAP_CLI_CRE, NUM_RAP_CLI_DEB, RAG_SOCIALE_ORDIN, RAG_SOCIALE_BENEF) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table BONIFICI_NAZ as (
+	select 
+		a.NR_MOV 
+		, case 
+			when a.CD_CAUS='PO' then a.CD_CAUS
+			when a.CD_CAUS in ('27','ZS') or a.ABI_BEN in ('07601','36081') then 'E'
+			else 'U' 
+		end as TIPO_BONIFICO 		
+		, case when a.CD_CAUS = '27' then 'STIPENDIO_PENSIONE'
+			when a.CD_CAUS='PO' then 'POSTAGIRO_DA_A_EVOLUTION'
+			when a.CD_CAUS ='ZS' or a.TIP_BON='SUPPORTO' then 'FINANZIAMENTI'
+			else 'BONIFICO' 
+		end as TIPO_BON 
+		, case 
+			when a.CD_FRAZ = '77333' then 'DIGITAL'
+			when a.CD_FRAZ = '55111' then 'WEB_POSTE'
+			when a.CD_FRAZ = 'DIREZ' then 'CENTRO' 
+			else 'UP' 
+		end as TIPO_CANALE
+		, case when TIPO_BONIFICO in ('PO','E') then a.NR_RAPP_BEN end as NUM_RAP_CLI_CRE
+		, case when TIPO_BONIFICO in ('PO','U') then a.NR_RAPP_ORD end as NUM_RAP_CLI_DEB
+		, case when TIPO_BONIFICO in ('PO','E') then 'PP' end as TIPO_RAP_CRE
+		, case when TIPO_BONIFICO in ('PO','U') then 'PP' end as TIPO_RAP_DEB
+		, a.ANAG_BEN
+		, a.ANAG_ORD
+		, cast('' as varchar(50)) as NOTE_BONIFICO
+		, a.DT_CONTABILE
+		, a.IMPORTO
+		, a.CD_FRAZ as CANALE
+	from V_EDW_DW_BP.PAG_BON_NAZ_ST as a
+	join EBIL_AREE.CT_PARAMETRI as p on 1=1
+	where a.DT_CONTABILE between add_months(p.DATA_AGGIORNAMENTO+1,-1) and p.DATA_AGGIORNAMENTO
+		and a.SOCIETA_APPARTENENZA='PPAY' 
+)with data primary index(NR_MOV, NUM_RAP_CLI_CRE, NUM_RAP_CLI_DEB, ANAG_BEN, ANAG_ORD) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table BONIFICI as (
+	select * from BONIFICI_SEPA
+	union all
+	select * from BONIFICI_ESTERI
+	union all
+	select * from BONIFICI_NAZ
+)with data primary index(RIFER_VTPIE, NUM_RAP_CLI_CRE, NUM_RAP_CLI_DEB) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+create volatile table CAUSALI_BONIFICI as (
+	select
+		a.RIFER_VTPIE, a.NUM_RAP_CLI_CRE, a.NUM_RAP_CLI_DEB, a.TIPO_RAP_CRE, a.TIPO_RAP_DEB, a.IND_BONIFICO
+		, a.RAG_SOC_ORD, a.RAG_SOC_BEN, a.INF_CLIENTE, a.DATA_CONT, a.CONTRO_EUR, a.CANALE, a.TIPO_BON, a.TIPO_CANALE
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%STIP%', '%SALAR%', '%MENSILIT%', '%RETRIB%', '%BENEF/STIPE%', '%BUST%PAGA%', '%PAGA %'
+			, '%COMPENSO%', '%CEDOLINO MESE%','%ACCREDITO COMPETENZE %', '%COMPETENZE %', '%ACCREDITO MENS.%', '%ACCONTO BP%', '%SALDO BP%'
+			, '%SALDO B.PA%', '%EMOLUMENT%' ,'%PENSION%', '%BENEF/PENS%', '%VITALIZIO%', '%RETRAITE%', '%RENTE/PENS.%', '% RV-RENTE %'
+			, 'AVS % CHF % AL CAMBIO%', '%RV-RENTE %', '%BR-RENTE %', '%UV-RENTE %', '%ESIMA %', '%13MA%', '%13SIMA%', '%13 MA%', '%14MA%'
+			, '%14 MA%', '%14SIMA%', '%QUATTORD.MA%', '%TREDIC.MA%','%TFR%', '%T.F.R.%','%T F R %') 
+			or a.TIPO_BON='STIPENDIO_PENSIONE' 
+		then 1 else 0 end as BON_STIPENDIO_PENSIONE
+		, case when upper(trim(a.INF_CLIENTE)) like any ('FITT%', '%FITT%', '%PIGION%', '%CANONE%MES%', '%CANONE%MENS%', '%LOCAZ%') 
+			then 1 else 0 end as BON_AFFITTO
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%MUTUO%', '%MUTUI%') 
+			and upper(trim(a.INF_CLIENTE)) not like '%MUTU%SOCCORS%' then 1 else 0 end as BON_MUTUO
+		, case when upper(trim(a.INF_CLIENTE)) like '% RETTA %' 
+			and upper(trim(a.INF_CLIENTE)) not like all ('FITT%', '%FITT%', '%PIGION%', '%CANONE%MES%', '%CANONE%MENS%', '%APPARTAM%', '%LOCAZ%', 
+				'%UNIVERSIT%', '%SCUOL%', '%SCOLASTIC%', '%MASTER%', '%LICEO%', '%ISTRUZ%', '%ASILO%', '%ALUNN%') then 1 else 0 end as BON_RETTA
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%PRESTIT%', '%FINANZIAMENTO%', '%ESTINZ FIN%', '%ESTINZ DEBITO%', '%ESTINZ CESSION%'
+			, '%ESTINZ CRED%', '%ESTINZ PRA%', '%ESTINZ PT%') then 1 else 0 end as BON_PRESTITO
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%IMPOSTE%', '%IRPEF%', '%BOLLO%', '%TASS%', '%CONTRIBUTI%', '% TASI %', '% TARI %') 
+			then 1 else 0 end as BON_TRIBUTO
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%CONDOM%', '% COND%') 
+			and upper(trim(a.INF_CLIENTE)) not like all ('%FITTO%', '%CONDIV%') then 1 else 0 end as BON_CONDOMINIO
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%ACQUIS%CASA%', '%ACQUIST%APPARTAMENT%', '%ACQUIS%CASA%', '%ACQUIST%IMMOBIL%', '%ACQUIST%ABITAZION%') 
+			then 1 else 0 end as BON_ACQUISTO_CASA
+		, case when upper(trim(a.INF_CLIENTE)) like '%BOLLETT%' then 1 else 0 end as BON_UTENZE
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%MEDIC%', '%DENTISTA%', '%OSPEDAL%', '%FISIOTERAP%', '%LOGOPEDI%', '%APPARECCHIO ACUSTICO%', 
+			'%PROTESI%', '%ODONTOIA%', '%SPES%SANIT%', '%MUTUO%SOCCORS%', '%FARMACIA%') 
+			and upper(trim(a.INF_CLIENTE)) not like all ('%ISCRIZIONE%', '%FITT%', '%LOCAZ%', '%CANONE%', '%PIGIONE%', '%ACCADEMIC%', '%TASSA%') 
+			then 1 else 0 end as BON_SPESE_SANITARIE
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%AUTOM%', '% AUTO %', '%AUTOVET%', '%FIAT%', '%TWINGO%', '%MERCEDES%', '%TOYOTA%', '%BMW%', '%HONDA%', '%HYUNDAY%'
+			, '%VOLKSWAGEN%', '%RENAULT%', '%PEUGEOT%', '% DUCATI%', '%APRILIA%', '%PIAGGIO%', '%NISSAN%', '%JEEP%', '% FORD%', '%MITSUBISHI%', '%TARGA%', '%MOTO%'
+			, '%SCOOTER%', '%YAMAHA%', '%SUZUKI%', '% AUDI %', '%OPEL%', '%CITROEN%') 
+			and upper(trim(a.INF_CLIENTE)) not like all ('%BOLLO%', '%TERREMOTO%', '%MOTORIA%', '%MOTORIE%') 
+			then 1 else 0 end as BON_MOTORI
+		, case when upper(trim(a.INF_CLIENTE)) like any ('% ASPI %', '%NASPI%', '%MINIASPI%', '%DISOCCUPAZIONE%', '%LIQUID. DS AGR%DOMANDA%', '%MOBILIT%') 
+			and upper(trim(a.INF_CLIENTE)) not like all ('FITT%', 'VIAGGIO', '% ASPIR%') then 1 else 0 end as BON_DISOCCUPAZIONE
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%SPOSA%', '%SPOSO%', '%NOZZE%', '%MATRIM%', '%WEDDING%', '% AMORE %', '%CONGRATULAZ%', '%AUGURI%REGAL%', '%AUGURI%SPOSA%')
+			and a.INF_CLIENTE not like all ('%CORSO%', '%CAMER%MATRIM%', '%STANZ%MATRIM%', '%FITT%', '%ISCRIZION%', '%CONDOM%', '%CAMER%', '%MATERAS%', '%COMPLEANN%', 
+				'%LETT%','%ONOMASTICO%', '%NATALE%', '%PASQUA%', '%BUON%ANNO%', '%BEFAN%', '%MUTUO%') 
+			then 1 else 0 end as BON_NOZZE
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%MANTENIM%', '%ALIMENTI%', '%FIGLI%DIVORZ%','%FIGLI%SEPAR%', '%ASSEGNO%DIVORZ%', '%ASSEGNO%CONIUG%', '%ASSEGNO%SEPARAZ%'
+			, '%ASSEGNO%MANTEN%') and upper(trim(a.INF_CLIENTE)) not like all ('%ACQUIST%') 
+			then 1 else 0 end as BON_MANTENIMENTO
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%FIGLI%', '%CONIUGE%', '%SORELL%', '%FRATELL%', '%NONN%', '%PAPA %', '%MAMMA%', '%FAMIGLIA%'
+			, '%FAMILI%', '%PADRE%', '%MADRE%') then 1 else 0 end as BON_NUCLEO_FAMIGLIA
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%SOGGIORN%', '%VACANZ%', '%VIAGGI%', '%HOTEL%', '%ALBERG%', '%AIRB%', '%AEREI%', '%AEREO%', '%TRENO%'
+			, '%TRENI%', '% VOLI%', '% VOLO %') then 1 else 0 end as BON_VIAGGI
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%UNIVERSIT%', '%SCUOL%', '%SCOLASTIC%', '%MASTER%', '%LICEO%', '%ISTRUZ%', '%ASILO%', '%ALUNN%') 
+			and not upper(trim(a.INF_CLIENTE)) like any ('%SPORT%', '%CALCIO%') then 1 else 0 end as BON_ISTRUZIONE
+		, case when upper(trim(a.INF_CLIENTE)) like any ('% EREDITA %', 'QUOTA%SUCCESSIONE%') then 1 else 0 end as BON_EREDITA
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%PAG%SINIS%DANNO%', '%SER%LIQ%DAN%POL%', '%SUP%PAGAM%SX%', '% SINISTRO % N.%', '%RISCATT%POL%'
+			, '%PAGAMEN%SINISTR%N%', '%SIN. %DEL:%/%BEN:%', '%SIN. %DEL:%/%', '%SCADENZA%POL%') then 1 else 0 end as BON_LIQUIDAZIONE_POLIZZA
+		, case when (BON_STIPENDIO_PENSIONE = 0
+			and BON_AFFITTO = 0
+			and BON_MUTUO = 0
+			and BON_RETTA = 0
+			and BON_PRESTITO = 0
+			and BON_TRIBUTO = 0
+			and BON_CONDOMINIO = 0
+			and BON_ACQUISTO_CASA = 0
+			and BON_UTENZE = 0
+			and BON_SPESE_SANITARIE = 0
+			and BON_MOTORI = 0
+			and BON_DISOCCUPAZIONE = 0
+			and BON_NOZZE = 0
+			and BON_MANTENIMENTO = 0
+			and BON_NUCLEO_FAMIGLIA = 0
+			and BON_VIAGGI = 0
+			and BON_ISTRUZIONE = 0
+			and BON_EREDITA = 0
+			and BON_LIQUIDAZIONE_POLIZZA = 0) then 1 else 0 end as BON_ALTRO
+	from BONIFICI as a
+)with data primary index(RIFER_VTPIE, NUM_RAP_CLI_CRE, NUM_RAP_CLI_DEB) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+create volatile table BONIFICI_ENTRATA as (
+	select
+		b.ID_CLIENTE_BIC, b.COD_FISCALE, b.CD_SOTTOTIPO_CARTA, a.RIFER_VTPIE, a.NUM_RAP_CLI_CRE, a.IND_BONIFICO, a.DATA_CONT, a.CONTRO_EUR, a.TIPO_BON, a.TIPO_CANALE
+		, a.BON_STIPENDIO_PENSIONE as BON_STIPENDIO_PENSIONE_ENTRATA
+		, a.BON_AFFITTO as BON_AFFITTO_ENTRATA
+		, a.BON_MUTUO as BON_MUTUO_ENTRATA
+		, a.BON_RETTA as BON_RETTA_ENTRATA
+		, a.BON_PRESTITO as BON_PRESTITO_ENTRATA
+		, a.BON_TRIBUTO as BON_TRIBUTO_ENTRATA
+		, a.BON_CONDOMINIO as BON_CONDOMINIO_ENTRATA
+		, a.BON_ACQUISTO_CASA as BON_ACQUISTO_CASA_ENTRATA
+		, a.BON_UTENZE as BON_UTENZE_ENTRATA
+		, a.BON_SPESE_SANITARIE as BON_SPESE_SANITARIE_ENTRATA
+		, a.BON_MOTORI as BON_MOTORI_ENTRATA
+		, a.BON_DISOCCUPAZIONE as BON_DISOCCUPAZIONE_ENTRATA
+		, a.BON_NOZZE as BON_NOZZE_ENTRATA
+		, a.BON_MANTENIMENTO as BON_MANTENIMENTO_ENTRATA
+		, a.BON_NUCLEO_FAMIGLIA as BON_NUCLEO_FAMIGLIA_ENTRATA
+		, a.BON_VIAGGI as BON_VIAGGI_ENTRATA
+		, a.BON_ISTRUZIONE as BON_ISTRUZIONE_ENTRATA
+		, a.BON_EREDITA as BON_EREDITA_ENTRATA
+		, a.BON_LIQUIDAZIONE_POLIZZA as BON_LIQUIDAZIONE_POLIZZA_ENTRATA
+		, a.BON_ALTRO as BON_ALTRO_ENTRATA
+		, row_number() over(partition by b.ID_CLIENTE_BIC, b.COD_FISCALE, a.NUM_RAP_CLI_CRE, a.DATA_CONT, a.CONTRO_EUR, b.CD_SOTTOTIPO_CARTA
+			order by a.RIFER_VTPIE) as JOIN_INDEX
+	from CAUSALI_BONIFICI as a
+	inner join (select distinct ID_CLIENTE_BIC, COD_FISCALE, NR_RAPPORTO, CD_SOTTOTIPO_CARTA from BIC_CARTA where TIPO_CARTA='EVOLUTION') as b
+		on a.NUM_RAP_CLI_CRE=b.NR_RAPPORTO
+	where a.TIPO_RAP_CRE='PP' and a.IND_BONIFICO in ('PO','E') 
+)with data primary index (ID_CLIENTE_BIC, COD_FISCALE, RIFER_VTPIE, NUM_RAP_CLI_CRE) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+
+create volatile table BONIFICI_USCITA as (
+	select
+		b.ID_CLIENTE_BIC, b.COD_FISCALE, b.CD_SOTTOTIPO_CARTA, a.RIFER_VTPIE, a.NUM_RAP_CLI_DEB, a.IND_BONIFICO, a.DATA_CONT, a.CONTRO_EUR, a.TIPO_BON, a.TIPO_CANALE
+		, a.BON_STIPENDIO_PENSIONE as BON_STIPENDIO_PENSIONE_USCITA
+		, a.BON_AFFITTO as BON_AFFITTO_USCITA
+		, a.BON_MUTUO as BON_MUTUO_USCITA
+		, a.BON_RETTA as BON_RETTA_USCITA
+		, a.BON_PRESTITO as BON_PRESTITO_USCITA
+		, a.BON_TRIBUTO as BON_TRIBUTO_USCITA
+		, a.BON_CONDOMINIO as BON_CONDOMINIO_USCITA
+		, a.BON_ACQUISTO_CASA as BON_ACQUISTO_CASA_USCITA
+		, a.BON_UTENZE as BON_UTENZE_USCITA
+		, a.BON_SPESE_SANITARIE as BON_SPESE_SANITARIE_USCITA
+		, a.BON_MOTORI as BON_MOTORI_USCITA
+		, a.BON_DISOCCUPAZIONE as BON_DISOCCUPAZIONE_USCITA
+		, a.BON_NOZZE as BON_NOZZE_USCITA
+		, a.BON_MANTENIMENTO as BON_MANTENIMENTO_USCITA
+		, a.BON_NUCLEO_FAMIGLIA as BON_NUCLEO_FAMIGLIA_USCITA
+		, a.BON_VIAGGI as BON_VIAGGI_USCITA
+		, a.BON_ISTRUZIONE as BON_ISTRUZIONE_USCITA
+		, a.BON_EREDITA as BON_EREDITA_USCITA
+		, a.BON_LIQUIDAZIONE_POLIZZA as BON_LIQUIDAZIONE_POLIZZA_USCITA
+		, a.BON_ALTRO as BON_ALTRO_USCITA
+		, row_number() over(partition by b.ID_CLIENTE_BIC, b.COD_FISCALE, a.NUM_RAP_CLI_DEB, a.DATA_CONT, a.CONTRO_EUR, b.CD_SOTTOTIPO_CARTA
+			order by a.RIFER_VTPIE) as JOIN_INDEX		
+	from CAUSALI_BONIFICI as a
+	inner join (select distinct ID_CLIENTE_BIC, COD_FISCALE, NR_RAPPORTO, CD_SOTTOTIPO_CARTA from BIC_CARTA where TIPO_CARTA='EVOLUTION') as b
+		on a.NUM_RAP_CLI_DEB=b.NR_RAPPORTO
+	where a.TIPO_RAP_DEB='PP' and a.IND_BONIFICO in ('PO','U')
+)with data primary index (ID_CLIENTE_BIC, COD_FISCALE, RIFER_VTPIE, NUM_RAP_CLI_DEB) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+ 
+create volatile table MONETICA as (
+	select
+		mov.NR_CARTA_EDWH
+		, mov.CD_SOTTOTIPO_CARTA
+		, mov.CD_CAUSALE
+		, mov.CD_MCC
+		, mov.DS_MOVIMENTO
+		, mov.FLG_TIPO_OPER_DARE_AVERE as SEGNO
+		, mov.CANALE
+		, mov.CD_FRAZ
+		, mov.DT_TRANS 
+		, mov.ORA_TRANS 
+		, count(*) as NUMERO
+		, sum(mov.IM_BILL) as IMPORTO
+	from V_EDW_DW_BP.MON_MOVIMCARTA as mov
+	join EBIL_AREE.CT_PARAMETRI as p on 1=1
+	where mov.DT_TRANS between add_months(p.DATA_AGGIORNAMENTO+1,-1) and p.DATA_AGGIORNAMENTO
+		and mov.FLG_TIPO_OPER_DARE_AVERE in ('D','A')
+		and mov.CD_SOTTOTIPO_CARTA not in (sel TIPO_CARTE from CARTE_ESCLUSE) 
+	group by 1,2,3,4,5,6,7,8,9,10
+)with data primary index(NR_CARTA_EDWH, CD_SOTTOTIPO_CARTA,DS_MOVIMENTO, CD_CAUSALE, SEGNO, CANALE, CD_MCC, CD_FRAZ, DT_TRANS, ORA_TRANS) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table MON_CAUSMOV as(
+	select 
+		distinct CD_CAUSALE, DS_CAUSALE_MOVIM
+		from V_EDW_DW_BP.MON_CAUSMOV_CARTA_ST 
+	where DT_FIN_VAL = '2999-12-31'
+    qualify row_number() over (partition by CD_CAUSALE order by DT_INI_VAL desc, FLG_TIPO_OPERAZIONE desc, CD_CAUSALE_ATM desc)=1
+)with data primary index(CD_CAUSALE) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table CAUSALI_MONETICA as (
+    select
+      a.CD_CAUSALE
+      , a.DS_MOVIMENTO
+       , case when b.DS_CAUSALE_MOVIM <> '*ND' then b.DS_CAUSALE_MOVIM else a.DS_MOVIMENTO end as DS_CAUSALE                                      
+       , case
+           when DS_CAUSALE like any ('%STORN%', '%RETT.%', '%RETTIFIC%', '%RET.%', '%RIACCR%', '%ANNULL%', '%BLOCC%', '%AZZERAMENT%', '%SOSPES%',
+				'RESTITUZIONE%', '%RIMBORSO%') and DS_CAUSALE not like ('COMMISSIONI RIMBORSO CARTE') then 'STORNO'
+           when DS_CAUSALE like any  ('%COMM.%', '%COMMI%', '%CANON%', '%IMPOST%BOLL%')
+                and DS_CAUSALE not like ('PAGA%CANON%TV%') then 'COMMISSIONI'
+           when DS_CAUSALE like any ('%RICARIC%POSTEPAY%', '%RIC%CART%', '%RIC%PREPAG%')
+                and DS_CAUSALE not like ('%TRASPORTI%') then 'RICARICA_POSTEPAY' 
+           when DS_CAUSALE like any ('%RICARIC%TELEFONIC%', '%RIC.TEL%', '%POSTE MOBILE%', '%RICARIC%SIM%',
+                '%TELERICARIC%', '%TIM AUTOMATIC%') then 'RICARICA_TELEFONICA'
+           when DS_CAUSALE like ('%RICARIC%') then 'RICARICA_POSTEPAY'
+           when DS_CAUSALE like any ('%SDD%', '%RID%', '%ADDEB%PREAUTORIZ%', '%ADDEBIT%UTENZ%INTERNET%') then 'SDD' 
+           when DS_CAUSALE like any ('%PRELIEV%') then 'PRELIEVO'
+           when DS_CAUSALE like any ('%STIPEND%', '%PENS%') then 'STIPENDIO_PENSIONE'
+           when DS_CAUSALE like any ('%POSTAGIRO%CARTA%CONT%') then 'POSTAGIRO_DA_A_CONTO'  
+           when DS_CAUSALE like any ('%GIROFOND%CC%DR%') then 'POSTAGIRO_DA_A_LIBRETTO'           
+           when DS_CAUSALE like any ('%POSTAGIRO%', '%POSTAG.%', '%GIROFOND%') then 'POSTAGIRO_DA_A_EVOLUTION'
+           when DS_CAUSALE like any ('%BONIFIC%') then 'BONIFICO'
+           when DS_CAUSALE like any ('%PAGAMENT%', '%PAG.%', '% RAV%', '%CHARGEBACK%', '%INC%TRANS%POS%', '%SCONT%BANCOPOSTA%', '%INCASS%C/TERZ%') then 'PAGAMENTI'
+           else 'VARIE'
+       end as CAUSALE
+    from (sel distinct cd_causale,ds_movimento from MONETICA) as a
+    left join MON_CAUSMOV as b
+    on a.CD_CAUSALE=b.CD_CAUSALE             
+) with data primary index(CD_CAUSALE, DS_MOVIMENTO) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table MOVIMENTAZIONI as (
+	select 
+		a.NR_CARTA_EDWH
+		, a.CD_SOTTOTIPO_CARTA
+		, a.SEGNO
+		, a.CD_MCC
+		, coalesce(b.CAUSALE,'VARIE') as DES_RICLAS
+		, b.DS_CAUSALE
+		, case 
+			when (a.CANALE = '3270' 
+				or DES_RICLAS like any ('COMMISSIONI', 'STORNO', 'SDD','VARIE') 
+				or b.DS_CAUSALE like any ('ACCR.%', 'ACCREDIT%', '%PREAUTORIZ%') 
+				or (b.CAUSALE in ('BONIFICO','POSTAGIRO_DA_A_CONTO', 'POSTAGIRO_DA_A_EVOLUTION','STIPENDIO_PENSIONE','PAGAMENTI') and a.SEGNO='A') 
+				or a.CD_FRAZ in ('00130','DIREZ')) and DES_RICLAS not in ('PRELIEVO')
+				then 'CENTRO' 
+			when a.CANALE in ('APP') or b.DS_CAUSALE like ('% APP%') then 'APP'
+			when (a.CANALE like any ('BPIOL', 'BPOL','POSTEPAY.IT', '%WEB%', '%MOTOR%PAGAM%',  '%PORT%PAGAM%', '%PIATTAFORM%PAG%', 'RPOL'
+				, 'POSTECOMMERCE','%POSTIN%TELEMATIC%') 
+				or b.DS_CAUSALE like ('% WEB%')
+				or a.CD_FRAZ in ('55111')) then 'WEB_POSTE'
+			when a.CD_FRAZ in ('77333') or a.CANALE in ('POSTEMOBILE') then 'DIGITAL'
+			when b.DS_CAUSALE like any ('%ON-LINE%', '%ONLINE%', '%ON LINE%', '%INTERNET%') then 'WEB_ESTERNO'
+			when b.DS_CAUSALE like any ('%ATM%BANCAR%') then 'ATM_BANCARIO'
+			when a.CANALE in ('ATM POSTE') or (b.DS_CAUSALE like '% ATM%') then 'ATM_POSTE'			
+			when a.CANALE in ('POS UFFICIO POSTALE') or b.DS_CAUSALE like any ('% UP%', '% SDP%', '%UFFICIO%POSTALE%') then 'UP'			
+			when b.DS_CAUSALE like any ('%POS%ESERCENT%', '% POS%') or a.CANALE='OLI' then 'POS_ESTERNO'
+			when a.CANALE like any ('%CHIOSC%') or b.DS_CAUSALE like any ('%CHS%','%CHIOSC%','%RET%TERZ%') then 'ALTRO'
+			when a.CD_FRAZ is not null then 'UP'
+			else 'ALTRO'
+			end as CANALE
+		, a.DT_TRANS
+		, a.ORA_TRANS
+		, sum(a.NUMERO) as NUMERO
+		, sum(a.IMPORTO) as IMPORTO
+	from MONETICA as a
+	left join CAUSALI_MONETICA as b
+		on a.CD_CAUSALE = b.CD_CAUSALE and a.DS_MOVIMENTO = b.DS_MOVIMENTO
+	group by 1,2,3,4,5,6,7,8,9
+)with data primary index(NR_CARTA_EDWH, CD_SOTTOTIPO_CARTA, SEGNO, CD_MCC, DES_RICLAS, CANALE, DT_TRANS, ORA_TRANS)on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+ 
+create volatile table MOVIMENTAZIONI_BIC as (
+	select
+		a.ID_CLIENTE_BIC
+		, a.COD_FISCALE	
+		, a.NR_RAPPORTO	
+		, a.TIPO_CARTA
+		, b.NR_CARTA_EDWH
+		, b.CD_SOTTOTIPO_CARTA
+		, b.SEGNO
+		, b.CD_MCC
+		, b.DES_RICLAS
+		, b.DS_CAUSALE
+		, b.CANALE
+		, b.DT_TRANS
+		, b.ORA_TRANS
+		, b.NUMERO
+		, b.IMPORTO
+		, row_number() over(partition by a.ID_CLIENTE_BIC, a.COD_FISCALE, a.NR_RAPPORTO, b.CD_SOTTOTIPO_CARTA, b.DT_TRANS, b.IMPORTO, b.SEGNO
+			, case
+				when b.DES_RICLAS in ('BONIFICO','STIPENDIO_PENSIONE','POSTAGIRO_DA_A_CONTO','POSTAGIRO_DA_A_EVOLUTION') then 1 
+				else 2
+			end order by b.ORA_TRANS) as JOIN_INDEX_BON	
+	from MOVIMENTAZIONI as b 
+	inner join BIC_CARTA as a 
+	on a.NR_CARTA=b.NR_CARTA_EDWH and a.CD_SOTTOTIPO_CARTA=b.CD_SOTTOTIPO_CARTA
+	where a.TIPO_CARTA <> 'ALTRE_CARTE'
+)with data primary index(ID_CLIENTE_BIC, COD_FISCALE, NR_RAPPORTO, NR_CARTA_EDWH, TIPO_CARTA, DES_RICLAS, CANALE, DT_TRANS, ORA_TRANS)on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table MOVIMENTAZIONI_BON_ENTRATA as (
+	select
+		a.ID_CLIENTE_BIC
+		, a.COD_FISCALE	
+		, a.NR_RAPPORTO	
+		, a.TIPO_CARTA
+		, a.NR_CARTA_EDWH
+		, a.CD_SOTTOTIPO_CARTA
+		, a.SEGNO
+		, a.CD_MCC
+		, case 
+			when b.TIPO_BON is not null and b.BON_STIPENDIO_PENSIONE_ENTRATA>0 then 'STIPENDIO_PENSIONE'
+			when b.TIPO_BON is not null then b.TIPO_BON 
+			else a.DES_RICLAS end as DES_RICLAS 
+		, a.DS_CAUSALE
+		, a.CANALE 
+		, a.DT_TRANS
+		, a.ORA_TRANS
+		, a.NUMERO
+		, a.IMPORTO
+		, b.BON_STIPENDIO_PENSIONE_ENTRATA, b.BON_AFFITTO_ENTRATA, b.BON_MUTUO_ENTRATA, b.BON_RETTA_ENTRATA, b.BON_PRESTITO_ENTRATA
+		, b.BON_TRIBUTO_ENTRATA, b.BON_CONDOMINIO_ENTRATA, b.BON_ACQUISTO_CASA_ENTRATA, b.BON_UTENZE_ENTRATA, b.BON_SPESE_SANITARIE_ENTRATA
+		, b.BON_MOTORI_ENTRATA, b.BON_DISOCCUPAZIONE_ENTRATA, b.BON_NOZZE_ENTRATA, b.BON_MANTENIMENTO_ENTRATA, b.BON_NUCLEO_FAMIGLIA_ENTRATA
+		, b.BON_VIAGGI_ENTRATA, b.BON_ISTRUZIONE_ENTRATA, b.BON_EREDITA_ENTRATA, b.BON_LIQUIDAZIONE_POLIZZA_ENTRATA, b.BON_ALTRO_ENTRATA, a.JOIN_INDEX_BON
+	from MOVIMENTAZIONI_BIC as a 
+	left join BONIFICI_ENTRATA as b 
+		on a.ID_CLIENTE_BIC=b.ID_CLIENTE_BIC and a.COD_FISCALE=b.COD_FISCALE and a.NR_RAPPORTO=b.NUM_RAP_CLI_CRE
+			and a.CD_SOTTOTIPO_CARTA=b.CD_SOTTOTIPO_CARTA and a.DT_TRANS=b.DATA_CONT and a.IMPORTO=b.CONTRO_EUR	
+			and a.JOIN_INDEX_BON=b.JOIN_INDEX and a.SEGNO='A'
+			and a.DES_RICLAS in ('BONIFICO','STIPENDIO_PENSIONE','POSTAGIRO_DA_A_CONTO','POSTAGIRO_DA_A_EVOLUTION')
+)with data primary index(ID_CLIENTE_BIC, COD_FISCALE, NR_RAPPORTO, NR_CARTA_EDWH, TIPO_CARTA, DES_RICLAS, CANALE, DT_TRANS, ORA_TRANS)on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table MOVIMENTAZIONI_BON_USCITA as (
+	select
+		a.ID_CLIENTE_BIC
+		, a.COD_FISCALE	
+		, a.NR_RAPPORTO	
+		, a.TIPO_CARTA
+		, a.NR_CARTA_EDWH
+		, a.CD_SOTTOTIPO_CARTA
+		, a.SEGNO
+		, a.CD_MCC
+		, case 
+			when b.ID_CLIENTE_BIC is not null then b.TIPO_BON 
+			else a.DES_RICLAS end as DES_RICLAS 
+		, a.DS_CAUSALE
+		, case 
+			when b.ID_CLIENTE_BIC is not null then b.TIPO_CANALE
+			else a.CANALE
+			end as CANALE 
+		, a.DT_TRANS
+		, a.ORA_TRANS
+		, a.NUMERO
+		, a.IMPORTO
+		, a.BON_STIPENDIO_PENSIONE_ENTRATA, a.BON_AFFITTO_ENTRATA, a.BON_MUTUO_ENTRATA, a.BON_RETTA_ENTRATA, a.BON_PRESTITO_ENTRATA
+		, a.BON_TRIBUTO_ENTRATA, a.BON_CONDOMINIO_ENTRATA, a.BON_ACQUISTO_CASA_ENTRATA, a.BON_UTENZE_ENTRATA, a.BON_SPESE_SANITARIE_ENTRATA
+		, a.BON_MOTORI_ENTRATA, a.BON_DISOCCUPAZIONE_ENTRATA, a.BON_NOZZE_ENTRATA, a.BON_MANTENIMENTO_ENTRATA, a.BON_NUCLEO_FAMIGLIA_ENTRATA
+		, a.BON_VIAGGI_ENTRATA, a.BON_ISTRUZIONE_ENTRATA, a.BON_EREDITA_ENTRATA, a.BON_LIQUIDAZIONE_POLIZZA_ENTRATA, a.BON_ALTRO_ENTRATA
+		, b.BON_STIPENDIO_PENSIONE_USCITA, b.BON_AFFITTO_USCITA, b.BON_MUTUO_USCITA, b.BON_RETTA_USCITA, b.BON_PRESTITO_USCITA
+		, b.BON_TRIBUTO_USCITA, b.BON_CONDOMINIO_USCITA, b.BON_ACQUISTO_CASA_USCITA, b.BON_UTENZE_USCITA, b.BON_SPESE_SANITARIE_USCITA
+		, b.BON_MOTORI_USCITA, b.BON_DISOCCUPAZIONE_USCITA, b.BON_NOZZE_USCITA, b.BON_MANTENIMENTO_USCITA, b.BON_NUCLEO_FAMIGLIA_USCITA
+		, b.BON_VIAGGI_USCITA, b.BON_ISTRUZIONE_USCITA, b.BON_EREDITA_USCITA, b.BON_LIQUIDAZIONE_POLIZZA_USCITA, b.BON_ALTRO_USCITA
+	from MOVIMENTAZIONI_BON_ENTRATA as a 
+	left join BONIFICI_USCITA as b 
+		on a.ID_CLIENTE_BIC=b.ID_CLIENTE_BIC and a.COD_FISCALE=b.COD_FISCALE and a.NR_RAPPORTO=b.NUM_RAP_CLI_DEB
+			and a.CD_SOTTOTIPO_CARTA=b.CD_SOTTOTIPO_CARTA and a.DT_TRANS=b.DATA_CONT and a.IMPORTO=b.CONTRO_EUR	
+			and a.JOIN_INDEX_BON=b.JOIN_INDEX and a.SEGNO='D' 
+			and a.DES_RICLAS in ('BONIFICO','STIPENDIO_PENSIONE','POSTAGIRO_DA_A_CONTO','POSTAGIRO_DA_A_EVOLUTION')
+)with data primary index(ID_CLIENTE_BIC, COD_FISCALE, NR_RAPPORTO, NR_CARTA_EDWH, TIPO_CARTA, DES_RICLAS, CANALE, DT_TRANS, ORA_TRANS)on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+
+create volatile table CLASSI_MCC as (
+	select
+		distinct a.CD_MCC
+		, case 
+			when a.CD_MCC in ('4829','6011','6012','6050','6051','6211','6300','6533','7276','7321','7800','9222','9223','9311','9399') then 'BANCA_FINANZA_IMPOSTE'
+			when a.CD_MCC in ('5811','5812','5813','5814') then 'BAR_RISTORANTI'
+			when a.CD_MCC in ('1520','1711','1731','1750','1761','2842','4812','4814','4816','4821','4899','4900','5021','5039','5051','5065'
+				,'5072','5074','5198','5200','5211','5231','5251','5261','5271','5712','5713','5714','5718','5719','5932','5950','5983','7217'
+				,'7342','7393') then 'CASA'
+			when a.CD_MCC in ('5199','5300','5310','5311','5399','5411','5422','5441','5451','5462','5499','5921') then 'CIBO_SPESA'
+			when a.CD_MCC in ('7995') then 'GIOCO'
+			when a.CD_MCC in ('5943','7338','8211','8220','8241','8244','8249','8299') then 'ISTRUZIONE'
+			when a.CD_MCC in ('3000','3001','3003','3005','3006','3007','3008','3009','3010','3011','3012','3013','3014','3015','3016','3017'
+				,'3018','3020','3021','3022','3024','3025','3026','3028','3029','3030','3031','3032','3034','3035','3037','3038','3039','3040'
+				,'3042','3043','3044','3047','3048','3049','3050','3051','3052','3056','3057','3058','3064','3066','3068','3069','3072','3075'
+				,'3076','3077','3078','3079','3082','3084','3088','3090','3097','3098','3099','3100','3102','3103','3127','3131','3132','3136'
+				,'3144','3146','3161','3174','3175','3180','3181','3182','3183','3184','3187','3190','3196','3206','3211','3217','3219','3220'
+				,'3221','3223','3228','3234','3236','3240','3245','3246','3247','3248','3256','3260','3261','3266','3267','3294','3295','3297'
+				,'3298','3299','3300','3351','3352','3355','3357','3359','3360','3364','3366','3368','3370','3374','3381','3385','3386','3387'
+				,'3388','3389','3390','3393','3395','3398','3400','3405','3412','3420','3435','3438','3441','4011','4111','4112','4121','4131'
+				,'4411','4457','4468','4511','4582','4784','4789','5013','5172','5511','5521','5531','5532','5533','5541','5542','5551','5561'
+				,'5571','5592','5598','5599','7512','7513','7519','7523','7531','7534','7535','7538','7542','7549','8675') then 'MOTORI_TRASPORTI'
+			when a.CD_MCC in ('4119','5047','5122','5912','5975','5976','5977','7230','7297','7298','8011','8021','8031','8041','8042','8043'
+				,'8049','8050','8062','8071','8099') then 'SALUTE_CURA'
+			when a.CD_MCC in ('5044','5045','5094','5099','5137','5139','5193','5309','5611','5621','5631','5641','5651','5655','5661','5681'
+				,'5691','5697','5698','5699','5722','5732','5733','5734','5815','5817','5818','5931','5933','5937','5944','5946','5947','5948'
+				,'5960','5963','5964','5965','5966','5967','5968','5969','5973','5978','5992','5993','5997','5998','5999','6513','7210','7211'
+				,'7216','7251','7277','7278','7296','7311','7339','7361','7372','7375','7379','7392','7395','7399','7622','7623','7629','7631'
+				,'7641','7692','7699','8111','8734','8911','8931','9402') then 'SHOPPING_SERVIZI'
+			when a.CD_MCC in ('2741','3501','3502','3503','3504','3505','3506','3507','3508','3509','3510','3511','3512','3513','3514','3515'
+				,'3516','3517','3518','3519','3520','3521','3523','3524','3525','3526','3528','3530','3533','3535','3536','3537','3538','3539'
+				,'3540','3541','3542','3543','3544','3545','3548','3549','3551','3552','3553','3554','3555','3558','3559','3560','3561','3562'
+				,'3564','3565','3567','3570','3572','3573','3575','3576','3577','3579','3580','3581','3583','3584','3586','3589','3590','3591'
+				,'3592','3595','3596','3598','3599','3602','3604','3607','3608','3609','3612','3613','3614','3615','3616','3617','3619','3621'
+				,'3623','3625','3628','3629','3630','3631','3633','3634','3635','3636','3637','3638','3639','3640','3641','3642','3643','3644'
+				,'3647','3649','3650','3651','3652','3653','3654','3655','3657','3658','3659','3660','3661','3662','3663','3665','3667','3668'
+				,'3670','3672','3675','3676','3677','3678','3679','3680','3681','3684','3685','3687','3688','3690','3692','3693','3694','3695'
+				,'3698','3700','3701','3703','3706','3708','3709','3710','3712','3714','3715','3716','3717','3718','3719','3720','3721','3722'
+				,'3723','3726','3728','3730','3731','3734','3736','3737','3738','3740','3741','3742','3743','3744','3745','3747','3748','3749'
+				,'3750','3751','3752','3754','3760','3763','3765','3766','3767','3769','3770','3771','3773','3774','3777','3778','3779','3780'
+				,'3782','3783','3784','3785','3786','3790','3791','3792','3793','3795','3800','3802','3807','3808','3811','3812','3813','3814'
+				,'3816','3818','3819','3822','3823','3824','3825','3826','3828','3829','3830','3831','3832','4722','4723','5192','5735','5816'
+				,'5940','5941','5942','5945','5949','5970','5971','5972','5996','7011','7012','7032','7033','7221','7333','7829','7832','7841'
+				,'7911','7922','7929','7932','7933','7941','7991','7992','7993','7994','7996','7997','7998','7999','8641') then 'TEMPOLIBERO_VIAGGIO'
+			when a.CD_MCC in ('1740','1771','1799','2791','4214','4215','4225','4813','5046','5085','5111','5131','5169','5331','5935','5962'
+				,'5994','5995','6538','6539','6540','7261','7273','7299','7349','7394','0742','0763','0780','8351','8398','8651','8661','8699'
+				,'8999','9211','9405','9406') then 'VARIE_MCC'
+			else 'ALTRE_MCC'
+			end as DESCRIZ_MCC
+	from MOVIMENTAZIONI_BON_USCITA as a
+	where a.DES_RICLAS='PAGAMENTI' and a.SEGNO='D' 
+)with data primary index(CD_MCC) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table MONETICA_MCC_RAGGR as (
+	select
+		a.ID_CLIENTE_BIC
+		, a.TIPO_CARTA
+		, case 
+			when a.DES_RICLAS='PAGAMENTI' and a.SEGNO='D' and b.DESCRIZ_MCC is not null then b.DESCRIZ_MCC
+			when a.DES_RICLAS='PAGAMENTI' and a.SEGNO='D' and coalesce(b.DESCRIZ_MCC,'')='' then 'ALTRE_MCC'
+			else a.DES_RICLAS 
+		end as DES_RICLAS
+		, a.CANALE
+		, sum(case when a.SEGNO='D' then a.NUMERO else 0 end) as NUMERO_DARE
+		, sum(case when a.SEGNO='A' then a.NUMERO else 0 end) as NUMERO_AVERE
+		, sum(case when a.SEGNO='D' then a.IMPORTO else 0 end) as IMPORTO_DARE
+		, sum(case when a.SEGNO='A' then a.IMPORTO else 0 end) as IMPORTO_AVERE		
+		, sum(coalesce(a.BON_STIPENDIO_PENSIONE_ENTRATA,0)) as BON_STIPENDIO_PENSIONE_ENTRATA
+		, sum(coalesce(a.BON_AFFITTO_ENTRATA,0)) as BON_AFFITTO_ENTRATA
+		, sum(coalesce(a.BON_MUTUO_ENTRATA,0)) as BON_MUTUO_ENTRATA
+		, sum(coalesce(a.BON_RETTA_ENTRATA,0)) as BON_RETTA_ENTRATA
+		, sum(coalesce(a.BON_PRESTITO_ENTRATA,0)) as BON_PRESTITO_ENTRATA
+		, sum(coalesce(a.BON_TRIBUTO_ENTRATA,0)) as BON_TRIBUTO_ENTRATA
+		, sum(coalesce(a.BON_CONDOMINIO_ENTRATA,0)) as BON_CONDOMINIO_ENTRATA
+		, sum(coalesce(a.BON_ACQUISTO_CASA_ENTRATA,0)) as BON_ACQUISTO_CASA_ENTRATA
+		, sum(coalesce(a.BON_UTENZE_ENTRATA,0)) as BON_UTENZE_ENTRATA
+		, sum(coalesce(a.BON_SPESE_SANITARIE_ENTRATA,0)) as BON_SPESE_SANITARIE_ENTRATA
+		, sum(coalesce(a.BON_MOTORI_ENTRATA,0)) as BON_MOTORI_ENTRATA
+		, sum(coalesce(a.BON_DISOCCUPAZIONE_ENTRATA,0)) as BON_DISOCCUPAZIONE_ENTRATA
+		, sum(coalesce(a.BON_NOZZE_ENTRATA,0)) as BON_NOZZE_ENTRATA
+		, sum(coalesce(a.BON_MANTENIMENTO_ENTRATA,0)) as BON_MANTENIMENTO_ENTRATA
+		, sum(coalesce(a.BON_NUCLEO_FAMIGLIA_ENTRATA,0)) as BON_NUCLEO_FAMIGLIA_ENTRATA
+		, sum(coalesce(a.BON_VIAGGI_ENTRATA,0)) as BON_VIAGGI_ENTRATA
+		, sum(coalesce(a.BON_ISTRUZIONE_ENTRATA,0)) as BON_ISTRUZIONE_ENTRATA
+		, sum(coalesce(a.BON_EREDITA_ENTRATA,0)) as BON_EREDITA_ENTRATA
+		, sum(coalesce(a.BON_LIQUIDAZIONE_POLIZZA_ENTRATA,0)) as BON_LIQUIDAZIONE_POLIZZA_ENTRATA
+		, sum(coalesce(a.BON_ALTRO_ENTRATA,0)) as BON_ALTRO_ENTRATA
+		, sum(coalesce(a.BON_STIPENDIO_PENSIONE_USCITA,0)) as BON_STIPENDIO_PENSIONE_USCITA
+		, sum(coalesce(a.BON_AFFITTO_USCITA,0)) as BON_AFFITTO_USCITA
+		, sum(coalesce(a.BON_MUTUO_USCITA,0)) as BON_MUTUO_USCITA
+		, sum(coalesce(a.BON_RETTA_USCITA,0)) as BON_RETTA_USCITA
+		, sum(coalesce(a.BON_PRESTITO_USCITA,0)) as BON_PRESTITO_USCITA
+		, sum(coalesce(a.BON_TRIBUTO_USCITA,0)) as BON_TRIBUTO_USCITA
+		, sum(coalesce(a.BON_CONDOMINIO_USCITA,0)) as BON_CONDOMINIO_USCITA
+		, sum(coalesce(a.BON_ACQUISTO_CASA_USCITA,0)) as BON_ACQUISTO_CASA_USCITA
+		, sum(coalesce(a.BON_UTENZE_USCITA,0)) as BON_UTENZE_USCITA
+		, sum(coalesce(a.BON_SPESE_SANITARIE_USCITA,0)) as BON_SPESE_SANITARIE_USCITA
+		, sum(coalesce(a.BON_MOTORI_USCITA,0)) as BON_MOTORI_USCITA
+		, sum(coalesce(a.BON_DISOCCUPAZIONE_USCITA,0)) as BON_DISOCCUPAZIONE_USCITA
+		, sum(coalesce(a.BON_NOZZE_USCITA,0)) as BON_NOZZE_USCITA
+		, sum(coalesce(a.BON_MANTENIMENTO_USCITA,0)) as BON_MANTENIMENTO_USCITA
+		, sum(coalesce(a.BON_NUCLEO_FAMIGLIA_USCITA,0)) as BON_NUCLEO_FAMIGLIA_USCITA
+		, sum(coalesce(a.BON_VIAGGI_USCITA,0)) as BON_VIAGGI_USCITA
+		, sum(coalesce(a.BON_ISTRUZIONE_USCITA,0)) as BON_ISTRUZIONE_USCITA
+		, sum(coalesce(a.BON_EREDITA_USCITA,0)) as BON_EREDITA_USCITA
+		, sum(coalesce(a.BON_LIQUIDAZIONE_POLIZZA_USCITA,0)) as BON_LIQUIDAZIONE_POLIZZA_USCITA
+		, sum(coalesce(a.BON_ALTRO_USCITA,0)) as BON_ALTRO_USCITA
+	from MOVIMENTAZIONI_BON_USCITA as a
+	left join CLASSI_MCC as b 
+	on a.CD_MCC=b.CD_MCC and a.DES_RICLAS='PAGAMENTI' and a.SEGNO='D' 
+	group by 1,2,3,4
+)with data primary index(ID_CLIENTE_BIC) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+drop table BONIFICI_SEPA;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table BONIFICI_ESTERI;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table BONIFICI_NAZ;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table BONIFICI;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table CAUSALI_BONIFICI;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table BONIFICI_ENTRATA;
+.IF ERRORCODE > 0 THEN .QUIT 16; 
+
+drop table BONIFICI_USCITA;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table MONETICA;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table MON_CAUSMOV;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table MOVIMENTAZIONI;
+.IF ERRORCODE > 0 THEN .QUIT 16; 
+
+drop table MOVIMENTAZIONI_BIC;
+.IF ERRORCODE > 0 THEN .QUIT 16; 
+
+drop table MOVIMENTAZIONI_BON_ENTRATA;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table MOVIMENTAZIONI_BON_USCITA;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table CLASSI_MCC;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table CT_OPERAT_POSTAMAT as (
+	select
+		b.ID_CLIENTE_BIC,
+		b.ID_PERIODO_TEMPORALE
+		
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PMAT_BANCA_FIN_IMPOSTE_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PMAT_BANCA_FIN_IMPOSTE_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as PMAT_BANCA_FIN_IMPOSTE_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as PMAT_BANCA_FIN_IMPOSTE_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='BAR_RISTORANTI' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PMAT_BAR_RISTORANTI_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BAR_RISTORANTI' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PMAT_BAR_RISTORANTI_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PMAT_CASA_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PMAT_CASA_POSESTERNO_NUM_USCITA		
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('UP') then a.IMPORTO_DARE else 0 end) as PMAT_CASA_UP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('UP') then a.NUMERO_DARE else 0 end) as PMAT_CASA_UP_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as PMAT_CASA_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as PMAT_CASA_WEBESTERNO_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='CIBO_SPESA' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PMAT_CIBO_SPESA_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='CIBO_SPESA' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PMAT_CIBO_SPESA_POSESTERNO_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='GIOCO' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PMAT_GIOCO_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='GIOCO' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PMAT_GIOCO_POSESTERNO_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='ISTRUZIONE' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PMAT_ISTRUZIONE_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ISTRUZIONE' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PMAT_ISTRUZIONE_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='MOTORI_TRASPORTI' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PMAT_MOTORI_TRASPORTI_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='MOTORI_TRASPORTI' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PMAT_MOTORI_TRASPORTI_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='SALUTE_CURA' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PMAT_SALUTE_CURA_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='SALUTE_CURA' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PMAT_SALUTE_CURA_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='SHOPPING_SERVIZI' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PMAT_SHOPPING_SERVIZI_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='SHOPPING_SERVIZI' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PMAT_SHOPPING_SERVIZI_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='SHOPPING_SERVIZI' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as PMAT_SHOPPING_SERVIZI_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='SHOPPING_SERVIZI' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as PMAT_SHOPPING_SERVIZI_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='TEMPOLIBERO_VIAGGIO' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PMAT_TEMPOLIBERO_VIAGGIO_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='TEMPOLIBERO_VIAGGIO' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PMAT_TEMPOLIBERO_VIAGGIO_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='VARIE_MCC' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PMAT_PAG_VARIE_MCC_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='VARIE_MCC' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PMAT_PAG_VARIE_MCC_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE not in ('ATM_POSTE','POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PMAT_PAG_ALTREMCC_ALTRO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE not in ('ATM_POSTE','POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PMAT_PAG_ALTREMCC_ALTRO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('ATM_POSTE') then a.IMPORTO_DARE else 0 end) as PMAT_PAG_ALTREMCC_ATMPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('ATM_POSTE') then a.NUMERO_DARE else 0 end) as PMAT_PAG_ALTREMCC_ATMPOSTE_NUM_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PMAT_PAG_ALTREMCC_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PMAT_PAG_ALTREMCC_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='PAGAMENTI' then a.IMPORTO_AVERE else 0 end) as PMAT_PAGAMENTI_CENTRO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='PAGAMENTI' then a.NUMERO_AVERE else 0 end) as PMAT_PAGAMENTI_CENTRO_NUM_ENTRATA
+		
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_LIBRETTO' and a.CANALE in ('ATM_POSTE') then a.IMPORTO_DARE else 0 end) as PMAT_POSTAGIRO_A_LIBRETTO_ATMPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_LIBRETTO' and a.CANALE in ('ATM_POSTE') then a.NUMERO_DARE else 0 end) as PMAT_POSTAGIRO_A_LIBRETTO_ATMPOSTE_NUM_USCITA		
+		
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('ATM_POSTE') then a.IMPORTO_DARE else 0 end) as PMAT_PRELIEVO_ATMPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('ATM_POSTE') then a.NUMERO_DARE else 0 end) as PMAT_PRELIEVO_ATMPOSTE_NUM_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('ATM_BANCARIO') then a.IMPORTO_DARE else 0 end) as PMAT_PRELIEVO_ATMBANCARIO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('ATM_BANCARIO') then a.NUMERO_DARE else 0 end) as PMAT_PRELIEVO_ATMBANCARIO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PMAT_PRELIEVO_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PMAT_PRELIEVO_POSESTERNO_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('UP') then a.IMPORTO_DARE else 0 end) as PMAT_PRELIEVO_UP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('UP') then a.NUMERO_DARE else 0 end) as PMAT_PRELIEVO_UP_NUM_USCITA	
+		
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('ATM_POSTE') then a.IMPORTO_DARE else 0 end) as PMAT_RICARICA_POSTEPAY_ATMPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('ATM_POSTE') then a.NUMERO_DARE else 0 end) as PMAT_RICARICA_POSTEPAY_ATMPOSTE_NUM_USCITA		
+		
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE in ('ATM_POSTE') then a.IMPORTO_DARE else 0 end) as PMAT_RICARICA_TELEFONICA_ATMPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE in ('ATM_POSTE') then a.NUMERO_DARE else 0 end) as PMAT_RICARICA_TELEFONICA_ATMPOSTE_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PMAT_RICARICA_TELEFONICA_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PMAT_RICARICA_TELEFONICA_POSESTERNO_NUM_USCITA
+		
+		, sum(case when a.DES_RICLAS='STORNO' then a.IMPORTO_AVERE else 0 end) as PMAT_STORNO_CENTRO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='STORNO' then a.NUMERO_AVERE else 0 end) as PMAT_STORNO_CENTRO_NUM_ENTRATA		
+		
+		, sum(case when a.DES_RICLAS='VARIE' then a.IMPORTO_AVERE else 0 end) as PMAT_VARIE_CENTRO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='VARIE' then a.NUMERO_AVERE else 0 end) as PMAT_VARIE_CENTRO_NUM_ENTRATA	
+		
+		, (PMAT_BANCA_FIN_IMPOSTE_POSESTERNO_IMP_USCITA + PMAT_BAR_RISTORANTI_POSESTERNO_IMP_USCITA + PMAT_CASA_POSESTERNO_IMP_USCITA + PMAT_CASA_UP_IMP_USCITA
+			+ PMAT_CIBO_SPESA_POSESTERNO_IMP_USCITA + PMAT_GIOCO_POSESTERNO_IMP_USCITA + PMAT_ISTRUZIONE_POSESTERNO_IMP_USCITA + PMAT_MOTORI_TRASPORTI_POSESTERNO_IMP_USCITA
+			+ PMAT_SALUTE_CURA_POSESTERNO_IMP_USCITA + PMAT_SHOPPING_SERVIZI_POSESTERNO_IMP_USCITA + PMAT_TEMPOLIBERO_VIAGGIO_POSESTERNO_IMP_USCITA
+			+ PMAT_PAG_VARIE_MCC_POSESTERNO_IMP_USCITA + PMAT_PAG_ALTREMCC_ALTRO_IMP_USCITA + PMAT_PAG_ALTREMCC_ATMPOSTE_IMP_USCITA + PMAT_PAG_ALTREMCC_POSESTERNO_IMP_USCITA
+			+ PMAT_POSTAGIRO_A_LIBRETTO_ATMPOSTE_IMP_USCITA + PMAT_PRELIEVO_ATMPOSTE_IMP_USCITA + PMAT_PRELIEVO_ATMBANCARIO_IMP_USCITA + PMAT_PRELIEVO_POSESTERNO_IMP_USCITA
+			+ PMAT_PRELIEVO_UP_IMP_USCITA + PMAT_RICARICA_POSTEPAY_ATMPOSTE_IMP_USCITA + PMAT_RICARICA_TELEFONICA_ATMPOSTE_IMP_USCITA + PMAT_RICARICA_TELEFONICA_POSESTERNO_IMP_USCITA
+			) as PMAT_TOT_OPER_FISICO_IMP_USCITA
+		
+		, (PMAT_BANCA_FIN_IMPOSTE_POSESTERNO_NUM_USCITA + PMAT_BAR_RISTORANTI_POSESTERNO_NUM_USCITA + PMAT_CASA_POSESTERNO_NUM_USCITA + PMAT_CASA_UP_NUM_USCITA
+			+ PMAT_CIBO_SPESA_POSESTERNO_NUM_USCITA + PMAT_GIOCO_POSESTERNO_NUM_USCITA + PMAT_ISTRUZIONE_POSESTERNO_NUM_USCITA + PMAT_MOTORI_TRASPORTI_POSESTERNO_NUM_USCITA
+			+ PMAT_SALUTE_CURA_POSESTERNO_NUM_USCITA + PMAT_SHOPPING_SERVIZI_POSESTERNO_NUM_USCITA + PMAT_TEMPOLIBERO_VIAGGIO_POSESTERNO_NUM_USCITA
+			+ PMAT_PAG_VARIE_MCC_POSESTERNO_NUM_USCITA + PMAT_PAG_ALTREMCC_ALTRO_NUM_USCITA + PMAT_PAG_ALTREMCC_ATMPOSTE_NUM_USCITA + PMAT_PAG_ALTREMCC_POSESTERNO_NUM_USCITA
+			+ PMAT_POSTAGIRO_A_LIBRETTO_ATMPOSTE_NUM_USCITA + PMAT_PRELIEVO_ATMPOSTE_NUM_USCITA + PMAT_PRELIEVO_ATMBANCARIO_NUM_USCITA + PMAT_PRELIEVO_POSESTERNO_NUM_USCITA
+			+ PMAT_PRELIEVO_UP_NUM_USCITA + PMAT_RICARICA_POSTEPAY_ATMPOSTE_NUM_USCITA + PMAT_RICARICA_TELEFONICA_ATMPOSTE_NUM_USCITA + PMAT_RICARICA_TELEFONICA_POSESTERNO_NUM_USCITA
+			) as PMAT_TOT_OPER_FISICO_NUM_USCITA
+		
+		, (PMAT_PAGAMENTI_CENTRO_IMP_ENTRATA + PMAT_STORNO_CENTRO_IMP_ENTRATA + PMAT_VARIE_CENTRO_IMP_ENTRATA) as PMAT_TOT_OPER_CENTRO_IMP_ENTRATA
+		
+		, (PMAT_PAGAMENTI_CENTRO_NUM_ENTRATA + PMAT_STORNO_CENTRO_NUM_ENTRATA + PMAT_VARIE_CENTRO_NUM_ENTRATA) as PMAT_TOT_OPER_CENTRO_NUM_ENTRATA
+		
+		, (PMAT_BANCA_FIN_IMPOSTE_WEBESTERNO_IMP_USCITA + PMAT_CASA_WEBESTERNO_IMP_USCITA + PMAT_SHOPPING_SERVIZI_WEBESTERNO_IMP_USCITA) as PMAT_TOT_OPER_DIGITAL_IMP_USCITA
+		
+		, (PMAT_BANCA_FIN_IMPOSTE_WEBESTERNO_NUM_USCITA + PMAT_CASA_WEBESTERNO_NUM_USCITA + PMAT_SHOPPING_SERVIZI_WEBESTERNO_NUM_USCITA) as PMAT_TOT_OPER_DIGITAL_NUM_USCITA
+	from EBIL_AREE.V_CT_PERIMETRO as b
+	left join MONETICA_MCC_RAGGR as a
+		on a.ID_CLIENTE_BIC=b.ID_CLIENTE_BIC and a.TIPO_CARTA='CARTA_DEBITO' 
+	group by 1,2
+)with data primary index(ID_CLIENTE_BIC, ID_PERIODO_TEMPORALE) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+
+BT
+
+;DELETE EBIL_AREE.CT_OPERAT_POSTAMAT
+WHERE ID_PERIODO_TEMPORALE= (SELECT ID_PERIODO_TEMPORALE FROM EBIL_AREE.CT_PARAMETRI)
+
+;INSERT INTO EBIL_AREE.CT_OPERAT_POSTAMAT 
+	select * from CT_OPERAT_POSTAMAT
+WHERE ID_PERIODO_TEMPORALE= (SELECT ID_PERIODO_TEMPORALE FROM EBIL_AREE.CT_PARAMETRI)
+
+;ET;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+CREATE VOLATILE TABLE VTB_OPERAT_POSTAMAT_SV AS
+(SELECT ID_PERIODO_TEMPORALE, ROW_NUMBER () over ( ORDER BY ID_PERIODO_TEMPORALE  DESC) AS ORDINAMENTO
+FROM  EBIL_AREE.CT_OPERAT_POSTAMAT
+GROUP BY 1)
+WITH DATA PRIMARY INDEX (ID_PERIODO_TEMPORALE) ON COMMIT PRESERVE ROWS;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+DELETE EBIL_AREE.CT_OPERAT_POSTAMAT
+WHERE ID_PERIODO_TEMPORALE IN ( SELECT ID_PERIODO_TEMPORALE 
+FROM VTB_OPERAT_POSTAMAT_SV
+WHERE ORDINAMENTO >25);
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+
+create volatile table CT_OPERAT_POSTEPAY as (
+	select
+		b.ID_CLIENTE_BIC,
+		b.ID_PERIODO_TEMPORALE
+		
+		, sum(case when a.DES_RICLAS='COMMISSIONI' then a.IMPORTO_DARE else 0 end) as PPAY_COMMISSIONI_CENTRO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='COMMISSIONI' then a.NUMERO_DARE else 0 end) as PPAY_COMMISSIONI_CENTRO_NUM_USCITA		
+		, sum(case when a.DES_RICLAS='COMMISSIONI' then a.IMPORTO_AVERE else 0 end) as PPAY_COMMISSIONI_CENTRO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='COMMISSIONI' then a.NUMERO_AVERE else 0 end) as PPAY_COMMISSIONI_CENTRO_NUM_ENTRATA
+		
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('APP') then a.IMPORTO_DARE else 0 end) as PPAY_BANCA_FIN_IMPOSTE_APP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('APP') then a.NUMERO_DARE else 0 end) as PPAY_BANCA_FIN_IMPOSTE_APP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_BANCA_FIN_IMPOSTE_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_BANCA_FIN_IMPOSTE_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_BANCA_FIN_IMPOSTE_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_BANCA_FIN_IMPOSTE_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('WEB_POSTE') then a.IMPORTO_DARE else 0 end) as PPAY_BANCA_FIN_IMPOSTE_WEBPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('WEB_POSTE') then a.NUMERO_DARE else 0 end) as PPAY_BANCA_FIN_IMPOSTE_WEBPOSTE_NUM_USCITA		
+		, sum(case when a.DES_RICLAS='BAR_RISTORANTI' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_BAR_RISTORANTI_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BAR_RISTORANTI' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_BAR_RISTORANTI_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='BAR_RISTORANTI' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_BAR_RISTORANTI_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BAR_RISTORANTI' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_BAR_RISTORANTI_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('APP') then a.IMPORTO_DARE else 0 end) as PPAY_CASA_APP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('APP') then a.NUMERO_DARE else 0 end) as PPAY_CASA_APP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_CASA_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_CASA_POSESTERNO_NUM_USCITA		
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('UP') then a.IMPORTO_DARE else 0 end) as PPAY_CASA_UP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('UP') then a.NUMERO_DARE else 0 end) as PPAY_CASA_UP_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_CASA_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_CASA_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='CIBO_SPESA' and a.CANALE in ('APP') then a.IMPORTO_DARE else 0 end) as PPAY_CIBO_SPESA_APP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='CIBO_SPESA' and a.CANALE in ('APP') then a.NUMERO_DARE else 0 end) as PPAY_CIBO_SPESA_APP_NUM_USCITA		
+		, sum(case when a.DES_RICLAS='CIBO_SPESA' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_CIBO_SPESA_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='CIBO_SPESA' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_CIBO_SPESA_POSESTERNO_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='CIBO_SPESA' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_CIBO_SPESA_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='CIBO_SPESA' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_CIBO_SPESA_WEBESTERNO_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='GIOCO' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_GIOCO_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='GIOCO' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_GIOCO_POSESTERNO_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='GIOCO' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_GIOCO_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='GIOCO' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_GIOCO_WEBESTERNO_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='ISTRUZIONE' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_ISTRUZIONE_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ISTRUZIONE' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_ISTRUZIONE_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='ISTRUZIONE' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_ISTRUZIONE_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ISTRUZIONE' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_ISTRUZIONE_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='MOTORI_TRASPORTI' and a.CANALE in ('APP') then a.IMPORTO_DARE else 0 end) as PPAY_MOTORI_TRASPORTI_APP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='MOTORI_TRASPORTI' and a.CANALE in ('APP') then a.NUMERO_DARE else 0 end) as PPAY_MOTORI_TRASPORTI_APP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='MOTORI_TRASPORTI' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_MOTORI_TRASPORTI_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='MOTORI_TRASPORTI' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_MOTORI_TRASPORTI_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='MOTORI_TRASPORTI' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_MOTORI_TRASPORTI_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='MOTORI_TRASPORTI' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_MOTORI_TRASPORTI_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='SALUTE_CURA' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_SALUTE_CURA_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='SALUTE_CURA' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_SALUTE_CURA_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='SALUTE_CURA' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_SALUTE_CURA_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='SALUTE_CURA' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_SALUTE_CURA_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='SHOPPING_SERVIZI' and a.CANALE in ('APP') then a.IMPORTO_DARE else 0 end) as PPAY_SHOPPING_SERVIZI_APP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='SHOPPING_SERVIZI' and a.CANALE in ('APP') then a.NUMERO_DARE else 0 end) as PPAY_SHOPPING_SERVIZI_APP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='SHOPPING_SERVIZI' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_SHOPPING_SERVIZI_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='SHOPPING_SERVIZI' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_SHOPPING_SERVIZI_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='SHOPPING_SERVIZI' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_SHOPPING_SERVIZI_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='SHOPPING_SERVIZI' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_SHOPPING_SERVIZI_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='TEMPOLIBERO_VIAGGIO' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_TEMPOLIBERO_VIAGGIO_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='TEMPOLIBERO_VIAGGIO' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_TEMPOLIBERO_VIAGGIO_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='TEMPOLIBERO_VIAGGIO' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_TEMPOLIBERO_VIAGGIO_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='TEMPOLIBERO_VIAGGIO' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_TEMPOLIBERO_VIAGGIO_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='VARIE_MCC' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_PAG_VARIE_MCC_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='VARIE_MCC' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_PAG_VARIE_MCC_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='VARIE_MCC' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_PAG_VARIE_MCC_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='VARIE_MCC' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_PAG_VARIE_MCC_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='VARIE_MCC' and a.CANALE in ('WEB_POSTE') then a.IMPORTO_DARE else 0 end) as PPAY_PAG_VARIE_MCC_WEBPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='VARIE_MCC' and a.CANALE in ('WEB_POSTE') then a.NUMERO_DARE else 0 end) as PPAY_PAG_VARIE_MCC_WEBPOSTE_NUM_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('APP') then a.IMPORTO_DARE else 0 end) as PPAY_PAG_ALTREMCC_APP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('APP') then a.NUMERO_DARE else 0 end) as PPAY_PAG_ALTREMCC_APP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('ATM_POSTE') then a.IMPORTO_DARE else 0 end) as PPAY_PAG_ALTREMCC_ATMPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('ATM_POSTE') then a.NUMERO_DARE else 0 end) as PPAY_PAG_ALTREMCC_ATMPOSTE_NUM_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_PAG_ALTREMCC_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_PAG_ALTREMCC_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_PAG_ALTREMCC_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_PAG_ALTREMCC_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('WEB_POSTE') then a.IMPORTO_DARE else 0 end) as PPAY_PAG_ALTREMCC_WEBPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('WEB_POSTE') then a.NUMERO_DARE else 0 end) as PPAY_PAG_ALTREMCC_WEBPOSTE_NUM_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE not in ('ATM_POSTE','POS_ESTERNO','WEB_ESTERNO','APP','WEB_POSTE') then a.IMPORTO_DARE else 0 end) as PPAY_PAG_ALTREMCC_ALTRO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE not in ('ATM_POSTE','POS_ESTERNO','WEB_ESTERNO','APP','WEB_POSTE') then a.NUMERO_DARE else 0 end) as PPAY_PAG_ALTREMCC_ALTRO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='PAGAMENTI' then a.IMPORTO_AVERE else 0 end) as PPAY_PAGAMENTI_CENTRO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='PAGAMENTI' then a.NUMERO_AVERE else 0 end) as PPAY_PAGAMENTI_CENTRO_NUM_ENTRATA
+		
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('ATM_POSTE') then a.IMPORTO_DARE else 0 end) as PPAY_PRELIEVO_ATMPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('ATM_POSTE') then a.NUMERO_DARE else 0 end) as PPAY_PRELIEVO_ATMPOSTE_NUM_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('ATM_BANCARIO') then a.IMPORTO_DARE else 0 end) as PPAY_PRELIEVO_ATMBANCARIO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('ATM_BANCARIO') then a.NUMERO_DARE else 0 end) as PPAY_PRELIEVO_ATMBANCARIO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_PRELIEVO_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_PRELIEVO_POSESTERNO_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('UP') then a.IMPORTO_DARE else 0 end) as PPAY_PRELIEVO_UP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('UP') then a.NUMERO_DARE else 0 end) as PPAY_PRELIEVO_UP_NUM_USCITA	
+		
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('APP') then a.IMPORTO_AVERE else 0 end) as PPAY_RICARICA_POSTEPAY_APP_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('APP') then a.NUMERO_AVERE else 0 end) as PPAY_RICARICA_POSTEPAY_APP_NUM_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('APP') then a.IMPORTO_DARE else 0 end) as PPAY_RICARICA_POSTEPAY_APP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('APP') then a.NUMERO_DARE else 0 end) as PPAY_RICARICA_POSTEPAY_APP_NUM_USCITA		
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('ATM_POSTE') then a.IMPORTO_AVERE else 0 end) as PPAY_RICARICA_POSTEPAY_ATMPOSTE_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('ATM_POSTE') then a.NUMERO_AVERE else 0 end) as PPAY_RICARICA_POSTEPAY_ATMPOSTE_NUM_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('ATM_POSTE') then a.IMPORTO_DARE else 0 end) as PPAY_RICARICA_POSTEPAY_ATMPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('ATM_POSTE') then a.NUMERO_DARE else 0 end) as PPAY_RICARICA_POSTEPAY_ATMPOSTE_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_AVERE else 0 end) as PPAY_RICARICA_POSTEPAY_POSESTERNO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_AVERE else 0 end) as PPAY_RICARICA_POSTEPAY_POSESTERNO_NUM_ENTRATA			
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('UP') then a.IMPORTO_AVERE else 0 end) as PPAY_RICARICA_POSTEPAY_UP_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('UP') then a.NUMERO_AVERE else 0 end) as PPAY_RICARICA_POSTEPAY_UP_NUM_ENTRATA	
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('CENTRO') then a.IMPORTO_AVERE else 0 end) as PPAY_RICARICA_POSTEPAY_CENTRO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('CENTRO') then a.NUMERO_AVERE else 0 end) as PPAY_RICARICA_POSTEPAY_CENTRO_NUM_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('WEB_POSTE') then a.IMPORTO_AVERE else 0 end) as PPAY_RICARICA_POSTEPAY_WEBPOSTE_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('WEB_POSTE') then a.NUMERO_AVERE else 0 end) as PPAY_RICARICA_POSTEPAY_WEBPOSTE_NUM_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('WEB_POSTE') then a.IMPORTO_DARE else 0 end) as PPAY_RICARICA_POSTEPAY_WEBPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('WEB_POSTE') then a.NUMERO_DARE else 0 end) as PPAY_RICARICA_POSTEPAY_WEBPOSTE_NUM_USCITA	
+		
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE in ('ATM_POSTE') then a.IMPORTO_DARE else 0 end) as PPAY_RICARICA_TELEFONICA_ATMPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE in ('ATM_POSTE') then a.NUMERO_DARE else 0 end) as PPAY_RICARICA_TELEFONICA_ATMPOSTE_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as PPAY_RICARICA_TELEFONICA_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as PPAY_RICARICA_TELEFONICA_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE in ('WEB_POSTE') then a.IMPORTO_DARE else 0 end) as PPAY_RICARICA_TELEFONICA_WEBPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE in ('WEB_POSTE') then a.NUMERO_DARE else 0 end) as PPAY_RICARICA_TELEFONICA_WEBPOSTE_NUM_USCITA			
+		
+		, sum(case when a.DES_RICLAS='STORNO' then a.IMPORTO_AVERE else 0 end) as PPAY_STORNO_CENTRO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='STORNO' then a.NUMERO_AVERE else 0 end) as PPAY_STORNO_CENTRO_NUM_ENTRATA	
+		, sum(case when a.DES_RICLAS='STORNO' then a.IMPORTO_DARE else 0 end) as PPAY_STORNO_CENTRO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='STORNO' then a.NUMERO_DARE else 0 end) as PPAY_STORNO_CENTRO_NUM_USCITA				
+		
+		, sum(case when a.DES_RICLAS='VARIE' then a.IMPORTO_AVERE else 0 end) as PPAY_VARIE_CENTRO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='VARIE' then a.NUMERO_AVERE else 0 end) as PPAY_VARIE_CENTRO_NUM_ENTRATA	
+		
+		, (PPAY_RICARICA_POSTEPAY_UP_IMP_ENTRATA + PPAY_RICARICA_POSTEPAY_ATMPOSTE_IMP_ENTRATA + PPAY_RICARICA_POSTEPAY_POSESTERNO_IMP_ENTRATA
+			) as PPAY_TOT_OPER_FISICO_IMP_ENTRATA
+		
+		, (PPAY_RICARICA_POSTEPAY_UP_NUM_ENTRATA + PPAY_RICARICA_POSTEPAY_ATMPOSTE_NUM_ENTRATA + PPAY_RICARICA_POSTEPAY_POSESTERNO_NUM_ENTRATA
+			) as PPAY_TOT_OPER_FISICO_NUM_ENTRATA
+		
+		, (PPAY_BANCA_FIN_IMPOSTE_POSESTERNO_IMP_USCITA + PPAY_BAR_RISTORANTI_POSESTERNO_IMP_USCITA + PPAY_CASA_POSESTERNO_IMP_USCITA
+			 + PPAY_CASA_UP_IMP_USCITA + PPAY_CIBO_SPESA_POSESTERNO_IMP_USCITA + PPAY_GIOCO_POSESTERNO_IMP_USCITA
+			 + PPAY_ISTRUZIONE_POSESTERNO_IMP_USCITA + PPAY_MOTORI_TRASPORTI_POSESTERNO_IMP_USCITA + PPAY_SALUTE_CURA_POSESTERNO_IMP_USCITA
+			 + PPAY_SHOPPING_SERVIZI_POSESTERNO_IMP_USCITA + PPAY_TEMPOLIBERO_VIAGGIO_POSESTERNO_IMP_USCITA
+			 + PPAY_PAG_VARIE_MCC_POSESTERNO_IMP_USCITA + PPAY_PAG_ALTREMCC_ATMPOSTE_IMP_USCITA + PPAY_PAG_ALTREMCC_POSESTERNO_IMP_USCITA
+			 + PPAY_PAG_ALTREMCC_ALTRO_IMP_USCITA + PPAY_PRELIEVO_ATMPOSTE_IMP_USCITA + PPAY_PRELIEVO_ATMBANCARIO_IMP_USCITA
+			 + PPAY_PRELIEVO_POSESTERNO_IMP_USCITA + PPAY_PRELIEVO_UP_IMP_USCITA + PPAY_RICARICA_POSTEPAY_ATMPOSTE_IMP_USCITA
+			 + PPAY_RICARICA_TELEFONICA_ATMPOSTE_IMP_USCITA + PPAY_RICARICA_TELEFONICA_POSESTERNO_IMP_USCITA) as PPAY_TOT_OPER_FISICO_IMP_USCITA
+		
+		, (PPAY_BANCA_FIN_IMPOSTE_POSESTERNO_NUM_USCITA + PPAY_BAR_RISTORANTI_POSESTERNO_NUM_USCITA + PPAY_CASA_POSESTERNO_NUM_USCITA
+			 + PPAY_CASA_UP_NUM_USCITA + PPAY_CIBO_SPESA_POSESTERNO_NUM_USCITA + PPAY_GIOCO_POSESTERNO_NUM_USCITA
+			 + PPAY_ISTRUZIONE_POSESTERNO_NUM_USCITA + PPAY_MOTORI_TRASPORTI_POSESTERNO_NUM_USCITA + PPAY_SALUTE_CURA_POSESTERNO_NUM_USCITA
+			 + PPAY_SHOPPING_SERVIZI_POSESTERNO_NUM_USCITA + PPAY_TEMPOLIBERO_VIAGGIO_POSESTERNO_NUM_USCITA + 
+			 + PPAY_PAG_VARIE_MCC_POSESTERNO_NUM_USCITA + PPAY_PAG_ALTREMCC_ATMPOSTE_NUM_USCITA + PPAY_PAG_ALTREMCC_POSESTERNO_NUM_USCITA
+			 + PPAY_PAG_ALTREMCC_ALTRO_NUM_USCITA + PPAY_PRELIEVO_ATMPOSTE_NUM_USCITA + PPAY_PRELIEVO_ATMBANCARIO_NUM_USCITA
+			 + PPAY_PRELIEVO_POSESTERNO_NUM_USCITA + PPAY_PRELIEVO_UP_NUM_USCITA + PPAY_RICARICA_POSTEPAY_ATMPOSTE_NUM_USCITA
+			 + PPAY_RICARICA_TELEFONICA_ATMPOSTE_NUM_USCITA + PPAY_RICARICA_TELEFONICA_POSESTERNO_NUM_USCITA) as PPAY_TOT_OPER_FISICO_NUM_USCITA
+		
+		, (PPAY_COMMISSIONI_CENTRO_IMP_ENTRATA + PPAY_PAGAMENTI_CENTRO_IMP_ENTRATA + PPAY_STORNO_CENTRO_IMP_ENTRATA + PPAY_VARIE_CENTRO_IMP_ENTRATA 
+			+ PPAY_RICARICA_POSTEPAY_CENTRO_IMP_ENTRATA) as PPAY_TOT_OPER_CENTRO_IMP_ENTRATA
+		
+		, (PPAY_COMMISSIONI_CENTRO_NUM_ENTRATA + PPAY_PAGAMENTI_CENTRO_NUM_ENTRATA + PPAY_STORNO_CENTRO_NUM_ENTRATA + PPAY_VARIE_CENTRO_NUM_ENTRATA
+			+ PPAY_RICARICA_POSTEPAY_CENTRO_NUM_ENTRATA) as PPAY_TOT_OPER_CENTRO_NUM_ENTRATA
+		
+		, (PPAY_COMMISSIONI_CENTRO_IMP_USCITA + PPAY_STORNO_CENTRO_IMP_USCITA) as PPAY_TOT_OPER_CENTRO_IMP_USCITA
+		
+		, (PPAY_COMMISSIONI_CENTRO_NUM_USCITA + PPAY_STORNO_CENTRO_NUM_USCITA) as PPAY_TOT_OPER_CENTRO_NUM_USCITA
+		
+		, (PPAY_RICARICA_POSTEPAY_APP_IMP_ENTRATA + PPAY_RICARICA_POSTEPAY_WEBPOSTE_IMP_ENTRATA) as PPAY_TOT_OPER_DIGITAL_IMP_ENTRATA
+				
+		, (PPAY_RICARICA_POSTEPAY_APP_NUM_ENTRATA + PPAY_RICARICA_POSTEPAY_WEBPOSTE_NUM_ENTRATA) as PPAY_TOT_OPER_DIGITAL_NUM_ENTRATA
+		
+		, (PPAY_BANCA_FIN_IMPOSTE_APP_IMP_USCITA + PPAY_BANCA_FIN_IMPOSTE_WEBESTERNO_IMP_USCITA + PPAY_BANCA_FIN_IMPOSTE_WEBPOSTE_IMP_USCITA
+			 + PPAY_BAR_RISTORANTI_WEBESTERNO_IMP_USCITA + PPAY_CASA_APP_IMP_USCITA + PPAY_CASA_WEBESTERNO_IMP_USCITA
+			 + PPAY_CIBO_SPESA_APP_IMP_USCITA + PPAY_CIBO_SPESA_WEBESTERNO_IMP_USCITA + PPAY_GIOCO_WEBESTERNO_IMP_USCITA
+			 + PPAY_ISTRUZIONE_WEBESTERNO_IMP_USCITA + PPAY_MOTORI_TRASPORTI_APP_IMP_USCITA + PPAY_MOTORI_TRASPORTI_WEBESTERNO_IMP_USCITA
+			 + PPAY_SALUTE_CURA_WEBESTERNO_IMP_USCITA + PPAY_SHOPPING_SERVIZI_APP_IMP_USCITA + PPAY_SHOPPING_SERVIZI_WEBESTERNO_IMP_USCITA
+			 + PPAY_TEMPOLIBERO_VIAGGIO_WEBESTERNO_IMP_USCITA + PPAY_PAG_VARIE_MCC_WEBESTERNO_IMP_USCITA + PPAY_PAG_VARIE_MCC_WEBPOSTE_IMP_USCITA
+			 + PPAY_PAG_ALTREMCC_APP_IMP_USCITA + PPAY_PAG_ALTREMCC_WEBESTERNO_IMP_USCITA + PPAY_PAG_ALTREMCC_WEBPOSTE_IMP_USCITA
+			 + PPAY_RICARICA_POSTEPAY_APP_IMP_USCITA + PPAY_RICARICA_POSTEPAY_WEBPOSTE_IMP_USCITA + PPAY_RICARICA_TELEFONICA_WEBPOSTE_IMP_USCITA
+			 ) as PPAY_TOT_OPER_DIGITAL_IMP_USCITA
+		
+		, (PPAY_BANCA_FIN_IMPOSTE_APP_NUM_USCITA + PPAY_BANCA_FIN_IMPOSTE_WEBESTERNO_NUM_USCITA + PPAY_BANCA_FIN_IMPOSTE_WEBPOSTE_NUM_USCITA
+			 + PPAY_BAR_RISTORANTI_WEBESTERNO_NUM_USCITA + PPAY_CASA_APP_NUM_USCITA + PPAY_CASA_WEBESTERNO_NUM_USCITA
+			 + PPAY_CIBO_SPESA_APP_NUM_USCITA + PPAY_CIBO_SPESA_WEBESTERNO_NUM_USCITA + PPAY_GIOCO_WEBESTERNO_NUM_USCITA
+			 + PPAY_ISTRUZIONE_WEBESTERNO_NUM_USCITA + PPAY_MOTORI_TRASPORTI_APP_NUM_USCITA + PPAY_MOTORI_TRASPORTI_WEBESTERNO_NUM_USCITA
+			 + PPAY_SALUTE_CURA_WEBESTERNO_NUM_USCITA + PPAY_SHOPPING_SERVIZI_APP_NUM_USCITA + PPAY_SHOPPING_SERVIZI_WEBESTERNO_NUM_USCITA
+			 + PPAY_TEMPOLIBERO_VIAGGIO_WEBESTERNO_NUM_USCITA + PPAY_PAG_VARIE_MCC_WEBESTERNO_NUM_USCITA + PPAY_PAG_VARIE_MCC_WEBPOSTE_NUM_USCITA
+			 + PPAY_PAG_ALTREMCC_APP_NUM_USCITA + PPAY_PAG_ALTREMCC_WEBESTERNO_NUM_USCITA + PPAY_PAG_ALTREMCC_WEBPOSTE_NUM_USCITA
+			 + PPAY_RICARICA_POSTEPAY_APP_NUM_USCITA + PPAY_RICARICA_POSTEPAY_WEBPOSTE_NUM_USCITA + PPAY_RICARICA_TELEFONICA_WEBPOSTE_NUM_USCITA
+			 ) as PPAY_TOT_OPER_DIGITAL_NUM_USCITA
+	from EBIL_AREE.V_CT_PERIMETRO as b
+	left join MONETICA_MCC_RAGGR as a
+		on a.ID_CLIENTE_BIC=b.ID_CLIENTE_BIC and a.TIPO_CARTA='CARTA_PREPAGATA' 
+	group by 1,2
+)with data primary index(ID_CLIENTE_BIC, ID_PERIODO_TEMPORALE) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+BT
+
+;DELETE EBIL_AREE.CT_OPERAT_POSTEPAY_STANDARD
+WHERE ID_PERIODO_TEMPORALE= (SELECT ID_PERIODO_TEMPORALE FROM EBIL_AREE.CT_PARAMETRI)
+
+;INSERT INTO  EBIL_AREE.CT_OPERAT_POSTEPAY_STANDARD 
+	select * from CT_OPERAT_POSTEPAY
+WHERE ID_PERIODO_TEMPORALE= (SELECT ID_PERIODO_TEMPORALE FROM EBIL_AREE.CT_PARAMETRI)
+
+;ET;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+CREATE VOLATILE TABLE VTB_OPERAT_POSTEPAY_STANDARD_SV AS
+(SELECT ID_PERIODO_TEMPORALE, ROW_NUMBER () over ( ORDER BY ID_PERIODO_TEMPORALE  DESC) AS ORDINAMENTO
+FROM  EBIL_AREE.CT_OPERAT_POSTEPAY_STANDARD
+GROUP BY 1)
+WITH DATA PRIMARY INDEX (ID_PERIODO_TEMPORALE) ON COMMIT PRESERVE ROWS;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+DELETE EBIL_AREE.CT_OPERAT_POSTEPAY_STANDARD
+WHERE ID_PERIODO_TEMPORALE IN ( SELECT ID_PERIODO_TEMPORALE 
+FROM VTB_OPERAT_POSTEPAY_STANDARD_SV
+WHERE ORDINAMENTO >25);
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+create volatile table CT_OPERAT_EVOLUTION as (
+	select
+		b.ID_CLIENTE_BIC,
+		b.ID_PERIODO_TEMPORALE
+		
+		, sum(case when a.DES_RICLAS='BONIFICO' then a.IMPORTO_AVERE else 0 end) as EVO_BONIFICO_CENTRO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='BONIFICO' then a.NUMERO_AVERE else 0 end) as EVO_BONIFICO_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE in ('APP') then a.IMPORTO_DARE else 0 end) as EVO_BONIFICO_APP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE in ('APP') then a.NUMERO_DARE else 0 end) as EVO_BONIFICO_APP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE in ('UP') then a.IMPORTO_DARE else 0 end) as EVO_BONIFICO_UP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE in ('UP') then a.NUMERO_DARE else 0 end) as EVO_BONIFICO_UP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE in ('WEB_POSTE') then a.IMPORTO_DARE else 0 end) as EVO_BONIFICO_WEBPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE in ('WEB_POSTE') then a.NUMERO_DARE else 0 end) as EVO_BONIFICO_WEBPOSTE_NUM_USCITA
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE in ('CENTRO') then a.IMPORTO_DARE else 0 end) as EVO_BONIFICO_CENTRO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE in ('CENTRO') then a.NUMERO_DARE else 0 end) as EVO_BONIFICO_CENTRO_NUM_USCITA
+		
+		, sum(case when a.DES_RICLAS='COMMISSIONI' then a.IMPORTO_DARE else 0 end) as EVO_COMMISSIONI_CENTRO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='COMMISSIONI' then a.NUMERO_DARE else 0 end) as EVO_COMMISSIONI_CENTRO_NUM_USCITA		
+		, sum(case when a.DES_RICLAS='COMMISSIONI' then a.IMPORTO_AVERE else 0 end) as EVO_COMMISSIONI_CENTRO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='COMMISSIONI' then a.NUMERO_AVERE else 0 end) as EVO_COMMISSIONI_CENTRO_NUM_ENTRATA
+		
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('APP') then a.IMPORTO_DARE else 0 end) as EVO_BANCA_FIN_IMPOSTE_APP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('APP') then a.NUMERO_DARE else 0 end) as EVO_BANCA_FIN_IMPOSTE_APP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_BANCA_FIN_IMPOSTE_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_BANCA_FIN_IMPOSTE_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_BANCA_FIN_IMPOSTE_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_BANCA_FIN_IMPOSTE_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('WEB_POSTE') then a.IMPORTO_DARE else 0 end) as EVO_BANCA_FIN_IMPOSTE_WEBPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BANCA_FINANZA_IMPOSTE' and a.CANALE in ('WEB_POSTE') then a.NUMERO_DARE else 0 end) as EVO_BANCA_FIN_IMPOSTE_WEBPOSTE_NUM_USCITA		
+		, sum(case when a.DES_RICLAS='BAR_RISTORANTI' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_BAR_RISTORANTI_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BAR_RISTORANTI' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_BAR_RISTORANTI_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='BAR_RISTORANTI' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_BAR_RISTORANTI_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='BAR_RISTORANTI' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_BAR_RISTORANTI_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('APP') then a.IMPORTO_DARE else 0 end) as EVO_CASA_APP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('APP') then a.NUMERO_DARE else 0 end) as EVO_CASA_APP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_CASA_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_CASA_POSESTERNO_NUM_USCITA		
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('UP') then a.IMPORTO_DARE else 0 end) as EVO_CASA_UP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('UP') then a.NUMERO_DARE else 0 end) as EVO_CASA_UP_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_CASA_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='CASA' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_CASA_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='CIBO_SPESA' and a.CANALE in ('APP') then a.IMPORTO_DARE else 0 end) as EVO_CIBO_SPESA_APP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='CIBO_SPESA' and a.CANALE in ('APP') then a.NUMERO_DARE else 0 end) as EVO_CIBO_SPESA_APP_NUM_USCITA		
+		, sum(case when a.DES_RICLAS='CIBO_SPESA' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_CIBO_SPESA_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='CIBO_SPESA' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_CIBO_SPESA_POSESTERNO_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='CIBO_SPESA' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_CIBO_SPESA_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='CIBO_SPESA' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_CIBO_SPESA_WEBESTERNO_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='GIOCO' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_GIOCO_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='GIOCO' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_GIOCO_POSESTERNO_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='GIOCO' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_GIOCO_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='GIOCO' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_GIOCO_WEBESTERNO_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='ISTRUZIONE' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_ISTRUZIONE_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ISTRUZIONE' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_ISTRUZIONE_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='ISTRUZIONE' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_ISTRUZIONE_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ISTRUZIONE' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_ISTRUZIONE_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='MOTORI_TRASPORTI' and a.CANALE in ('APP') then a.IMPORTO_DARE else 0 end) as EVO_MOTORI_TRASPORTI_APP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='MOTORI_TRASPORTI' and a.CANALE in ('APP') then a.NUMERO_DARE else 0 end) as EVO_MOTORI_TRASPORTI_APP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='MOTORI_TRASPORTI' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_MOTORI_TRASPORTI_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='MOTORI_TRASPORTI' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_MOTORI_TRASPORTI_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='MOTORI_TRASPORTI' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_MOTORI_TRASPORTI_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='MOTORI_TRASPORTI' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_MOTORI_TRASPORTI_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='SALUTE_CURA' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_SALUTE_CURA_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='SALUTE_CURA' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_SALUTE_CURA_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='SALUTE_CURA' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_SALUTE_CURA_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='SALUTE_CURA' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_SALUTE_CURA_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='SHOPPING_SERVIZI' and a.CANALE in ('APP') then a.IMPORTO_DARE else 0 end) as EVO_SHOPPING_SERVIZI_APP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='SHOPPING_SERVIZI' and a.CANALE in ('APP') then a.NUMERO_DARE else 0 end) as EVO_SHOPPING_SERVIZI_APP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='SHOPPING_SERVIZI' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_SHOPPING_SERVIZI_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='SHOPPING_SERVIZI' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_SHOPPING_SERVIZI_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='SHOPPING_SERVIZI' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_SHOPPING_SERVIZI_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='SHOPPING_SERVIZI' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_SHOPPING_SERVIZI_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='TEMPOLIBERO_VIAGGIO' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_TEMPOLIBERO_VIAGGIO_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='TEMPOLIBERO_VIAGGIO' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_TEMPOLIBERO_VIAGGIO_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='TEMPOLIBERO_VIAGGIO' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_TEMPOLIBERO_VIAGGIO_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='TEMPOLIBERO_VIAGGIO' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_TEMPOLIBERO_VIAGGIO_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='VARIE_MCC' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_PAG_VARIE_MCC_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='VARIE_MCC' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_PAG_VARIE_MCC_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='VARIE_MCC' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_PAG_VARIE_MCC_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='VARIE_MCC' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_PAG_VARIE_MCC_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='VARIE_MCC' and a.CANALE in ('WEB_POSTE') then a.IMPORTO_DARE else 0 end) as EVO_PAG_VARIE_MCC_WEBPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='VARIE_MCC' and a.CANALE in ('WEB_POSTE') then a.NUMERO_DARE else 0 end) as EVO_PAG_VARIE_MCC_WEBPOSTE_NUM_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('APP') then a.IMPORTO_DARE else 0 end) as EVO_PAG_ALTREMCC_APP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('APP') then a.NUMERO_DARE else 0 end) as EVO_PAG_ALTREMCC_APP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('ATM_POSTE') then a.IMPORTO_DARE else 0 end) as EVO_PAG_ALTREMCC_ATMPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('ATM_POSTE') then a.NUMERO_DARE else 0 end) as EVO_PAG_ALTREMCC_ATMPOSTE_NUM_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_PAG_ALTREMCC_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_PAG_ALTREMCC_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('WEB_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_PAG_ALTREMCC_WEBESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('WEB_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_PAG_ALTREMCC_WEBESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('WEB_POSTE') then a.IMPORTO_DARE else 0 end) as EVO_PAG_ALTREMCC_WEBPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('WEB_POSTE') then a.NUMERO_DARE else 0 end) as EVO_PAG_ALTREMCC_WEBPOSTE_NUM_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('CENTRO') then a.IMPORTO_DARE else 0 end) as EVO_PAG_ALTREMCC_CENTRO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE in ('CENTRO') then a.NUMERO_DARE else 0 end) as EVO_PAG_ALTREMCC_CENTRO_NUM_USCITA		
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE not in ('ATM_POSTE','POS_ESTERNO','WEB_ESTERNO','APP','WEB_POSTE') then a.IMPORTO_DARE else 0 end) as EVO_PAG_ALTREMCC_ALTRO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='ALTRE_MCC' and a.CANALE not in ('ATM_POSTE','POS_ESTERNO','WEB_ESTERNO','APP','WEB_POSTE') then a.NUMERO_DARE else 0 end) as EVO_PAG_ALTREMCC_ALTRO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='PAGAMENTI' then a.IMPORTO_AVERE else 0 end) as EVO_PAGAMENTI_CENTRO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='PAGAMENTI' then a.NUMERO_AVERE else 0 end) as EVO_PAGAMENTI_CENTRO_NUM_ENTRATA
+		
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' then a.IMPORTO_AVERE else 0 end) as EVO_POSTAGIRO_DA_CONTO_CENTRO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' then a.NUMERO_AVERE else 0 end) as EVO_POSTAGIRO_DA_CONTO_CENTRO_NUM_ENTRATA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' and a.CANALE in ('APP') then a.IMPORTO_DARE else 0 end) as EVO_POSTAGIRO_A_CONTO_APP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' and a.CANALE in ('APP') then a.NUMERO_DARE else 0 end) as EVO_POSTAGIRO_A_CONTO_APP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' and a.CANALE in ('UP') then a.IMPORTO_DARE else 0 end) as EVO_POSTAGIRO_A_CONTO_UP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' and a.CANALE in ('UP') then a.NUMERO_DARE else 0 end) as EVO_POSTAGIRO_A_CONTO_UP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' and a.CANALE in ('WEB_POSTE') then a.IMPORTO_DARE else 0 end) as EVO_POSTAGIRO_A_CONTO_WEBPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' and a.CANALE in ('WEB_POSTE') then a.NUMERO_DARE else 0 end) as EVO_POSTAGIRO_A_CONTO_WEBPOSTE_NUM_USCITA
+		
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_EVOLUTION' then a.IMPORTO_AVERE else 0 end) as EVO_POSTAGIRO_DA_EVO_CENTRO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_EVOLUTION' then a.NUMERO_AVERE else 0 end) as EVO_POSTAGIRO_DA_EVO_CENTRO_NUM_ENTRATA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_EVOLUTION' and a.CANALE in ('APP') then a.IMPORTO_DARE else 0 end) as EVO_POSTAGIRO_A_EVO_APP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_EVOLUTION' and a.CANALE in ('APP') then a.NUMERO_DARE else 0 end) as EVO_POSTAGIRO_A_EVO_APP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_EVOLUTION' and a.CANALE in ('UP') then a.IMPORTO_DARE else 0 end) as EVO_POSTAGIRO_A_EVO_UP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_EVOLUTION' and a.CANALE in ('UP') then a.NUMERO_DARE else 0 end) as EVO_POSTAGIRO_A_EVO_UP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_EVOLUTION' and a.CANALE in ('WEB_POSTE') then a.IMPORTO_DARE else 0 end) as EVO_POSTAGIRO_A_EVO_WEBPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_EVOLUTION' and a.CANALE in ('WEB_POSTE') then a.NUMERO_DARE else 0 end) as EVO_POSTAGIRO_A_EVO_WEBPOSTE_NUM_USCITA
+		
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('ATM_POSTE') then a.IMPORTO_DARE else 0 end) as EVO_PRELIEVO_ATMPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('ATM_POSTE') then a.NUMERO_DARE else 0 end) as EVO_PRELIEVO_ATMPOSTE_NUM_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('ATM_BANCARIO') then a.IMPORTO_DARE else 0 end) as EVO_PRELIEVO_ATMBANCARIO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('ATM_BANCARIO') then a.NUMERO_DARE else 0 end) as EVO_PRELIEVO_ATMBANCARIO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_PRELIEVO_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_PRELIEVO_POSESTERNO_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('UP') then a.IMPORTO_DARE else 0 end) as EVO_PRELIEVO_UP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE in ('UP') then a.NUMERO_DARE else 0 end) as EVO_PRELIEVO_UP_NUM_USCITA	
+		
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('APP') then a.IMPORTO_AVERE else 0 end) as EVO_RICARICA_POSTEPAY_APP_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('APP') then a.NUMERO_AVERE else 0 end) as EVO_RICARICA_POSTEPAY_APP_NUM_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('APP') then a.IMPORTO_DARE else 0 end) as EVO_RICARICA_POSTEPAY_APP_IMP_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('APP') then a.NUMERO_DARE else 0 end) as EVO_RICARICA_POSTEPAY_APP_NUM_USCITA		
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('ATM_POSTE') then a.IMPORTO_AVERE else 0 end) as EVO_RICARICA_POSTEPAY_ATMPOSTE_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('ATM_POSTE') then a.NUMERO_AVERE else 0 end) as EVO_RICARICA_POSTEPAY_ATMPOSTE_NUM_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('ATM_POSTE') then a.IMPORTO_DARE else 0 end) as EVO_RICARICA_POSTEPAY_ATMPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('ATM_POSTE') then a.NUMERO_DARE else 0 end) as EVO_RICARICA_POSTEPAY_ATMPOSTE_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_AVERE else 0 end) as EVO_RICARICA_POSTEPAY_POSESTERNO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_AVERE else 0 end) as EVO_RICARICA_POSTEPAY_POSESTERNO_NUM_ENTRATA			
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('UP') then a.IMPORTO_AVERE else 0 end) as EVO_RICARICA_POSTEPAY_UP_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('UP') then a.NUMERO_AVERE else 0 end) as EVO_RICARICA_POSTEPAY_UP_NUM_ENTRATA	
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('CENTRO') then a.IMPORTO_AVERE else 0 end) as EVO_RICARICA_POSTEPAY_CENTRO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('CENTRO') then a.NUMERO_AVERE else 0 end) as EVO_RICARICA_POSTEPAY_CENTRO_NUM_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('WEB_POSTE') then a.IMPORTO_AVERE else 0 end) as EVO_RICARICA_POSTEPAY_WEBPOSTE_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('WEB_POSTE') then a.NUMERO_AVERE else 0 end) as EVO_RICARICA_POSTEPAY_WEBPOSTE_NUM_ENTRATA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('WEB_POSTE') then a.IMPORTO_DARE else 0 end) as EVO_RICARICA_POSTEPAY_WEBPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE in ('WEB_POSTE') then a.NUMERO_DARE else 0 end) as EVO_RICARICA_POSTEPAY_WEBPOSTE_NUM_USCITA	
+		
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE in ('ATM_POSTE') then a.IMPORTO_DARE else 0 end) as EVO_RICARICA_TELEFONICA_ATMPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE in ('ATM_POSTE') then a.NUMERO_DARE else 0 end) as EVO_RICARICA_TELEFONICA_ATMPOSTE_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE in ('DIGITAL') then a.IMPORTO_DARE else 0 end) as EVO_RICARICA_TELEFONICA_DIGITAL_IMP_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE in ('DIGITAL') then a.NUMERO_DARE else 0 end) as EVO_RICARICA_TELEFONICA_DIGITAL_NUM_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE in ('POS_ESTERNO') then a.IMPORTO_DARE else 0 end) as EVO_RICARICA_TELEFONICA_POSESTERNO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE in ('POS_ESTERNO') then a.NUMERO_DARE else 0 end) as EVO_RICARICA_TELEFONICA_POSESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE in ('WEB_POSTE') then a.IMPORTO_DARE else 0 end) as EVO_RICARICA_TELEFONICA_WEBPOSTE_IMP_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE in ('WEB_POSTE') then a.NUMERO_DARE else 0 end) as EVO_RICARICA_TELEFONICA_WEBPOSTE_NUM_USCITA			
+		
+		, sum(case when a.DES_RICLAS='SDD' and a.CANALE in ('CENTRO') then a.IMPORTO_AVERE else 0 end) as EVO_SDD_CENTRO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='SDD' and a.CANALE in ('CENTRO') then a.NUMERO_AVERE else 0 end) as EVO_SDD_CENTRO_NUM_ENTRATA
+		, sum(case when a.DES_RICLAS='SDD' and a.CANALE in ('CENTRO') then a.IMPORTO_DARE else 0 end) as EVO_SDD_CENTRO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='SDD' and a.CANALE in ('CENTRO') then a.NUMERO_DARE else 0 end) as EVO_SDD_CENTRO_NUM_USCITA		
+		
+		, sum(case when a.DES_RICLAS='STIPENDIO_PENSIONE' and a.CANALE in ('CENTRO') then a.IMPORTO_AVERE else 0 end) as EVO_STIPENDIO_PENSIONE_CENTRO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='STIPENDIO_PENSIONE' and a.CANALE in ('CENTRO') then a.NUMERO_AVERE else 0 end) as EVO_STIPENDIO_PENSIONE_CENTRO_NUM_ENTRATA
+		
+		, sum(case when a.DES_RICLAS='STORNO' then a.IMPORTO_AVERE else 0 end) as EVO_STORNO_CENTRO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='STORNO' then a.NUMERO_AVERE else 0 end) as EVO_STORNO_CENTRO_NUM_ENTRATA	
+		, sum(case when a.DES_RICLAS='STORNO' then a.IMPORTO_DARE else 0 end) as EVO_STORNO_CENTRO_IMP_USCITA
+		, sum(case when a.DES_RICLAS='STORNO' then a.NUMERO_DARE else 0 end) as EVO_STORNO_CENTRO_NUM_USCITA				
+		
+		, sum(case when a.DES_RICLAS='VARIE' then a.IMPORTO_AVERE else 0 end) as EVO_VARIE_CENTRO_IMP_ENTRATA
+		, sum(case when a.DES_RICLAS='VARIE' then a.NUMERO_AVERE else 0 end) as EVO_VARIE_CENTRO_NUM_ENTRATA	
+		
+		, sum(coalesce(a.BON_STIPENDIO_PENSIONE_ENTRATA,0)) as EVO_BON_STIPENDIO_PENSIONE_ENTRATA
+		, sum(coalesce(a.BON_AFFITTO_ENTRATA,0)) as EVO_BON_AFFITTO_ENTRATA
+		, sum(coalesce(a.BON_MUTUO_ENTRATA,0)) as EVO_BON_MUTUO_ENTRATA
+		, sum(coalesce(a.BON_RETTA_ENTRATA,0)) as EVO_BON_RETTA_ENTRATA
+		, sum(coalesce(a.BON_PRESTITO_ENTRATA,0)) as EVO_BON_PRESTITO_ENTRATA
+		, sum(coalesce(a.BON_TRIBUTO_ENTRATA,0)) as EVO_BON_TRIBUTO_ENTRATA
+		, sum(coalesce(a.BON_CONDOMINIO_ENTRATA,0)) as EVO_BON_CONDOMINIO_ENTRATA
+		, sum(coalesce(a.BON_ACQUISTO_CASA_ENTRATA,0)) as EVO_BON_ACQUISTO_CASA_ENTRATA
+		, sum(coalesce(a.BON_UTENZE_ENTRATA,0)) as EVO_BON_UTENZE_ENTRATA
+		, sum(coalesce(a.BON_SPESE_SANITARIE_ENTRATA,0)) as EVO_BON_SPESE_SANITARIE_ENTRATA
+		, sum(coalesce(a.BON_MOTORI_ENTRATA,0)) as EVO_BON_MOTORI_ENTRATA
+		, sum(coalesce(a.BON_DISOCCUPAZIONE_ENTRATA,0)) as EVO_BON_DISOCCUPAZIONE_ENTRATA
+		, sum(coalesce(a.BON_NOZZE_ENTRATA,0)) as EVO_BON_NOZZE_ENTRATA
+		, sum(coalesce(a.BON_MANTENIMENTO_ENTRATA,0)) as EVO_BON_MANTENIMENTO_ENTRATA
+		, sum(coalesce(a.BON_NUCLEO_FAMIGLIA_ENTRATA,0)) as EVO_BON_NUCLEO_FAMIGLIA_ENTRATA
+		, sum(coalesce(a.BON_VIAGGI_ENTRATA,0)) as EVO_BON_VIAGGI_ENTRATA
+		, sum(coalesce(a.BON_ISTRUZIONE_ENTRATA,0)) as EVO_BON_ISTRUZIONE_ENTRATA
+		, sum(coalesce(a.BON_EREDITA_ENTRATA,0)) as EVO_BON_EREDITA_ENTRATA
+		, sum(coalesce(a.BON_LIQUIDAZIONE_POLIZZA_ENTRATA,0)) as EVO_BON_LIQUIDAZIONE_POLIZZA_ENTRATA
+		, sum(coalesce(a.BON_ALTRO_ENTRATA,0)) as EVO_BON_ALTRO_ENTRATA
+		, sum(coalesce(a.BON_STIPENDIO_PENSIONE_USCITA,0)) as EVO_BON_STIPENDIO_PENSIONE_USCITA
+		, sum(coalesce(a.BON_AFFITTO_USCITA,0)) as EVO_BON_AFFITTO_USCITA
+		, sum(coalesce(a.BON_MUTUO_USCITA,0)) as EVO_BON_MUTUO_USCITA
+		, sum(coalesce(a.BON_RETTA_USCITA,0)) as EVO_BON_RETTA_USCITA
+		, sum(coalesce(a.BON_PRESTITO_USCITA,0)) as EVO_BON_PRESTITO_USCITA
+		, sum(coalesce(a.BON_TRIBUTO_USCITA,0)) as EVO_BON_TRIBUTO_USCITA
+		, sum(coalesce(a.BON_CONDOMINIO_USCITA,0)) as EVO_BON_CONDOMINIO_USCITA
+		, sum(coalesce(a.BON_ACQUISTO_CASA_USCITA,0)) as EVO_BON_ACQUISTO_CASA_USCITA
+		, sum(coalesce(a.BON_UTENZE_USCITA,0)) as EVO_BON_UTENZE_USCITA
+		, sum(coalesce(a.BON_SPESE_SANITARIE_USCITA,0)) as EVO_BON_SPESE_SANITARIE_USCITA
+		, sum(coalesce(a.BON_MOTORI_USCITA,0)) as EVO_BON_MOTORI_USCITA
+		, sum(coalesce(a.BON_DISOCCUPAZIONE_USCITA,0)) as EVO_BON_DISOCCUPAZIONE_USCITA
+		, sum(coalesce(a.BON_NOZZE_USCITA,0)) as EVO_BON_NOZZE_USCITA
+		, sum(coalesce(a.BON_MANTENIMENTO_USCITA,0)) as EVO_BON_MANTENIMENTO_USCITA
+		, sum(coalesce(a.BON_NUCLEO_FAMIGLIA_USCITA,0)) as EVO_BON_NUCLEO_FAMIGLIA_USCITA
+		, sum(coalesce(a.BON_VIAGGI_USCITA,0)) as EVO_BON_VIAGGI_USCITA
+		, sum(coalesce(a.BON_ISTRUZIONE_USCITA,0)) as EVO_BON_ISTRUZIONE_USCITA
+		, sum(coalesce(a.BON_EREDITA_USCITA,0)) as EVO_BON_EREDITA_USCITA
+		, sum(coalesce(a.BON_LIQUIDAZIONE_POLIZZA_USCITA,0)) as EVO_BON_LIQUIDAZIONE_POLIZZA_USCITA
+		, sum(coalesce(a.BON_ALTRO_USCITA,0)) as EVO_BON_ALTRO_USCITA
+		
+		, (EVO_RICARICA_POSTEPAY_ATMPOSTE_IMP_ENTRATA + EVO_RICARICA_POSTEPAY_POSESTERNO_IMP_ENTRATA + EVO_RICARICA_POSTEPAY_UP_IMP_ENTRATA
+			) as EVO_TOT_OPER_FISICO_IMP_ENTRATA
+		
+		, (EVO_RICARICA_POSTEPAY_ATMPOSTE_NUM_ENTRATA + EVO_RICARICA_POSTEPAY_POSESTERNO_NUM_ENTRATA + EVO_RICARICA_POSTEPAY_UP_NUM_ENTRATA
+			) as EVO_TOT_OPER_FISICO_NUM_ENTRATA
+		
+		, (EVO_BONIFICO_UP_IMP_USCITA + EVO_BANCA_FIN_IMPOSTE_POSESTERNO_IMP_USCITA + EVO_BAR_RISTORANTI_POSESTERNO_IMP_USCITA
+			+ EVO_CASA_POSESTERNO_IMP_USCITA + EVO_CASA_UP_IMP_USCITA + EVO_CIBO_SPESA_POSESTERNO_IMP_USCITA
+			+ EVO_GIOCO_POSESTERNO_IMP_USCITA + EVO_ISTRUZIONE_POSESTERNO_IMP_USCITA + EVO_MOTORI_TRASPORTI_POSESTERNO_IMP_USCITA
+			+ EVO_SALUTE_CURA_POSESTERNO_IMP_USCITA + EVO_SHOPPING_SERVIZI_POSESTERNO_IMP_USCITA + EVO_TEMPOLIBERO_VIAGGIO_POSESTERNO_IMP_USCITA
+			+ EVO_PAG_VARIE_MCC_POSESTERNO_IMP_USCITA + EVO_PAG_ALTREMCC_ATMPOSTE_IMP_USCITA + EVO_PAG_ALTREMCC_POSESTERNO_IMP_USCITA
+			+ EVO_PAG_ALTREMCC_ALTRO_IMP_USCITA + EVO_POSTAGIRO_A_CONTO_UP_IMP_USCITA + EVO_POSTAGIRO_A_EVO_UP_IMP_USCITA + EVO_PRELIEVO_ATMPOSTE_IMP_USCITA 
+			+ EVO_PRELIEVO_ATMBANCARIO_IMP_USCITA + EVO_PRELIEVO_POSESTERNO_IMP_USCITA + EVO_PRELIEVO_UP_IMP_USCITA + EVO_RICARICA_POSTEPAY_ATMPOSTE_IMP_USCITA
+			+ EVO_RICARICA_TELEFONICA_ATMPOSTE_IMP_USCITA + EVO_RICARICA_TELEFONICA_POSESTERNO_IMP_USCITA) as EVO_TOT_OPER_FISICO_IMP_USCITA
+		
+		, (EVO_BONIFICO_UP_NUM_USCITA + EVO_BANCA_FIN_IMPOSTE_POSESTERNO_NUM_USCITA + EVO_BAR_RISTORANTI_POSESTERNO_NUM_USCITA
+			+ EVO_CASA_POSESTERNO_NUM_USCITA + EVO_CASA_UP_NUM_USCITA + EVO_CIBO_SPESA_POSESTERNO_NUM_USCITA
+			+ EVO_GIOCO_POSESTERNO_NUM_USCITA + EVO_ISTRUZIONE_POSESTERNO_NUM_USCITA + EVO_MOTORI_TRASPORTI_POSESTERNO_NUM_USCITA
+			+ EVO_SALUTE_CURA_POSESTERNO_NUM_USCITA + EVO_SHOPPING_SERVIZI_POSESTERNO_NUM_USCITA + EVO_TEMPOLIBERO_VIAGGIO_POSESTERNO_NUM_USCITA
+			+ EVO_PAG_VARIE_MCC_POSESTERNO_NUM_USCITA + EVO_PAG_ALTREMCC_ATMPOSTE_NUM_USCITA + EVO_PAG_ALTREMCC_POSESTERNO_NUM_USCITA
+			+ EVO_PAG_ALTREMCC_ALTRO_NUM_USCITA + EVO_POSTAGIRO_A_CONTO_UP_NUM_USCITA + EVO_POSTAGIRO_A_EVO_UP_NUM_USCITA + EVO_PRELIEVO_ATMPOSTE_NUM_USCITA 
+			+ EVO_PRELIEVO_ATMBANCARIO_NUM_USCITA + EVO_PRELIEVO_POSESTERNO_NUM_USCITA + EVO_PRELIEVO_UP_NUM_USCITA + EVO_RICARICA_POSTEPAY_ATMPOSTE_NUM_USCITA
+			+ EVO_RICARICA_TELEFONICA_ATMPOSTE_NUM_USCITA + EVO_RICARICA_TELEFONICA_POSESTERNO_NUM_USCITA) as EVO_TOT_OPER_FISICO_NUM_USCITA
+		
+		, (EVO_BONIFICO_CENTRO_IMP_ENTRATA + EVO_COMMISSIONI_CENTRO_IMP_ENTRATA + EVO_PAGAMENTI_CENTRO_IMP_ENTRATA
+			 + EVO_POSTAGIRO_DA_CONTO_CENTRO_IMP_ENTRATA + EVO_POSTAGIRO_DA_EVO_CENTRO_IMP_ENTRATA + EVO_RICARICA_POSTEPAY_CENTRO_IMP_ENTRATA
+			 + EVO_SDD_CENTRO_IMP_ENTRATA + EVO_STIPENDIO_PENSIONE_CENTRO_IMP_ENTRATA
+			 + EVO_STORNO_CENTRO_IMP_ENTRATA + EVO_VARIE_CENTRO_IMP_ENTRATA) as EVO_TOT_OPER_CENTRO_IMP_ENTRATA
+		
+		, (EVO_BONIFICO_CENTRO_NUM_ENTRATA + EVO_COMMISSIONI_CENTRO_NUM_ENTRATA + EVO_PAGAMENTI_CENTRO_NUM_ENTRATA
+			 + EVO_POSTAGIRO_DA_CONTO_CENTRO_NUM_ENTRATA + EVO_POSTAGIRO_DA_EVO_CENTRO_NUM_ENTRATA + EVO_RICARICA_POSTEPAY_CENTRO_NUM_ENTRATA
+			 + EVO_SDD_CENTRO_NUM_ENTRATA + EVO_STIPENDIO_PENSIONE_CENTRO_NUM_ENTRATA
+			 + EVO_STORNO_CENTRO_NUM_ENTRATA + EVO_VARIE_CENTRO_NUM_ENTRATA) as EVO_TOT_OPER_CENTRO_NUM_ENTRATA
+		
+		, (EVO_BONIFICO_CENTRO_IMP_USCITA + EVO_COMMISSIONI_CENTRO_IMP_USCITA + EVO_PAG_ALTREMCC_CENTRO_IMP_USCITA
+			+ EVO_SDD_CENTRO_IMP_USCITA + EVO_STORNO_CENTRO_IMP_USCITA) as EVO_TOT_OPER_CENTRO_IMP_USCITA
+		
+		, (EVO_BONIFICO_CENTRO_NUM_USCITA + EVO_COMMISSIONI_CENTRO_NUM_USCITA + EVO_PAG_ALTREMCC_CENTRO_NUM_USCITA
+			+ EVO_SDD_CENTRO_NUM_USCITA + EVO_STORNO_CENTRO_NUM_USCITA) as EVO_TOT_OPER_CENTRO_NUM_USCITA
+				
+		, (EVO_RICARICA_POSTEPAY_APP_IMP_ENTRATA + EVO_RICARICA_POSTEPAY_WEBPOSTE_IMP_ENTRATA) as EVO_TOT_OPER_DIGITAL_IMP_ENTRATA
+		
+		, (EVO_RICARICA_POSTEPAY_APP_NUM_ENTRATA + EVO_RICARICA_POSTEPAY_WEBPOSTE_NUM_ENTRATA) as EVO_TOT_OPER_DIGITAL_NUM_ENTRATA
+		
+		, (EVO_BONIFICO_APP_IMP_USCITA + EVO_BANCA_FIN_IMPOSTE_APP_IMP_USCITA + EVO_CASA_APP_IMP_USCITA + EVO_CIBO_SPESA_APP_IMP_USCITA
+			+ EVO_MOTORI_TRASPORTI_APP_IMP_USCITA + EVO_SHOPPING_SERVIZI_APP_IMP_USCITA + EVO_PAG_ALTREMCC_APP_IMP_USCITA
+			+ EVO_POSTAGIRO_A_CONTO_APP_IMP_USCITA + EVO_POSTAGIRO_A_EVO_APP_IMP_USCITA + EVO_RICARICA_POSTEPAY_APP_IMP_USCITA
+			+ EVO_BONIFICO_WEBPOSTE_IMP_USCITA + EVO_BANCA_FIN_IMPOSTE_WEBESTERNO_IMP_USCITA + EVO_BANCA_FIN_IMPOSTE_WEBPOSTE_IMP_USCITA
+			+ EVO_BAR_RISTORANTI_WEBESTERNO_IMP_USCITA + EVO_CASA_WEBESTERNO_IMP_USCITA + EVO_CIBO_SPESA_WEBESTERNO_IMP_USCITA
+			+ EVO_GIOCO_WEBESTERNO_IMP_USCITA + EVO_ISTRUZIONE_WEBESTERNO_IMP_USCITA + EVO_MOTORI_TRASPORTI_WEBESTERNO_IMP_USCITA
+			+ EVO_SALUTE_CURA_WEBESTERNO_IMP_USCITA + EVO_SHOPPING_SERVIZI_WEBESTERNO_IMP_USCITA + EVO_TEMPOLIBERO_VIAGGIO_WEBESTERNO_IMP_USCITA
+			+ EVO_PAG_VARIE_MCC_WEBESTERNO_IMP_USCITA + EVO_PAG_VARIE_MCC_WEBPOSTE_IMP_USCITA + EVO_PAG_ALTREMCC_WEBESTERNO_IMP_USCITA
+			+ EVO_PAG_ALTREMCC_WEBPOSTE_IMP_USCITA + EVO_POSTAGIRO_A_CONTO_WEBPOSTE_IMP_USCITA + EVO_POSTAGIRO_A_EVO_WEBPOSTE_IMP_USCITA
+			+ EVO_RICARICA_POSTEPAY_WEBPOSTE_IMP_USCITA + EVO_RICARICA_TELEFONICA_WEBPOSTE_IMP_USCITA + EVO_RICARICA_TELEFONICA_DIGITAL_IMP_USCITA
+		) as EVO_TOT_OPER_DIGITAL_IMP_USCITA		
+		
+		, (EVO_BONIFICO_APP_NUM_USCITA + EVO_BANCA_FIN_IMPOSTE_APP_NUM_USCITA + EVO_CASA_APP_NUM_USCITA + EVO_CIBO_SPESA_APP_NUM_USCITA
+			+ EVO_MOTORI_TRASPORTI_APP_NUM_USCITA + EVO_SHOPPING_SERVIZI_APP_NUM_USCITA + EVO_PAG_ALTREMCC_APP_NUM_USCITA
+			+ EVO_POSTAGIRO_A_CONTO_APP_NUM_USCITA + EVO_POSTAGIRO_A_EVO_APP_NUM_USCITA + EVO_RICARICA_POSTEPAY_APP_NUM_USCITA
+			+ EVO_BONIFICO_WEBPOSTE_NUM_USCITA + EVO_BANCA_FIN_IMPOSTE_WEBESTERNO_NUM_USCITA + EVO_BANCA_FIN_IMPOSTE_WEBPOSTE_NUM_USCITA
+			+ EVO_BAR_RISTORANTI_WEBESTERNO_NUM_USCITA + EVO_CASA_WEBESTERNO_NUM_USCITA + EVO_CIBO_SPESA_WEBESTERNO_NUM_USCITA
+			+ EVO_GIOCO_WEBESTERNO_NUM_USCITA + EVO_ISTRUZIONE_WEBESTERNO_NUM_USCITA + EVO_MOTORI_TRASPORTI_WEBESTERNO_NUM_USCITA
+			+ EVO_SALUTE_CURA_WEBESTERNO_NUM_USCITA + EVO_SHOPPING_SERVIZI_WEBESTERNO_NUM_USCITA + EVO_TEMPOLIBERO_VIAGGIO_WEBESTERNO_NUM_USCITA
+			+ EVO_PAG_VARIE_MCC_WEBESTERNO_NUM_USCITA + EVO_PAG_VARIE_MCC_WEBPOSTE_NUM_USCITA + EVO_PAG_ALTREMCC_WEBESTERNO_NUM_USCITA
+			+ EVO_PAG_ALTREMCC_WEBPOSTE_NUM_USCITA + EVO_POSTAGIRO_A_CONTO_WEBPOSTE_NUM_USCITA + EVO_POSTAGIRO_A_EVO_WEBPOSTE_NUM_USCITA
+			+ EVO_RICARICA_POSTEPAY_WEBPOSTE_NUM_USCITA + EVO_RICARICA_TELEFONICA_WEBPOSTE_NUM_USCITA + EVO_RICARICA_TELEFONICA_DIGITAL_NUM_USCITA
+		) as EVO_TOT_OPER_DIGITAL_NUM_USCITA
+	from EBIL_AREE.V_CT_PERIMETRO as b
+	left join MONETICA_MCC_RAGGR as a
+		on a.ID_CLIENTE_BIC=b.ID_CLIENTE_BIC and a.TIPO_CARTA='EVOLUTION' 
+	group by 1,2
+)with data primary index(ID_CLIENTE_BIC) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+BT
+
+;DELETE EBIL_AREE.CT_OPERAT_POSTEPAY_EVOLUTION
+WHERE ID_PERIODO_TEMPORALE= (SELECT ID_PERIODO_TEMPORALE FROM EBIL_AREE.CT_PARAMETRI)
+
+;INSERT INTO  EBIL_AREE.CT_OPERAT_POSTEPAY_EVOLUTION 
+	select * from CT_OPERAT_EVOLUTION
+WHERE ID_PERIODO_TEMPORALE= (SELECT ID_PERIODO_TEMPORALE FROM EBIL_AREE.CT_PARAMETRI)
+
+;ET;
+
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+CREATE VOLATILE TABLE VTB_OPERAT_POSTEPAY_EVOLUTION_SV AS
+(SELECT ID_PERIODO_TEMPORALE, ROW_NUMBER () over ( ORDER BY ID_PERIODO_TEMPORALE  DESC) AS ORDINAMENTO
+FROM  EBIL_AREE.CT_OPERAT_POSTEPAY_EVOLUTION
+GROUP BY 1)
+WITH DATA PRIMARY INDEX (ID_PERIODO_TEMPORALE) ON COMMIT PRESERVE ROWS;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+DELETE EBIL_AREE.CT_OPERAT_POSTEPAY_EVOLUTION
+WHERE ID_PERIODO_TEMPORALE IN ( SELECT ID_PERIODO_TEMPORALE 
+FROM VTB_OPERAT_POSTEPAY_EVOLUTION_SV
+WHERE ORDINAMENTO >25);
+.IF ERRORCODE > 0 THEN .QUIT 16;
+

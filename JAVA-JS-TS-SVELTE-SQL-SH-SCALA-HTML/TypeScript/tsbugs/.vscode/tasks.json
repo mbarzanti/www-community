@@ -1,0 +1,10 @@
+{
+    "tasks": [
+        {
+            "identifier": "compile_tests",
+            "type": "npm",
+            "script": "compile:test",
+            "problemMatcher": ["$tsc"]
+        }
+    ]
+}

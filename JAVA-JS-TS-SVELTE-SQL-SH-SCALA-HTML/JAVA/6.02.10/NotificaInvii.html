@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9" />
+<link rel="stylesheet" href="../themes/posteItaliane/jquery.ui.core_IE9.css"/>
+<!--  <link rel="stylesheet" href="../themes/posteItaliane/jquery.ui.core.css">-->
+<link rel="stylesheet" href="../themes/posteItaliane/jquery.ui.theme.css">
+<link rel="stylesheet" href="../themes/posteItaliane/jquery.ui.datepicker.css">
+<link rel="stylesheet" href="../themes/posteItaliane/jquery.ui.button.css">
+<link rel="stylesheet" type="text/css" href="../css/jquery.multiselect.css" />
+
+<link rel="stylesheet" href="../css/prettyForms.css" type="text/css" media="screen" />
+<link rel="stylesheet" href="../css/style_IE9.css" type="text/css"/>
+
+<link href="../themes/ui.jqgrid.css" media="screen" type="text/css" rel="stylesheet">
+<link href="../css/DispaccioView.css" media="screen" type="text/css" rel="stylesheet">
+
+<link rel="stylesheet" href="../css/prettyCheckboxes.css" type="text/css" media="screen" title="prettyComment main stylesheet" charset="utf-8" />
+<link href="../css/showLoading.css" rel="stylesheet" media="screen" />
+<!-- begin of jqgrid -->
+<!-- begin of Wizard Form -->
+
+<script type="text/javascript" language="javascript" src="http://localhost:2080/web/smistatore/smistatore.js"> </script>
+<script type="text/javascript" language="javascript" src="http://localhost:2080/web/smistatore/newsmistatore.js"> </script>
+<script type="text/javascript" language="javascript" src="http://localhost:2080/web/tdem/tdem.js"> </script>
+<script type="text/javascript" src="../js/utility/tdem/internal_ManageRifiuto_override.js"></script>
+<script type="text/javascript" language="javascript" src="http://localhost:2080/web/extra/printer.js"></script>
+<script type="text/javascript" src="../js/smistatore.js"></script>
+<script src="../js/patch.js" type="text/javascript"></script>
+<script src="../js/lib/json2.js" type="text/javascript"></script>
+<script type="text/javascript" src="../js/sdp.js"></script>
+<script type="text/javascript" src="../js/padXONI.js"></script>
+<!-- fine blocco scripts per sdp -->
+<script type="text/javascript" src="../js/lib/jquery-1.7.2.min.js"></script>
+<script src="../js/jquery.base64.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="../js/plugins/prettyforms/prettyForms.js"></script>
+
+<script type="text/javascript" src="../js/lib/lazyLoading.js"></script>
+<script src="../js/plugins/jqueryUi/jquery.ui.core.js"></script>
+<script src="../js/plugins/jqueryUi/jquery.ui.widget.js"></script>
+<script src="../js/plugins/jqueryUi/jquery.effects.core.js"></script>
+<script src="../js/plugins/jqueryUi/jquery.effects.fold.js"></script>
+<script src="../js/plugins/jqueryUi/jquery.ui.position.min.js"></script>
+<script src="../js/plugins/selectUi/jquery.multiselectXONI.min.js"></script>
+
+<!-- begin of jqgrid -->
+<script src="../js/plugins/jqGrid/grid.locale-en.js"></script>
+<script src="../js/plugins/jqGrid/jquery.jqGrid.min.js"></script>
+<script src="../js/plugins/jqGrid/grid.custom.js"></script>
+<script src="../js/plugins/jqueryUi/jquery.ui.datepicker-it.js"></script>
+<script src="../js/plugins/jqueryUi/jquery.ui.datepicker.js"></script>
+
+<script type="text/javascript" src="../js/plugins/wizard/jquery.form.js"></script>
+<script type="text/javascript" src="../js/plugins/wizard/jquery.form.wizard.js"></script>
+
+<!-- end of Wizard Form -->
+<!-- begin prettychexboxes -->
+<script src="../js/plugins/prettycheckboxes/prettyCheckboxes.js" type="text/javascript" charset="utf-8"></script>
+<!-- end prettychexboxes -->
+<script type="text/javascript" src="../js/lib/jquery.json-2.2.js"></script>
+<script type="text/javascript" src="../js/lib/log4javascript_production.js"></script>
+<script type="text/javascript" src="../js/config.js"></script>
+<script type="text/javascript" src="../model/model.js"></script>
+<script type="text/javascript" src="../js/tabNotificaInvii.js"></script>
+<script type="text/javascript" src="../controller/notificaInvii.js"></script>
+<script type="text/javascript" src="../js/plugins/showLoading/jquery.showLoading.js"></script>
+<script type="text/javascript" src="../js/utility/date.format.js"></script>
+<script type="text/javascript" src="../js/plugins/maskedInput/jquery.maskedinput.js"></script>
+
+<script type="text/javascript" src="../js/plugins/download/jQuery.download.js"></script>
+<script type="text/javascript" src="../js/utility/commonFunc.js"></script>
+<script type="text/javascript" src="../js/plugins/autoNumeric/autoNumeric.js"></script>
+<!--<script type="text/javascript" src="../js/firebug-lite.js"></script>-->
+<script type="text/javascript" src="../js/plugins/i18n/jquery.i18n.properties-min-1.0.9.js"></script>
+<script type="text/javascript" src="../js/utility/properties.js"></script>
+<script type="text/javascript" src="../js/dema28aut.js"></script>
+
+<script type="text/javascript">
+$(document).ready(
+		function() {
+			LoadNotificaInvii();
+
+		}
+		
+);
+</script>
+<style>
+	fieldset { padding:0;}
+	.ui-jqgrid td input, .ui-jqgrid td select .ui-jqgrid td textarea { margin: 0em; height: 20px;}
+	.ui-jqgrid-bdiv {overflow-x : hidden !important;}
+</style>
+
+<title>ConsegnaInvii</title>
+</head>
+<body scroll="no">
+	<form id="notificaInvii" method="get" action="" class="noMarginPadding stretchContainer">
+	<table class="noMarginPadding parentContainer" style="height:98%;" cellpadding="0" cellspacing="0">
+		<tr>
+			<td height="4%">
+				<div id="pathLabel">
+					<h5 style="margin-top: 0px; margin-bottom: 0px;"></h5>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td height="96%">
+			<!-- INIZIO  WIZARD -->
+
+				<!-- FINE INTESTAZIONE -->
+					<!-- PAGINA DINAMICA  -->
+					<!-- INIZIO STEP 1 -->
+					<div class="step" id="ricercaInvii" style="height:100%;width:100%;">
+						<table class="noMarginPadding" cellpadding="0" cellspacing="0">
+							<tr>
+								<td height="80%" colspan="6">
+									<fieldset class="stretchContainer" style="width:100%;">
+										<legend>Elenco Oggetti in Notifica</legend>
+										<table style="height: 100%; width: 100%;">
+											<tr>
+												<td style="height: 5%">Codice Invio</td>
+												<td><input type="text" name="textfield" id="codInvio" maxlength="25" size="31" style="text-transform: uppercase;"></td>
+												<td colspan="4">
+													<fieldset>
+														<table>
+															<tr>
+																<td>Data tentato recapito</td>
+																<td><input type="text" id="datepicker" class="all-datepicker" readonly="readonly" style="cursor: pointer"></td>
+																<td style="float: left;"><button type="button" style=" height: 19px; padding-top: 0px;"
+																	class="button_right_blue accesskeyButton" id="cerca">C<u>e</u>rca</button> </td>
+															</tr>
+															<tr>
+																<td>Destinatario</td>
+																<td><input type="text" id="destinatario" maxlength="50"></td>
+															</tr>
+														</table>
+													</fieldset>
+												</td>
+											</tr>
+											<tr>
+												<td colspan="6" style="height: 20%">
+													<fieldset style="height: 80%">
+														<legend>Registri</legend>
+														<table >
+															<tr>
+																<td width="8%">Registro</td>
+																<td width="50%"><select name="Registro" id="Registro"
+																	class="customSelect">
+																</select></td>
+																<td colspan="3" width="42%">
+																</td>
+															</tr>
+															<tr>
+																<td>Sottoregistro</td>
+																<td><select name="SottoRegistro" id="SottoRegistro"
+																	class="customSelect">
+																</select></td>
+																<td>Note</td>
+																<td><input type="text" id="user" readonly="readonly"></td>
+																<td >
+																	<div class="centeredDiv" style="margin-bottom:0px;">
+																		<button type="button" class="button_right_blue accesskeyButton" style=" height: 19px; padding-top: 0px;"
+																			id="cercaStep1">Visuali<u>z</u>za</button>
+																	</div>
+																</td>
+															</tr>
+														</table>
+													</fieldset>
+												</td>
+											</tr>
+											<tr>
+												<td colspan="4" style="height: 5%"></td>
+												<td align="right">Numero Invii: </td>
+												<td><input type="text" id="nInviiStep1" size="4"
+													readonly></td>
+											</tr>
+											<tr>
+												<td colspan="6" style="height: 45%">
+													<div>
+														<table id="listaRicercaStep1"></table>
+
+														<div id="listaRicercaStep1Pager"></div>
+													</div>
+												</td>
+											</tr>
+											<tr>
+												<td colspan="6" style="height: 20%;">
+													<table class="stretchContainer collapseBorder" border="0" cellpadding="0" cellspacing="0">
+														<tr>
+															<td style="height:100%;width:50%;text-align: center;">
+																	<button type="button" class="button accesskeyButton"
+																		 id="stampaStep1" style="float: none; height: 19px; padding-top: 0px;">Stam<u>p</u>a</button>
+															</td>
+															<td style="text-align: center;height:100%;width:50%;">
+																	<button type="button" class="button accesskeyButton"
+																		id="dettaglio" style="float: none; height: 19px; padding-top: 0px;"><u>D</u>ettaglio</button>
+															</td>
+														</tr>
+													</table>
+												</td>
+											</tr>
+										</table>
+									</fieldset>
+								</td>
+							</tr>
+							<tr>
+								<td height="20%" colspan="2" width="33%" style="text-align: center;" valign="top">
+										<button type="button" class="button accesskeyButton"
+											id="annullaStep1" style="float: none; height: 19px; padding-top: 0px;">Annu<u>l</u>la</button>
+								</td>
+								<td colspan="2" width="33%"></td>
+
+								<td colspan="2" width="33%" style="text-align: center;" valign="top">
+										<button type="button" class="button accesskeyButton"
+											id="avantiStep1" style="float: none; height: 19px; padding-top: 0px;">A<u>v</u>anti</button>
+								</td>
+							</tr>
+						</table>
+					</div>
+					<!-- FINE STEP 1 -->
+					<!-- INIZIO STEP 2-->
+					<div class="step" id="ricercaPerData" style="height:100%;width:100%;">
+						<table class="noMarginPadding" cellpadding="0" cellspacing="0">
+							<tr>
+								<td style="width: 100%; height: 85%">
+									<fieldset>
+										<legend id = "legend_risultati">Risultati Ricerca per Data</legend>
+										<div>
+											<table>
+												<tr>
+													<td id = "lbl_tentatoRecapito">Data di Tentato Recapito</td>
+													<td><input type="text" id="dtRec" size="12" readonly></td>
+													<td style="width: 70px;float: right;margin-right: 10px;text-align: center;">N.Invii</td>
+													<td style="width: 70px;margin-right: 10px;"><input type="text" id="nInv" size="4" readonly></td>
+												</tr>
+											</table>
+											<table id="listaRicercaStep2"></table>
+											<div id="listaRicercaStep2Pager"></div>
+										</div>
+									</fieldset>
+								</td>
+							</tr>
+							<tr>
+								<td height="15%">
+									<table>
+										<tr>
+											<td width="25%" align="center"><button type="button"
+												class="accesskeyButton" id="indietroStep2"><u>I</u>ndietro</button> </td>
+											<td width="50%"></td>
+											<td width="25%"  align="center">
+											<button type="button" class="accesskeyButton"
+											id="confermaInviiSelezionati">Con<u>f</u>erma Invii Selezionati</button></td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</div>
+					<!-- FINE STEP 2 -->
+					<!-- INIZIO STEP 3 -->
+					<div id="visualizzaDettaglioInvio" class="step" style="height:100%;width:100%;">
+						<table class="noMarginPadding" cellpadding="0" cellspacing="0">
+							<tr>
+								<td height="80%">
+									<fieldset style="height:100%;">
+										<legend>Dettaglio Invio</legend>
+										<table>
+											<tr>
+												<td ><label for="codiceInvio">Codice Invio </label></td>
+												<td><input type="text" id="codiceInvio"
+													readonly="readonly" maxlength="15" style="text-transform: uppercase;"></td>
+												<td><label for="tassaRispedizionePacchi">Tassa di
+														rispedizione pacchi</label></td>
+												<td><input type="text" id="tassaRispedizionePacchi"
+													readonly="readonly" ></td>
+											</tr>
+											<tr>
+												<td><label for="tipologiaOggetto">Tipologia</label></td>
+												<td><input type="text" id="tipologiaOggetto"
+													readonly="readonly"></td>
+												<td><label for="tassaGiorniGiacenza">Tassa di
+														Giacenza</label></td>
+												<td><input type="text" id="tassaGiorniGiacenza"
+													readonly="readonly" ></td>
+											</tr>
+											<tr>
+												<td><label for="registro">Registro</label></td>
+												<td><input type="text" id="registro" readonly="readonly"></td>
+												<td><label for="importoContrassegno">Importo
+														Contrassegno </label></td>
+												<td><input type="text" id="importoContrassegno"
+													readonly="readonly"></td>
+											</tr>
+											<tr>
+												<td><label for="sottoRegistro">Sottoregistro</label></td>
+												<td><input type="text" id="sottoRegistro"
+													readonly="readonly"></td>
+												<td><label for="importoDirittiPostali">Importo
+														Diritti Postali </label></td>
+												<td><input type="text" id="importoDirittiPostali"
+													readonly="readonly" ></td>
+											</tr>
+											<tr>
+												<td><label for="serviziAccessori">Servizi
+														Accessori </label></td>
+												<td><input type="text" id="serviziAccessori"
+													readonly="readonly"></td>
+												<td><label for="importoOneriDoganali">Importo
+														Oneri Doganali</label></td>
+												<td><input type="text" id="importoOneriDoganali"
+													readonly="readonly"></td>
+											</tr>
+											<tr>
+												<td><label for="numeroGiorniGiacenza">Numero
+														giorni di giacenza </label></td>
+												<td><input type="text" id="numeroGiorniGiacenza"
+													size="6" readonly="readonly"></td>
+												<td><label for="totaleImporti">Totale Importi</label></td>
+												<td><input type="text" id="totaleImporti"
+													readonly="readonly" ></td>
+											</tr>
+											<tr>
+												<td><label for="codiceArchiviazione">Codice
+														Archivio</label></td>
+												<td><input type="text" id="codiceArchiviazione"
+													readonly="readonly"></td>
+												<td>&nbsp;</td>
+												<td>&nbsp;</td>
+											</tr>
+											<tr>
+												<td><label for="dataInserimentoRegistro">Data
+														Inserimento Registro </label></td>
+												<td><input type="text" id="dataInserimentoRegistro"
+													readonly="readonly" ></td>
+												<td>&nbsp;</td>
+												<td>&nbsp;</td>
+											</tr>
+											<tr>
+												<td><label for="dataTentatoRecapito">Data
+														Tentato Recapito </label></td>
+												<td><input type="text" id="dataTentatoRecapito"
+													readonly="readonly"></td>
+												<td>&nbsp;</td>
+												<td>&nbsp;</td>
+											</tr>
+											<tr>
+												<td><label for="descNazione">Nazione</label></td>
+												<td><input type="text" id="descNazione"
+													readonly="readonly"></td>
+												<td>&nbsp;</td>
+												<td>&nbsp;</td>
+											</tr>
+										</table>
+									</fieldset>
+								</td>
+							</tr>
+							<tr>
+								<td height="20%">
+									<div class="centeredDiv">
+										<button type="button" class="button_left_blue accesskeyButton"
+											id="chiudiStep3" style="float: right;">C<u>h</u>iudi</button>
+									</div>
+								</td>
+							</tr>
+						</table>
+					</div>
+					<!-- FINE STEP 3 -->
+					<!-- INIZIO STEP 4.1 -->
+					<div id="anagraficaInviiSelezionati" class="step" style="height:100%;width:100%;">
+						<table class="noMarginPadding" cellpadding="0" cellspacing="0">
+							<tr>
+								<td height="70%">
+									<fieldset>
+										<legend>Anagrafica Invii Selezionati</legend>
+										<div width="100%" style="margin-right:1%;margin-left:1%">
+											<table>
+												<tr>
+													<td width="13%">Consegna a:</td>
+													<td align="left" width="26%">
+														<select id="modcons" class="customSelect " style="width:90%;">
+															<option value="-1">&nbsp;</option>
+															<option value= "1">Destinatario Unico</option>
+															<option value= "2">Delegato</option>
+															<option value= "3">Altro</option>
+														</select>
+													</td>
+													<td width="12%" align="right">Allegati</td>
+													<td width="1%">&nbsp;</td>
+													<td width="5%" align="right"><input type="checkbox" readonly="readonly"  disabled="disabled" id="ckAllegati" ></input></td>
+													<td width="27%" align="right">Numero di Firme</td>
+													<td width="5%" align="right">
+														<input type="text" disabled="disabled" readonly="readonly"  size="5" maxlength="2" 
+															onkeydown="return ( event.ctrlKey || event.altKey || (47<event.keyCode && event.keyCode<58 && event.shiftKey==false) || (95<event.keyCode && event.keyCode<106) || (event.keyCode==8) || (event.keyCode==9)|| (event.keyCode>34 && event.keyCode<40)|| (event.keyCode==46) )" id="nFirme"  width="20%">
+														</input>
+									                </td>
+													<td width="1%">&nbsp;</td>
+												</tr>
+											</table>
+										</div>
+
+										<div width="100%" style="margin-right:1%;margin-left:1%">
+											<table id="listaInviiSelStep41" ></table>
+											<div id="listaInviiSelStep41Pager"></div>
+										</div>		
+									</fieldset>
+								</td>
+							</tr>
+							<tr><td height="5%"/>&nbsp;</tr>
+							<tr>
+								<td height="25%">
+									<fieldset>
+										<legend id="docId">Nominativo Firmatario </legend>
+										
+										<div width="100%" style="margin-right:1%;margin-left:1%;max-height:83px; overflow-y: scroll;">
+											<table id="tabellaFirmatari" >
+											</table>
+										</div>
+									</fieldset>
+								</td>
+							</tr>
+							<tr>
+								<td height="12%" valign="top">
+									<table>
+										<tr>
+											<td width="25%" align="center" valign="top"><button type="button" class="accesskeyButton " id="indietroStep41"><u>I</u>ndietro</button> </td>
+											<td width="50%"></td>
+											<td width="25%"  align="center" valign="top"><button type="button" class="accesskeyButton " id="avantiStep41">A<u>v</u>anti</button></td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</div>
+					
+					
+					<!-- FINE STEP 4.1 -->
+					<!-- INIZIO STEP 4.2 -->
+					<div id="documentiIdentita" class="step" style="height:100%;width:100%;">
+						<table class="noMarginPadding" cellpadding="0" cellspacing="0">
+							<tr>
+								<td height="80%">
+									<fieldset>
+										<legend id="docId_s">Nominativo Firmatario </legend>
+										<div width="90%" style="margin-right:1%;margin-left:1%">
+											<table>
+												<tr>
+													<td align="left" width="40%">Nome e Cognome</td>
+													<td align="left" width="40%" style="margin-left:2px;"><input type="text" size="35" id="nomecogn_s"/></td>	
+												</tr>
+											</table>
+										</div>
+									</fieldset>
+								</td>
+							</tr>
+							<tr>
+								<td height="12%" valign="top">
+									<table>
+										<tr>
+											<td width="25%" align="center" valign="top"><button type="button" class="accesskeyButton" id="indietroStep42"><u>I</u>ndietro</button> </td>
+											<td width="50%"></td>
+											<td width="25%"  align="center" valign="top"><button type="button" class="accesskeyButton" id="avantiStep42">A<u>v</u>anti</button></td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+						</div>			
+					
+					
+					
+					
+					<!--  FINE STEP 4.2-->
+					<!-- INIZIO STEP 4 -->
+					<div id="confermaInviiNotificati" class="step" style="height:100%;width:100%;">
+						<table class="noMarginPadding" cellpadding="0" cellspacing="0">
+							<tr>
+								<td height="70%">
+									<fieldset>
+										<legend>Conferma Invii Notificati</legend>
+										<table>
+											<tr>
+												<!--  td width="15%">Causale Notifica</td>
+												<td width="22%"><select name="........" id="causNot"
+												class="customSelect">
+													<option>....................</option>
+												</select></td -->
+												<td width="10%" align="right">Codice invio</td>
+												<td width="30%"><input type="text" class="textbox-focus"
+													id="idInserito" maxlength="16" size="20" style="text-transform: uppercase;"/></td>
+												<td width="12%" align="right">Numero Invii</td>
+												<td width="10%"><input type="text" id="nInvStep4" size="4" readonly></td>
+
+												<!-- Modifica Evolutive OMP -->
+												<td width="11%" align="right">Selezionati</td>
+										 		<td width="8%"><input type="text" id="selStep4" size="4" readonly></td>
+										 		<td width="10%" align="right">da Rifiutare</td>
+										 		<td width="8%"><input type="text" id="daRifStep4" size="4" readonly></td>
+
+											</tr>
+
+										</table>
+										<div width="100%" style="margin-right:1%;margin-left:1%">
+											<table id="listaRicercaStep4"></table>
+
+											<div id="listaRicercaStep4Pager"></div>
+
+										</div>
+										<table>
+										<tr>
+										 	<td colspan="2">
+										 		<table>
+										 			<!-- Modifica Evolutive OMP -->
+											 		<td width="25%">Causale Notifica</td>
+													<td width="75%"><select name="........" id="causNot"
+													class="customSelect">
+														<option>....................</option>
+													</select>
+													</td>
+										 		</table>
+										 		<!--fieldset>
+										 		<legend>Totale Oggetti</legend>
+										 		<table>
+											 		<tr>
+												 		<td>
+												 			Selezionati
+												 		</td>
+												 		<td>
+												 			<input type="text" id="selStep4" size="4" readonly>
+												 		</td>
+												 		<td>
+												 			da Rifiutare
+												 		</td>
+												 		<td>
+												 			<input type="text" id="daRifStep4" size="4" readonly>
+												 		</td>
+											 		</tr>
+										 		</table>
+										 		</fieldset-->
+										 	</td>
+										 	<td colspan="2">
+										 	</td>
+										</tr>
+										<tr>
+											<td align="right" width="30%">Causale Azzeramento Giacenza</td>
+											<td align="left" width="30%"><select name="........" id="causAzzGiac"
+												class="customSelect">
+												</select></td>
+											<td><button name="button" type="button"
+												class="button_right_blue accesskeyButton" id="Elimina"><u>E</u>limina</button> </td>
+											<td><button name="button2" type="button"
+												class="button_right_blue accesskeyButton"
+												id="dettaglioStep4"><u>D</u>ettaglio</button> </td>
+										</tr>
+										</table>
+									</fieldset>
+								</td>
+							</tr>
+							<tr>
+								<td height="18%">
+									<table width="100%">
+
+										<tr>
+										<td colspan="4">
+										<fieldset>
+										<legend>Totali</legend>
+										<table>
+										<tr>
+											<td>Tassa di Giacenza</td>
+											<td>Contrassegno</td>
+											<td>Diritti Postali</td>
+											<td>Oneri Doganali</td>
+											<td>Tasse Rispedizione Pacchi</td>
+											<td style="font-weight:bold;">Totale</td>
+
+										</tr>
+										<tr>
+											<td><input type="text" id="totGiac" readonly="readonly" size="16"></td>
+											<td><input type="text" id="totContr" readonly="readonly" size="16"></td>
+											<td><input type="text" id="totDirPost" readonly="readonly" size="16"></td>
+											<td><input type="text" id="totOnDog" readonly="readonly" size="16"></td>
+											<td><input type="text" id="totRispPac" readonly="readonly" size="16"></td>
+											<td><input type="text" id="totale" readonly="readonly" size="16"></td>
+										</tr>
+										</table>
+										</fieldset>
+										</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td height="12%" valign="top">
+									<table>
+										<tr>
+											<td width="25%" align="center" valign="top"><button type="button"
+												class="accesskeyButton" id="indietroStep3"><u>I</u>ndietro</button> </td>
+											<td width="50%"></td>
+											<td width="25%"  align="center" valign="top"><button type="button"
+												class="accesskeyButton"
+												id="confermaModifica">Con<u>f</u>erma Notifica</button></td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</div>
+					<!-- FINE STEP 4 -->
+					<!-- INIZIO STEP 4.2 -->
+					<div id="anteprimaSca" class="step" style="height:100%;width:100%;">
+						<div id ="messaggioSca" style="margin-bottom: 10px" align="center" >
+								<p style="font-size: 1.4em; font-weight: bold;">
+									Il documento e' stato correttamente acquisito?
+								</p>
+								<table>
+								<tr>
+									<td align="center">
+											<button type="button" id="leggibile" class="accesskeyButton" style="width: 80px; height: 30px;" >SI</button>
+											<button type="button" id="nonLeggibile" class="accesskeyButton" style="width: 80px; height: 30px;">NO</button>
+									</td>
+							
+								</tr>
+							</table>
+						</div>
+						<div id="idImg" style= "max-height:260px; overflow-y: scroll;">
+						<img id="immagine" style=" display: none;margin-left: auto;margin-right: auto; border:1px solid #000000;"/>
+						</div>
+					</div>
+					<!--  FINE STEP 4.2  -->
+					<!-- INIZIO STEP 5 -->
+					<div id="stampaModello" class="step" style="height:100%;width:100%;">
+						<table class="noMarginPadding" cellpadding="0" cellspacing="0" style="table-layout:fixed;height:100%;">
+							<tr>
+								<td height="85%" colspan="2">
+									<fieldset style="height:100%">
+										<legend id="legStmp">Stampa Modello</legend>
+										<table style="height:100%;">
+											<tr>
+												<td style="height:80%;">
+													<div id="anteprimaDispaccio" class="anteprimaStampa" style="margin: auto"></div>
+												</td>
+											</tr>
+										</table>
+									</fieldset>
+								</td>
+							</tr>
+							<tr>
+								<td height="15%" align="left">
+									<button type="button" class="accesskeyButton"
+										id="indietroStep5" style="display: none;"><u>I</u>ndietro</button>
+								</td>
+								<td align="right">
+									<button type="button" class="accesskeyButton" id="stampaStep4" style="display: block;">Stam<u>p</u>a</button>
+									<button type="button" class="accesskeyButton" id="padStep4" style="display: none;">Avvia pad</button>
+								</td>							
+							</tr>
+						</table>
+					</div>
+					<!-- FINE STEP 5 -->
+
+					<!-- INIZIO STEP 6 -->
+					<div id="printJquery" class="step">
+						<fieldset style="float: left; margin-right: 10px; width: 770px">
+							<br class="clearAll" />
+							<table id="stampaRegistri"></table>
+						</fieldset>
+						<br class="clearAll" />
+					</div>
+					<!-- FINE STEP 6 -->
+
+
+				<div id="errorBar" class="info error">
+					<span></span> <input type="button" class="errorButton"
+						value="Cancella Errore" id="escErrorButton"> <input
+						type="button" class="errorButton" value="Forza Sblocco"
+						id="forzaSblocco" style="display: none">
+				</div>
+			</td>
+		</tr>
+	</table>
+	</form>
+	<iframe
+		style="position: absolute; top: 0px; left: 0px; width: 0px; height: 0px; border: 0px none; z-index: -1;"
+		src="iframes/iframe.html" name="printPage" id="printPage"></iframe>
+</body>
+</html>

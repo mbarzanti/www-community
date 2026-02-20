@@ -1,0 +1,19 @@
+[info] [SourceCollector] start collect
+[info] [Collector] check remote files...
+[trac] [Collector]    remote dir: /action
+[trac] [Collector]    remote dir: /com
+[trac] [Collector]    remote dir: /dao
+[trac] [Collector]    remote dir: /com/gtone
+[trac] [Collector]    remote dir: /com/gtone/dq
+[trac] [Collector]    remote dir: /com/gtone/dq/customer
+[trac] [Collector]    remote dir: /com/gtone/dq/customer/config
+[trac] [Collector]    remote dir: /com/gtone/dq/customer/query
+[trac] [Collector]    remote dir: /com/gtone/dq/customer/server
+[trac] [Collector]    remote dir: /com/gtone/dq/customer/util
+[info] [Collector] id=20200813185000(2001), from=C:/Users/S&SSLAWKS/BeyondSecurity/beSOURCE developer/Sample/Java, target files=33
+[info] [Collector] new=33, change=0, remove=0
+[info] [Collector] copy new files...
+[info] [Collector] copy end.
+[info] [SourceCollector] end collect (time=447ms)
+[info] working time: 644ms
+[info] CLI end...

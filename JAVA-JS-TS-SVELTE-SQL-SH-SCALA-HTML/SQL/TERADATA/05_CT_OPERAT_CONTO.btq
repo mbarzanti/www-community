@@ -1,0 +1,1501 @@
+--------------------------------------------------------------------------------
+----------------------CT OPERATIVITA' CONTO CORRENTE----------------------------
+--------------------------------------------------------------------------------
+
+/*
+  Tabella: EBIL_AREE.CT_OPERAT_CONTO
+  Regime: Delta Mensile
+  Gdl: Teradata
+  Progetto: Operazionalizzazione CT
+  */  
+  
+.SET WIDTH 240;
+.SET ERROROUT STDOUT;
+
+--------------------------------------------------------------------------------
+/*Estrazione dei soli conti retail e conversione del numero conto in NDG*/
+
+create volatile table CONVERSIONE_CONTI_NDG as (
+	select 
+		distinct rapp_cc.NR_RAPPORTO
+		, assoc.CD_CLIENTE_SORGENTE
+ 	from EBIL_ANAG_V.V_AN_RAPPORTO_CONTO as rapp_cc 
+	join  EBIL_AREE.CT_PARAMETRI as p on 1=1
+	inner join EBIL_ANAG_V.V_ASSOC_RAPP_PROD_CLIENTE as assoc
+		on rapp_cc.PK_RAPPORTO=assoc.FK_RAPPORTO
+	left join(
+		sel NR_RAPPORTO, CD_PRODOTTO
+		from V_EDW_DW_BP.CC_LISTINO_ST as a
+		join EBIL_AREE.CT_PARAMETRI as p on 1=1
+		where p.DATA_AGGIORNAMENTO >= DT_INI_VAL
+			qualify row_number() over(partition by NR_RAPPORTO order by DT_INI_VAL desc) = 1
+	) as lis
+		on rapp_cc.NR_RAPPORTO=lis.NR_RAPPORTO
+	where p.DATA_AGGIORNAMENTO between rapp_cc.DT_INI_VAL and rapp_cc.DT_FIN_VAL
+		and assoc.CD_TIPO_RAPP='CC' and assoc.CD_CLIENTE_SORGENTE<>'000000000000' 
+		and p.DATA_AGGIORNAMENTO between assoc.DT_INIZIO_VALIDITA and assoc.DT_FINE_VALIDITA and assoc.FL_VALIDITA='1'
+		and lis.CD_PRODOTTO in ('CCBP-RETAIL', 'CCBP-CLICK', 'CCBPCONSUMER', 'CC-BASE-BP', 'CCBP-CONSNEW')--FIX 2019/10/24: aggiunto CCBP-CONSNEW)
+)with data primary index(NR_RAPPORTO, CD_CLIENTE_SORGENTE) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+--Riclassificazione delle descrizione di Movimentazione del Conto 
+create volatile table MOV_DES_CC as (
+	select a.CD_CAUS_TRANS
+		, b.DES as DES_OLD
+		, a.DS_CAUSALE 
+		, case
+			when upper(trim(a.DS_CAUSALE)) like any ('%STORN%','RETT.%','%RETTIFIC%','REST%','AZZERAMENTO%') 
+				or upper(trim(b.DES)) like 'STORNI' then 'STORNI'
+			when (upper(trim(a.DS_CAUSALE)) like any ('%COMM%','%INTERESS%', 'COM.N%','CONGUAGL%', '%CANONE%', '%IMPOST%BOLL%') 
+				or upper(trim(b.DES)) like 'COMMISSIONI') and upper(trim(a.DS_CAUSALE)) not like '%CANON%TOL%' then 'COMMISSIONI' 
+			when upper(trim(a.DS_CAUSALE)) like any ('%LIQUIDIT%','%CONTI%ROSSO%','%FA %') then 'VARIE'
+			when upper(trim(a.DS_CAUSALE)) like any ('%ASSEGN%BANC%') then 'ASSEGNI_BANCARI' 
+			when upper(trim(a.DS_CAUSALE)) like any ('%ASSEGN%POSTAL%', '%VIDIM%', '%VAGL%') or upper(trim(b.DES))='ASSEGNI' then 'ASSEGNI_POSTALI'
+			when upper(trim(a.DS_CAUSALE)) like '%SCOPERT%' then 'SCOPERTO_CONTO'
+			when upper(trim(a.DS_CAUSALE)) like any ('RICARICA TEL%','%TELEFON%','%AUTORICARICA%','%TIMAUTOMATICA%','%TELERICARICA%') 
+				and upper(trim(a.DS_CAUSALE)) not like '%POLIZZA%' then 'RICARICA_TELEFONICA'
+			when upper(trim(b.DES)) = 'CARTE (E/C + OP. DA CENTRO)' then 'CARTA_CREDITO'
+			when upper(trim(a.DS_CAUSALE)) like any ('%FINANZIAM%','%FINANZ%', '%AUMENTO DI CAPITALE%') 
+				or upper(trim(b.DES)) = 'FINANZIAMENTI' then 'FINANZIAMENTI'
+			when upper(trim(b.DES)) like 'POLIZZE' or upper(trim(a.DS_CAUSALE)) like '%PREVIDENZ%' then 'POLIZZE'
+			when upper(trim(b.DES)) like 'RID'  or upper(trim(a.DS_CAUSALE)) like any ('%SDD%','%RID%','%ADDEBIT%PREAUTORIZZAT%') then 'SDD'
+			when upper(trim(b.DES)) like 'BFP' or upper(trim(a.DS_CAUSALE)) like '%BPF%' then 'BFP'
+			when upper(trim(a.DS_CAUSALE)) like any ('%STIPEND%','%PENSION%','%STIP%PENS%','ACCREDITO A VOSTRO FAVORE%') 
+				and upper(trim(a.DS_CAUSALE)) not like all ('%BOLLETT%','%RAV%') then 'STIPENDIO_PENSIONE'
+			when (upper(trim(b.DES)) like 'TENUTA CONTO' or upper(trim(a.DS_CAUSALE)) like '%TENUTA%CONTO%') 
+				and upper(trim(a.DS_CAUSALE)) not like '%RITENUTA%ACCONTO%' then 'TENUTA_CONTO'
+			when upper(trim(a.DS_CAUSALE)) like any ('%RICARIC%PREPAGATA%', '%RICARIC%POSTEPAY%') then 'RICARICA_POSTEPAY'
+			when upper(trim(a.DS_CAUSALE)) like '%GIROFOND%LIBRETT%' then 'POSTAGIRO_DA_A_LIBRETTI'
+			when upper(trim(a.DS_CAUSALE)) like '%POSTAGIR%' then 'POSTAGIRO_DA_A_CONTO'
+			when upper(trim(a.DS_CAUSALE)) like '%ACCREDIT%DISP%POSTEPAY' then 'POSTAGIRO_DA_A_EVOLUTION'
+			when upper(trim(a.DS_CAUSALE)) like any ('BON IN%','BON.%', '%BONIFIC%','%GIROFOND%') or upper(trim(b.DES)) like 'BONIFIC%' then 'BONIFICO'
+			when upper(trim(a.DS_CAUSALE)) like any ('%FONDI%','%PIAN%ACCUMUL%') and upper(trim(a.DS_CAUSALE)) not like ('%MONEYGRAM%') then 'FONDI'
+			when upper(trim(a.DS_CAUSALE)) like any ('%TITOL%', '%CEDOLE%', '%DIVIDENDI%', '% AZION%', '%DIRITTI%CUSTODIA%', '%CANON%TOL%')
+				or upper(trim(b.DES)) like '%INVESTIMENTI%' then 'TITOLI'
+			when upper(trim(a.DS_CAUSALE)) like any ('%PRELIEV%', '%PRELEVAMENT%') then 'PRELIEVO' 
+			when upper(trim(a.DS_CAUSALE)) like 'VERSAMENT%' then 'VERSAMENTI'
+			when upper(trim(a.DS_CAUSALE)) like any ('%BOLL%','%PAGAM%','%PAG.%', '%RAV%','%F23%','%F24%') 
+				or upper(trim(b.DES)) like 'PAGAMENTI%' then 'PAGAMENTI'			
+			else 'VARIE'
+		end as DES --> riclassificazione delle causali
+	from V_EDW_DW_BP.CC_CAUS_MOV_ST as a
+	join EBIL_AREE.CT_PARAMETRI as p on 1=1
+	left join V_EDW_DW_BP.FAMIGLIA_CC as B
+		on a.DS_CAUSALE=b.COD
+	where p.DATA_AGGIORNAMENTO between a.DT_INI_VAL and a.DT_FIN_VAL
+) with data primary index(CD_CAUS_TRANS) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+/*Analisi dei bonifici per l'attribuzione dell'operazione al singolo cliente, riclassificazione delle operazioni e individuazione dei canali di compentenza*/
+--Estrazione di tutti i bonifici/postagiro SEPA in entrata/uscita su/da conto
+create volatile table BONIFICI_SEPA as(
+	select
+		a.RIFER_VTPIE
+		, a.IND_BONIFICO
+		, case 
+			when a.CAUSALE_CONT = '27' then 'STIPENDIO_PENSIONE'
+			when (a.IND_BONIFICO = 'PO' and (a.TIPO_RAP_CRE='PP' or a.TIPO_RAP_DEB='PP')) then 'POSTAGIRO_DA_A_EVOLUTION'
+			when a.IND_BONIFICO = 'PO' and a.TIPO_RAP_CRE='DR' then 'POSTAGIRO_DA_A_LIBRETTI'
+			when a.IND_BONIFICO = 'PO' then 'POSTAGIRO_DA_A_CONTO' --> esclusi tutti i casi precedenti
+			else coalesce(b.DES,'BONIFICO') --> esclusi tutti i casi di postagiro
+		end as TIPO_BON
+		, case 
+			when a.CANALE in ('APP', 'APPBP', 'APPPP', 'APPPM') then 'APP'
+			when a.CANALE in ('CBI_A', 'CBI_M', 'CBI_P', 'BPIOL', 'CLICK', 'PPAY', 'BPOL') then 'WEB'
+			when a.CANALE in ('PMOBI') then 'DIGITAL'
+			when a.CANALE = 'SDP' then 'UP'
+			else 'CENTRO' 
+		end as TIPO_CANALE		
+		, a.NUM_RAP_CLI_CRE, a.NUM_RAP_CLI_DEB, a.TIPO_RAP_CRE, a.TIPO_RAP_DEB
+		, a.RAG_SOC_BEN, a.RAG_SOC_ORD, a.INF_CLIENTE, a.DATA_CONT, a.CONTRO_EUR, a.CANALE 
+	from V_EDW_DW_BP.PAG_BON_SEPAD_ST as a 
+	join EBIL_AREE.CT_PARAMETRI as p on 1=1
+	left join MOV_DES_CC as b 
+		on a.CAUSALE_CONT=b.CD_CAUS_TRANS
+	where a.DATA_CONT between add_months(p.DATA_AGGIORNAMENTO+1,-1) and p.DATA_AGGIORNAMENTO
+		and ((a.TIPO_RAP_CRE='CC' and a.NUM_RAP_CLI_CRE<>'000000000000' and a.NUM_RAP_CLI_CRE is not null)
+			or (a.TIPO_RAP_DEB='CC' and a.NUM_RAP_CLI_DEB<>'000000000000' and a.NUM_RAP_CLI_DEB is not null))
+		and a.RIFER_VTPIE not in (select RIFER_ORI_VTPIE from V_EDW_DW_BP.PAG_BON_SEPAD_ST   
+			where IND_BONIFICO= 'SU' and RIFER_ORI_VTPIE is not null) --si escludono i bonifici stornati e riemessi
+		and a.IND_BONIFICO in ('E','U','PO')
+)with data primary index(RIFER_VTPIE, NUM_RAP_CLI_CRE, NUM_RAP_CLI_DEB) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+--Estrazione di tutti i bonifici/postagiro ESTERI in entrata/uscita su/da conto
+create volatile table BONIFICI_ESTERI as (
+	select 
+		cast(a.NUM_OPERAZ_ESTERO as varchar(20)) as NUM_OPERAZ_ESTERO -->serve come chiave univoca
+		, a.TIPO_BONIFICO 
+		, 'BONIFICO' as TIPO_BON --> serve per riclassificazione causale
+		, case when a.CANALE in ('BPOL', 'CBIM', 'CBIP', 'BPIOL', 'CBIA', 'POIT') then 'WEB'
+			else 'CENTRO' --> presente solo CANALE 3270 che corrisponde al centro
+		end as TIPO_CANALE 
+		, case when a.TIPO_BONIFICO='E' then trim(right(trim(a.IBAN_BENEFICIARIO), 12)) end as NUM_RAP_CLI_CRE
+		, case when a.TIPO_BONIFICO='U' then trim(right(trim(a.IBAN_ORDINANTE), 12)) end as NUM_RAP_CLI_DEB
+		, case when a.TIPO_BONIFICO='E' then 'CC' end as TIPO_RAP_CRE
+		, case when a.TIPO_BONIFICO='U' then 'CC' end as TIPO_RAP_DEB
+		, a.RAG_SOCIALE_BENEF
+		, a.RAG_SOCIALE_ORDIN
+		, a.NOTE_BONIFICO
+		, a.DATA_CONTABILE
+		, a.CONTR_ORDINE --> IMPORTO
+		, a.CANALE
+	from V_EDW_DW_BP.PAG_BON_ESTPPAY_ST as a
+	join EBIL_AREE.CT_PARAMETRI as p on 1=1
+	where a.DATA_CONTABILE between add_months(p.DATA_AGGIORNAMENTO+1,-1) and p.DATA_AGGIORNAMENTO
+		and a.INDICATORE_STORNO = 'N' and a.STRUMENTO_REGOLAMENTO='CC' -->identifica il conto corrente
+)with data primary index(NUM_OPERAZ_ESTERO, NUM_RAP_CLI_CRE, NUM_RAP_CLI_DEB, RAG_SOCIALE_ORDIN, RAG_SOCIALE_BENEF) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+--Estrazione di tutti i bonifici/postagiro NAZIONALI in entrata/uscita su/da conto
+create volatile table BONIFICI_NAZ as (
+	select 
+		a.NR_MOV --> serve come chiave univoca
+		, case 
+			when a.CD_CAUS='PO' then a.CD_CAUS
+			when a.CD_CAUS in ('27','ZS') or a.ABI_BEN in ('07601') then 'E'
+			else 'U' end as TIPO_BONIFICO 		
+		, case 
+			when a.CD_CAUS='PO' then 'POSTAGIRO_DA_A_CONTO'
+			when a.CD_CAUS ='ZS' or a.TIP_BON='SUPPORTO' then 'FINANZIAMENTI'
+			when a.CD_CAUS in '27' then 'STIPENDIO_PENSIONE' --> superfluo perchè è presente anche il coalesce con la mov_des_cc
+			else coalesce(b.DES,'BONIFICO') end as TIPO_BON -->riclassificazione delle operazioni
+		, case 
+			when a.CD_FRAZ in ('55111') then 'WEB'
+			when a.CD_FRAZ in ('77333') then 'DIGITAL'
+			when a.CD_FRAZ = 'DIREZ' then 'CENTRO'
+			else 'UP' --> gli altri sono frazionari fisici e quindi UP
+		end as TIPO_CANALE  --> riclassificazione dei canali
+		, case when TIPO_BONIFICO in ('PO','E') then a.NR_RAPP_BEN end as NUM_RAP_CLI_CRE
+		, case when TIPO_BONIFICO in ('PO','U') then a.NR_RAPP_ORD end as NUM_RAP_CLI_DEB
+		, case when TIPO_BONIFICO in ('PO','E') then 'CC' end as TIPO_RAP_CRE
+		, case when TIPO_BONIFICO in ('PO','U') then 'CC' end as TIPO_RAP_DEB
+		, a.ANAG_BEN
+		, a.ANAG_ORD
+		, cast('' as varchar(50)) as NOTE_BONIFICO
+		, a.DT_CONTABILE
+		, a.IMPORTO
+		, a.CD_FRAZ as CANALE
+	from V_EDW_DW_BP.PAG_BON_NAZ_ST as a
+	join EBIL_AREE.CT_PARAMETRI as p on 1=1
+	left join MOV_DES_CC as b
+		on a.CD_CAUS=b.CD_CAUS_TRANS
+	where a.DT_CONTABILE between add_months(p.DATA_AGGIORNAMENTO+1,-1) and p.DATA_AGGIORNAMENTO
+		and a.SOCIETA_APPARTENENZA='BP' --> identifica il conto corrente
+		and a.CD_CAUS<>'68' --> esclusi gli storni
+)with data primary index(NR_MOV, NUM_RAP_CLI_CRE, NUM_RAP_CLI_DEB, ANAG_BEN, ANAG_ORD) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+--Tabella unica dei bonifici per riclassificazione delle causali e attribuzione al singolo cliente
+create volatile table BONIFICI as (
+	select * from BONIFICI_SEPA
+	union all
+	select * from BONIFICI_ESTERI
+	union all
+	select * from BONIFICI_NAZ
+)with data primary index(RIFER_VTPIE, NUM_RAP_CLI_CRE, NUM_RAP_CLI_DEB) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+ 
+drop table BONIFICI_SEPA;
+drop table BONIFICI_ESTERI;
+drop table BONIFICI_NAZ;
+
+--------------------------------------------------------------------------------
+--Classificazione dei Bonifici in 20 categorie
+create volatile table CAUSALI_BONIFICI as (
+	select
+		a.RIFER_VTPIE, a.NUM_RAP_CLI_CRE, a.NUM_RAP_CLI_DEB, a.TIPO_RAP_CRE, a.TIPO_RAP_DEB, a.IND_BONIFICO
+		, a.RAG_SOC_ORD, a.RAG_SOC_BEN, a.INF_CLIENTE, a.DATA_CONT, a.CONTRO_EUR, a.CANALE, a.TIPO_BON, a.TIPO_CANALE
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%STIP%', '%SALAR%', '%MENSILIT%', '%RETRIB%', '%BENEF/STIPE%', '%BUST%PAGA%', '%PAGA %'
+			, '%COMPENSO%', '%CEDOLINO MESE%','%ACCREDITO COMPETENZE %', '%COMPETENZE %', '%ACCREDITO MENS.%', '%ACCONTO BP%', '%SALDO BP%'
+			, '%SALDO B.PA%', '%EMOLUMENT%' ,'%PENSION%', '%BENEF/PENS%', '%VITALIZIO%', '%RETRAITE%', '%RENTE/PENS.%', '% RV-RENTE %'
+			, 'AVS % CHF % AL CAMBIO%', '%RV-RENTE %', '%BR-RENTE %', '%UV-RENTE %', '%ESIMA %', '%13MA%', '%13SIMA%', '%13 MA%', '%14MA%'
+			, '%14 MA%', '%14SIMA%', '%QUATTORD.MA%', '%TREDIC.MA%','%TFR%', '%T.F.R.%','%T F R %') 
+			or a.TIPO_BON='STIPENDIO_PENSIONE' --> si imputa a 1 tale valore anche quando la causale del bonifico è mancante, ma è sicuro un accredito di stipendio o pensione
+			then 1 else 0 end as BON_STIPENDIO_PENSIONE
+		, case when upper(trim(a.INF_CLIENTE)) like any ('FITT%', '%FITT%', '%PIGION%', '%CANONE%MES%', '%CANONE%MENS%', '%LOCAZ%') then 1 else 0 end as BON_AFFITTO
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%MUTUO%', '%MUTUI%') 
+			and upper(trim(a.INF_CLIENTE)) not like '%MUTU%SOCCORS%' then 1 else 0 end as BON_MUTUO
+		, case when upper(trim(a.INF_CLIENTE)) like '% RETTA %' 
+			and upper(trim(a.INF_CLIENTE)) not like all ('FITT%', '%FITT%', '%PIGION%', '%CANONE%MES%', '%CANONE%MENS%', '%APPARTAM%', '%LOCAZ%', 
+				'%UNIVERSIT%', '%SCUOL%', '%SCOLASTIC%', '%MASTER%', '%LICEO%', '%ISTRUZ%', '%ASILO%', '%ALUNN%') then 1 else 0 end as BON_RETTA
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%PRESTIT%', '%FINANZIAMENTO%', '%ESTINZ FIN%', '%ESTINZ DEBITO%', '%ESTINZ CESSION%'
+			, '%ESTINZ CRED%', '%ESTINZ PRA%', '%ESTINZ PT%') then 1 else 0 end as BON_PRESTITO
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%IMPOSTE%', '%IRPEF%', '%BOLLO%', '%TASS%', '%CONTRIBUTI%', '% TASI %', '% TARI %') then 1 else 0 end as BON_TRIBUTO
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%CONDOM%', '% COND%') 
+			and upper(trim(a.INF_CLIENTE)) not like all ('%FITTO%', '%CONDIV%') then 1 else 0 end as BON_CONDOMINIO
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%ACQUIS%CASA%', '%ACQUIST%APPARTAMENT%', '%ACQUIS%CASA%', '%ACQUIST%IMMOBIL%', '%ACQUIST%ABITAZION%') then 1 else 0 end as BON_ACQUISTO_CASA
+		, case when upper(trim(a.INF_CLIENTE)) like '%BOLLETT%' then 1 else 0 end as BON_UTENZE
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%MEDIC%', '%DENTISTA%', '%OSPEDAL%', '%FISIOTERAP%', '%LOGOPEDI%', '%APPARECCHIO ACUSTICO%', 
+			'%PROTESI%', '%ODONTOIA%', '%SPES%SANIT%', '%MUTUO%SOCCORS%', '%FARMACIA%') and upper(trim(a.INF_CLIENTE)) not like all ('%ISCRIZIONE%', '%FITT%', '%LOCAZ%'
+				, '%CANONE%', '%PIGIONE%', '%ACCADEMIC%', '%TASSA%') then 1 else 0 end as BON_SPESE_SANITARIE
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%AUTOM%', '% AUTO %', '%AUTOVET%', '%FIAT%', '%TWINGO%', '%MERCEDES%', '%TOYOTA%', '%BMW%', '%HONDA%', '%HYUNDAY%'
+			, '%VOLKSWAGEN%', '%RENAULT%', '%PEUGEOT%', '% DUCATI%', '%APRILIA%', '%PIAGGIO%', '%NISSAN%', '%JEEP%', '% FORD%', '%MITSUBISHI%', '%TARGA%', '%MOTO%'
+			, '%SCOOTER%', '%YAMAHA%', '%SUZUKI%', '% AUDI %', '%OPEL%', '%CITROEN%') 
+			and upper(trim(a.INF_CLIENTE)) not like all ('%BOLLO%', '%TERREMOTO%', '%MOTORIA%', '%MOTORIE%') then 1 else 0 end as BON_MOTORI
+		, case when upper(trim(a.INF_CLIENTE)) like any ('% ASPI %', '%NASPI%', '%MINIASPI%', '%DISOCCUPAZIONE%', '%LIQUID. DS AGR%DOMANDA%', '%MOBILIT%') 
+			and upper(trim(a.INF_CLIENTE)) not like all ('FITT%', 'VIAGGIO', '% ASPIR%') then 1 else 0 end as BON_DISOCCUPAZIONE
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%SPOSA%', '%SPOSO%', '%NOZZE%', '%MATRIM%', '%WEDDING%', '% AMORE %', '%CONGRATULAZ%', '%AUGURI%REGAL%', '%AUGURI%SPOSA%')
+			and a.INF_CLIENTE not like all ('%CORSO%', '%CAMER%MATRIM%', '%STANZ%MATRIM%', '%FITT%', '%ISCRIZION%', '%CONDOM%', '%CAMER%', '%MATERAS%', '%COMPLEANN%', 
+				'%LETT%','%ONOMASTICO%', '%NATALE%', '%PASQUA%', '%BUON%ANNO%', '%BEFAN%', '%MUTUO%') then 1 else 0 end as BON_NOZZE
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%MANTENIM%', '%ALIMENTI%', '%FIGLI%DIVORZ%','%FIGLI%SEPAR%', '%ASSEGNO%DIVORZ%', '%ASSEGNO%CONIUG%', '%ASSEGNO%SEPARAZ%'
+			, '%ASSEGNO%MANTEN%') and upper(trim(a.INF_CLIENTE)) not like all ('%ACQUIST%') then 1 else 0 end as BON_MANTENIMENTO
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%FIGLI%', '%CONIUGE%', '%SORELL%', '%FRATELL%', '%NONN%', '%PAPA %', '%MAMMA%', '%FAMIGLIA%'
+			, '%FAMILI%', '%PADRE%', '%MADRE%') then 1 else 0 end as BON_NUCLEO_FAMIGLIA
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%SOGGIORN%', '%VACANZ%', '%VIAGGI%', '%HOTEL%', '%ALBERG%', '%AIRB%', '%AEREI%', '%AEREO%', '%TRENO%'
+			, '%TRENI%', '% VOLI%', '% VOLO %') then 1 else 0 end as BON_VIAGGI
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%UNIVERSIT%', '%SCUOL%', '%SCOLASTIC%', '%MASTER%', '%LICEO%', '%ISTRUZ%', '%ASILO%', '%ALUNN%') 
+			and not upper(trim(a.INF_CLIENTE)) like any ('%SPORT%', '%CALCIO%') then 1 else 0 end as BON_ISTRUZIONE
+		, case when upper(trim(a.INF_CLIENTE)) like any ('% EREDITA %', 'QUOTA%SUCCESSIONE%') then 1 else 0 end as BON_EREDITA
+		, case when upper(trim(a.INF_CLIENTE)) like any ('%PAG%SINIS%DANNO%', '%SER%LIQ%DAN%POL%', '%SUP%PAGAM%SX%', '% SINISTRO % N.%', '%RISCATT%POL%'
+			, '%PAGAMEN%SINISTR%N%', '%SIN. %DEL:%/%BEN:%', '%SIN. %DEL:%/%', '%SCADENZA%POL%') then 1 else 0 end as BON_LIQUIDAZIONE_POLIZZA
+		, case when (BON_STIPENDIO_PENSIONE = 0
+			and BON_AFFITTO = 0
+			and BON_MUTUO = 0
+			and BON_RETTA = 0
+			and BON_PRESTITO = 0
+			and BON_TRIBUTO = 0
+			and BON_CONDOMINIO = 0
+			and BON_ACQUISTO_CASA = 0
+			and BON_UTENZE = 0
+			and BON_SPESE_SANITARIE = 0
+			and BON_MOTORI = 0
+			and BON_DISOCCUPAZIONE = 0
+			and BON_NOZZE = 0
+			and BON_MANTENIMENTO = 0
+			and BON_NUCLEO_FAMIGLIA = 0
+			and BON_VIAGGI = 0
+			and BON_ISTRUZIONE = 0
+			and BON_EREDITA = 0
+			and BON_LIQUIDAZIONE_POLIZZA = 0) then 1 else 0 end as BON_ALTRO
+	from BONIFICI as a
+)with data primary index(RIFER_VTPIE, NUM_RAP_CLI_CRE, NUM_RAP_CLI_DEB) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+--------------------------------------------------------------------------------
+--Identificazione dei bonifici/postagiro in entrata e aggancio NDG
+create volatile table BONIFICI_ENTRATA_TEMP as (
+	select conv.CD_CLIENTE_SORGENTE, a.*
+	from CAUSALI_BONIFICI as a
+	inner join CONVERSIONE_CONTI_NDG as conv
+		on a.NUM_RAP_CLI_CRE=conv.NR_RAPPORTO
+	where a.TIPO_RAP_CRE='CC' and a.IND_BONIFICO in ('E','PO') --> si considerano tutti i bonifici in entrata sul conto (anche i postagiro)
+)with data primary index (CD_CLIENTE_SORGENTE, RIFER_VTPIE, NUM_RAP_CLI_CRE, NUM_RAP_CLI_DEB) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+--Assegnazione dei bonifici in entrata al cliente singolo (analizzando la ragione sociale del beneficiario)
+create volatile table BONIFICI_ENTRATA_BIC as (
+	select a.* 
+		, c.ID_CLIENTE_BIC, c.TIPO_INTESTATARIO, d.NOME, d.COGNOME, d.COGNOME||' '||d.NOME as INTESTATARIO
+		, syslib.levenshtein(trim(coalesce(a.RAG_SOC_BEN, '')), trim(coalesce(INTESTATARIO, '')), 1 
+			, '''$%&()*+/\|-"1234567890', 'dott,geol,ing,arch,prof,mme,geom,mr,mrs,miss,d.ssa') as SCORE_BEN
+		, case when row_number() over (partition by a.RIFER_VTPIE, a.NUM_RAP_CLI_CRE 
+			order by SCORE_BEN DESc, case when SCORE_BEN>=60 then 0 else 1 end, c.ID_CLIENTE_BIC)=1 then 1 else 0 
+		end as FL_ATTRIBUZ_BIC --> flag di possibile attribuzione del bic
+		, case 
+			when c.TIPO_INTESTATARIO='U' then 1 --> assegnazione univoca all'intestatario unico
+			when SCORE_BEN<=60 then 0  --> flag=0 quando non è possibile distinguere il singolo cliente tra i cointestatari
+			else FL_ATTRIBUZ_BIC 
+		end as FL_BIC --> flag di attribuzione del bonifico al singolo cliente
+	from BONIFICI_ENTRATA_TEMP as a
+	join EBIL_AREE.CT_PARAMETRI as p on 1=1
+	left join EBIL_AREE.NDG_BIC as c --> riprendere da cartella di rilascio 'PARAMETRI'
+		on a.CD_CLIENTE_SORGENTE=c.NDG
+	left join EDWAE_VM.CLIENTE as d 
+		on c.ID_CLIENTE_BIC=d.ID_CLIENTE_BIC and p.DATA_AGGIORNAMENTO between d.DT_INI_VAL and d.DT_FIN_VAL
+)with data primary index (ID_CLIENTE_BIC, CD_CLIENTE_SORGENTE, RIFER_VTPIE, NUM_RAP_CLI_CRE, NUM_RAP_CLI_DEB) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+--Estrazione dei bonifici e classificazione delle causali in Entrata (numero posto a 0 per i cointestatari in caso di assegnazione al cliente singolo)
+create volatile table BONIFICI_ENTRATA as (
+	select
+		a.ID_CLIENTE_BIC, a.CD_CLIENTE_SORGENTE, a.RIFER_VTPIE, a.NUM_RAP_CLI_CRE, a.IND_BONIFICO, a.DATA_CONT, a.CONTRO_EUR, a.TIPO_BON, a.TIPO_CANALE
+		--in caso di assegnazione del bonifico a tutti i cointestatari si impone il flag beneficiario=1		
+		, case when max(a.FL_BIC) over(partition by a.RIFER_VTPIE)=0 then 1 else a.FL_BIC end as FL_BIC_BEN
+		, case when FL_BIC_BEN=1 then a.BON_STIPENDIO_PENSIONE else 0 end as BON_STIPENDIO_PENSIONE_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_AFFITTO else 0 end as BON_AFFITTO_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_MUTUO else 0 end as BON_MUTUO_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_RETTA else 0 end as BON_RETTA_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_PRESTITO else 0 end as BON_PRESTITO_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_TRIBUTO else 0 end as BON_TRIBUTO_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_CONDOMINIO else 0 end as BON_CONDOMINIO_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_ACQUISTO_CASA else 0 end as BON_ACQUISTO_CASA_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_UTENZE else 0 end as BON_UTENZE_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_SPESE_SANITARIE else 0 end as BON_SPESE_SANITARIE_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_MOTORI else 0 end as BON_MOTORI_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_DISOCCUPAZIONE else 0 end as BON_DISOCCUPAZIONE_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_NOZZE else 0 end as BON_NOZZE_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_MANTENIMENTO else 0 end as BON_MANTENIMENTO_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_NUCLEO_FAMIGLIA else 0 end as BON_NUCLEO_FAMIGLIA_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_VIAGGI else 0 end as BON_VIAGGI_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_ISTRUZIONE else 0 end as BON_ISTRUZIONE_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_EREDITA else 0 end as BON_EREDITA_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_LIQUIDAZIONE_POLIZZA else 0 end as BON_LIQUIDAZIONE_POLIZZA_ENTRATA
+		, case when FL_BIC_BEN=1 then a.BON_ALTRO else 0 end as BON_ALTRO_ENTRATA
+		, row_number() over(partition by a.ID_CLIENTE_BIC, a.NUM_RAP_CLI_CRE, a.CD_CLIENTE_SORGENTE, a.DATA_CONT, a.CONTRO_EUR
+			order by a.RIFER_VTPIE) as JOIN_INDEX
+	from BONIFICI_ENTRATA_BIC as a
+)with data primary index (ID_CLIENTE_BIC, CD_CLIENTE_SORGENTE, RIFER_VTPIE, NUM_RAP_CLI_CRE) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+--------------------------------------------------------------------------------
+--Identificazione dei bonifici/postagiro in uscita e aggancio NDG
+create volatile table BONIFICI_USCITA_TEMP as (
+	select conv.CD_CLIENTE_SORGENTE, a.*
+	from CAUSALI_BONIFICI as a
+	inner join CONVERSIONE_CONTI_NDG as conv
+		on a.NUM_RAP_CLI_DEB=conv.NR_RAPPORTO
+	where a.TIPO_RAP_DEB='CC' and a.IND_BONIFICO in ('U','PO') --> si considerano tutti i bonifici in uscita dal conto (anche i postagiro)
+)with data primary index (CD_CLIENTE_SORGENTE, RIFER_VTPIE, NUM_RAP_CLI_CRE, NUM_RAP_CLI_DEB) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+--Assegnazione dei bonifici in uscita al cliente singolo (analizzando la ragione sociale dell'ordinante)
+create volatile table BONIFICI_USCITA_BIC as (
+	select a.* 
+		, c.ID_CLIENTE_BIC, c.TIPO_INTESTATARIO, d.NOME, d.COGNOME, d.COGNOME||' '||d.NOME as INTESTATARIO
+		, syslib.levenshtein(trim(coalesce(a.RAG_SOC_ORD, '')), trim(coalesce(INTESTATARIO, '')), 1 
+			, '''$%&()*+/\|-"1234567890', 'dott,geol,ing,arch,prof,mme,geom,mr,mrs,miss,d.ssa') as SCORE_ORD
+		, case when row_number() over (partition by a.RIFER_VTPIE, a.NUM_RAP_CLI_DEB 
+			order by SCORE_ORD DESc, case when SCORE_ORD>=60 then 0 else 1 end, c.ID_CLIENTE_BIC)=1 then 1 else 0 
+		end as FL_ATTRIBUZ_BIC --> flag di possibile attribuzione del bic
+		, case 
+			when c.TIPO_INTESTATARIO='U' then 1 --> assegnazione univoca all'intestatario unico
+			when SCORE_ORD<=60 then 0  --> flag=0 quando non è possibile distinguere il singolo cliente tra i cointestatari
+			else FL_ATTRIBUZ_BIC 
+		end as FL_BIC --> flag di attribuzione del bonifico al singolo cliente
+	from BONIFICI_USCITA_TEMP as a 
+	join EBIL_AREE.CT_PARAMETRI as p on 1=1
+	left join EBIL_AREE.NDG_BIC as c  --> riprendere da cartella di rilascio 'PARAMETRI'
+		on a.CD_CLIENTE_SORGENTE=c.NDG
+	left join EDWAE_VM.CLIENTE as d 
+		on c.ID_CLIENTE_BIC=d.ID_CLIENTE_BIC and p.DATA_AGGIORNAMENTO between d.DT_INI_VAL and d.DT_FIN_VAL
+)with data primary index (ID_CLIENTE_BIC, CD_CLIENTE_SORGENTE, RIFER_VTPIE, NUM_RAP_CLI_CRE, NUM_RAP_CLI_DEB) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+--Estrazione dei bonifici e classificazione delle causali in Uscita (numero posto a 0 per i cointestatari in caso di assegnazione al cliente singolo)
+create volatile table BONIFICI_USCITA as (
+	select
+		a.ID_CLIENTE_BIC, a.CD_CLIENTE_SORGENTE, a.RIFER_VTPIE, a.NUM_RAP_CLI_DEB, a.IND_BONIFICO, a.DATA_CONT, a.CONTRO_EUR, a.TIPO_BON, a.TIPO_CANALE
+		--in caso di assegnazione del bonifico a tutti i cointestatari si impone il flag beneficiario=1		
+		, case when max(a.FL_BIC) over(partition by a.RIFER_VTPIE)=0 then 1 else a.FL_BIC end as FL_BIC_BEN		
+		, case when a.FL_BIC=1 then a.BON_STIPENDIO_PENSIONE else 0 end as BON_STIPENDIO_PENSIONE_USCITA
+		, case when a.FL_BIC=1 then a.BON_AFFITTO else 0 end as BON_AFFITTO_USCITA
+		, case when a.FL_BIC=1 then a.BON_MUTUO else 0 end as BON_MUTUO_USCITA
+		, case when a.FL_BIC=1 then a.BON_RETTA else 0 end as BON_RETTA_USCITA
+		, case when a.FL_BIC=1 then a.BON_PRESTITO else 0 end as BON_PRESTITO_USCITA
+		, case when a.FL_BIC=1 then a.BON_TRIBUTO else 0 end as BON_TRIBUTO_USCITA
+		, case when a.FL_BIC=1 then a.BON_CONDOMINIO else 0 end as BON_CONDOMINIO_USCITA
+		, case when a.FL_BIC=1 then a.BON_ACQUISTO_CASA else 0 end as BON_ACQUISTO_CASA_USCITA
+		, case when a.FL_BIC=1 then a.BON_UTENZE else 0 end as BON_UTENZE_USCITA
+		, case when a.FL_BIC=1 then a.BON_SPESE_SANITARIE else 0 end as BON_SPESE_SANITARIE_USCITA
+		, case when a.FL_BIC=1 then a.BON_MOTORI else 0 end as BON_MOTORI_USCITA
+		, case when a.FL_BIC=1 then a.BON_DISOCCUPAZIONE else 0 end as BON_DISOCCUPAZIONE_USCITA
+		, case when a.FL_BIC=1 then a.BON_NOZZE else 0 end as BON_NOZZE_USCITA
+		, case when a.FL_BIC=1 then a.BON_MANTENIMENTO else 0 end as BON_MANTENIMENTO_USCITA
+		, case when a.FL_BIC=1 then a.BON_NUCLEO_FAMIGLIA else 0 end as BON_NUCLEO_FAMIGLIA_USCITA
+		, case when a.FL_BIC=1 then a.BON_VIAGGI else 0 end as BON_VIAGGI_USCITA
+		, case when a.FL_BIC=1 then a.BON_ISTRUZIONE else 0 end as BON_ISTRUZIONE_USCITA
+		, case when a.FL_BIC=1 then a.BON_EREDITA else 0 end as BON_EREDITA_USCITA
+		, case when a.FL_BIC=1 then a.BON_LIQUIDAZIONE_POLIZZA else 0 end as BON_LIQUIDAZIONE_POLIZZA_USCITA
+		, case when a.FL_BIC=1 then a.BON_ALTRO else 0 end as BON_ALTRO_USCITA
+		, row_number() over(partition by a.ID_CLIENTE_BIC, a.NUM_RAP_CLI_DEB, a.CD_CLIENTE_SORGENTE, a.DATA_CONT, a.CONTRO_EUR
+			order by a.RIFER_VTPIE) as JOIN_INDEX	
+	from BONIFICI_USCITA_BIC as a
+)with data primary index (ID_CLIENTE_BIC, CD_CLIENTE_SORGENTE, RIFER_VTPIE, NUM_RAP_CLI_DEB) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table BONIFICI;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table CAUSALI_BONIFICI;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table BONIFICI_ENTRATA_TEMP;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table BONIFICI_USCITA_TEMP;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table BONIFICI_ENTRATA_BIC;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+drop table BONIFICI_USCITA_BIC;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+/*Pensioni dal Verticale delle Pensioni*/
+--Estrazione dei ratei delle pensioni con accredito sul conto
+
+create volatile table PENSIONI as (
+	select 
+		ratei.SK_RAPPORTO --> serve come chiave univoca 
+		, ratei.NR_RAPPORTO_ACCR
+		, anag.COD_FISC_BENEFICIARIO
+		, ratei.DT_INI_PAGAMENTO
+		, ratei.IMPORTO 	
+	from V_EDW_DW_BP.PAG_INPS_RAPPORTO_ST rapp
+	inner join V_EDW_DW_BP.PAG_RATEI_INPS_ST ratei
+		on rapp.SK_RAPPORTO = ratei.SK_RAPPORTO
+	inner join V_EDW_DW_BP.PAG_ANAGR_INPS_ST anag
+		on rapp.SK_RAPPORTO = anag.SK_RAPPORTO
+	join EBIL_AREE.CT_PARAMETRI as p on 1=1 
+	where p.DATA_AGGIORNAMENTO between rapp.DT_INI_VAL and rapp.DT_FIN_VAL
+		and p.DATA_AGGIORNAMENTO between anag.DT_INI_VAL and anag.DT_FIN_VAL
+		and ratei.DT_INI_PAGAMENTO between add_months(p.DATA_AGGIORNAMENTO+1,-1) and p.DATA_AGGIORNAMENTO
+		and ratei.STATO_RATEO = 'DIS'
+		and ratei.MOD_PAGAMENTO = '01' --> identifica l'accredito del conto come modalità di pagamento
+)with data primary index(SK_RAPPORTO, NR_RAPPORTO_ACCR, COD_FISC_BENEFICIARIO) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+--Aggancio ai ratei delle pensioni NDG e ID_CLIENTE_BIC 
+create volatile table PENSIONI_AGGANCI_NDG as (
+	select
+		c.ID_CLIENTE_BIC
+		, conv.CD_CLIENTE_SORGENTE 
+		, ratei.SK_RAPPORTO 
+		, ratei.NR_RAPPORTO_ACCR 
+		, ratei.COD_FISC_BENEFICIARIO
+		, ratei.DT_INI_PAGAMENTO
+		, ratei.IMPORTO
+	from PENSIONI as ratei
+	join EBIL_AREE.CT_PARAMETRI as p on 1=1
+	inner join CONVERSIONE_CONTI_NDG as conv
+		on ratei.NR_RAPPORTO_ACCR=conv.NR_RAPPORTO
+	left join EBIL_AREE.NDG_BIC c  --> riprendere da cartella di rilascio 'PARAMETRI'
+		on conv.CD_CLIENTE_SORGENTE=c.NDG
+)with data primary index(ID_CLIENTE_BIC, CD_CLIENTE_SORGENTE, SK_RAPPORTO, NR_RAPPORTO_ACCR, COD_FISC_BENEFICIARIO) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+--Attribuzione del rateo della pensione al singolo cliente beneficiario della pensione (tramite codice fiscale)
+create volatile table PENSIONI_AGGANCI_BIC as (
+	select
+		ratei.ID_CLIENTE_BIC
+		, ratei.CD_CLIENTE_SORGENTE 
+		, ratei.SK_RAPPORTO 
+		, ratei.NR_RAPPORTO_ACCR
+		, ratei.COD_FISC_BENEFICIARIO
+		, ratei.DT_INI_PAGAMENTO
+		, ratei.IMPORTO
+		, case when anag.ID_CLIENTE_BIC is not null then 1 else 0 
+		end as FL_BENEF_PENS --> flag di assegnazione del rateo al beneficiario della pensione
+		, row_number() over(partition by ratei.ID_CLIENTE_BIC, ratei.NR_RAPPORTO_ACCR, ratei.CD_CLIENTE_SORGENTE
+			, ratei.DT_INI_PAGAMENTO, ratei.IMPORTO order by ratei.SK_RAPPORTO) as JOIN_INDEX		
+	from PENSIONI_AGGANCI_NDG as ratei
+	left join 
+		(sel ana.ID_CLIENTE_BIC
+		, trim(ana.COD_FISCALE) as COD_FISCALE
+		from EDWAE_VM.CLIENTE as ana	 join EBIL_AREE.CT_PARAMETRI as p on 1=1
+		where p.DATA_AGGIORNAMENTO between ana.DT_INI_VAL and ana.DT_FIN_VAL
+		qualify row_number() over (partition by trim(COD_FISCALE) 
+			order by case when NATURA_GIURIDICA='PERSONA FISICA' then 0 else 1 end, ID_CLIENTE_BIC DESc)=1) as anag
+		on ratei.COD_FISC_BENEFICIARIO=anag.COD_FISCALE and ratei.ID_CLIENTE_BIC=anag.ID_CLIENTE_BIC
+)with data primary index(ID_CLIENTE_BIC, CD_CLIENTE_SORGENTE, SK_RAPPORTO, NR_RAPPORTO_ACCR, COD_FISC_BENEFICIARIO) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table PENSIONI;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table PENSIONI_AGGANCI_NDG;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+--------------------------------------------------------------------------------
+/*Analisi dei mandati delle Domiciliazioni (SDD) per l'attribuzione dell'operazione al singolo cliente*/
+--Estrazione mandati per addebito su conto corrente e aggancio NDG
+create volatile table MANDATI_DOMICILIAZIONI as ( 
+	select b.CD_CLIENTE_SORGENTE, right(a.IBAN_DEBITORE,12) as NR_RAPPORTO_CC, trim(a.ID_MANDATO) as ID_MANDATO
+		, a.ID_CREDITORE, a.RAG_SOC_CREDITORE, a.RAG_SOC_DEBITORE 
+	from V_EDW_DW_BP.SDD_MANDATI_ST as a
+	join EBIL_AREE.CT_PARAMETRI as p on 1=1 
+	inner join CONVERSIONE_CONTI_NDG as b
+		on right(a.IBAN_DEBITORE,12)=b.NR_RAPPORTO
+	where p.DATA_AGGIORNAMENTO between a.DT_INI_VAL and a.DT_FIN_VAL
+		and a.TIPOLOGIA_RAPPORTO_DEBITORE='CC' --> identifica le domiciliazioni sul conto
+)with data primary index(ID_MANDATO, ID_CREDITORE, RAG_SOC_CREDITORE, RAG_SOC_DEBITORE, CD_CLIENTE_SORGENTE, NR_RAPPORTO_CC) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+--Attribuzione del mandato al singolo cliente (analizzando la ragione sociale del debitore)
+create volatile table MANDATI_DOMICILIAZIONI_BIC as (
+	select a.*
+		, c.ID_CLIENTE_BIC, c.TIPO_INTESTATARIO, d.NOME, d.COGNOME, d.COGNOME||' '||d.NOME as INTESTATARIO
+		, syslib.levenshtein(trim(coalesce(a.RAG_SOC_DEBITORE, '')), trim(coalesce(INTESTATARIO, '')), 1
+			, '''$%&()*+/\|-"1234567890', 'dott,geol,ing,arch,prof,mme,geom,mr,mrs,miss,d.ssa') as SCORE_DEBIT
+		, case when row_number() over (partition by a.ID_MANDATO, a.NR_RAPPORTO_CC 
+			order by SCORE_DEBIT DESc, case when SCORE_DEBIT>=60 then 0 else 1 end, c.ID_CLIENTE_BIC)=1 then 1 else 0 
+		end as FL_ATTRIBUZ_BIC --> flag di possibile attribuzione del bic
+		, case 
+			when c.TIPO_INTESTATARIO='U' then 1 --> assegnazione univoca all'intestatario unico
+			when SCORE_DEBIT<=60 then 0  --> flag=0 quando non è possibile distinguere il singolo cliente tra i cointestatari
+			else FL_ATTRIBUZ_BIC 
+		end as FL_BIC --> flag di attribuzione del mandato al singolo cliente
+	from MANDATI_DOMICILIAZIONI as a
+	join EBIL_AREE.CT_PARAMETRI as p on 1=1
+	left join EBIL_AREE.NDG_BIC c  --> riprendere da cartella di rilascio 'PARAMETRI'
+		on a.CD_CLIENTE_SORGENTE=c.NDG
+	left join EDWAE_VM.CLIENTE d 
+		on c.ID_CLIENTE_BIC=d.ID_CLIENTE_BIC and p.DATA_AGGIORNAMENTO between d.DT_INI_VAL and d.DT_FIN_VAL
+)with data primary index(ID_CLIENTE_BIC, ID_MANDATO, ID_CREDITORE, RAG_SOC_CREDITORE, RAG_SOC_DEBITORE, CD_CLIENTE_SORGENTE, NR_RAPPORTO_CC) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+--Estrazione addebiti pagati nel mese di riferimento e assegnazione al singolo cliente
+create volatile table DOMICILIAZIONI_PAGATE as (
+	select
+		b.ID_CLIENTE_BIC, b.CD_CLIENTE_SORGENTE, b.NR_RAPPORTO_CC
+		, c.DES 	--> identifica le causali di finanziamento, polizze o utenze
+		, a.ID_DISPOSIZIONE --> serve come chiave univoca
+		--in caso di assegnazione dell'addebito a tutti i cointestatari si impone il flag ordinante=1		
+		, case when max(b.FL_BIC) over(partition by a.ID_DISPOSIZIONE)=0 then 1 else b.FL_BIC end as FL_BIC 	
+		, a.ID_MANDATO, a.ID_CREDITORE, a.DT_EVENTO, a.IM_ADDEBITATO --> si considerano solo gli importi effettivamente addebitati sul conto
+		, row_number() over(partition by b.ID_CLIENTE_BIC, b.NR_RAPPORTO_CC, b.CD_CLIENTE_SORGENTE, a.DT_EVENTO, a.IM_ADDEBITATO
+			order by a.ID_DISPOSIZIONE) as JOIN_INDEX
+	from V_EDW_DW_BP.SDD_DISPOSIZIONI_ST as a
+	inner join MANDATI_DOMICILIAZIONI_BIC as b 
+		on a.ID_MANDATO=b.ID_MANDATO and a.ID_CREDITORE=b.ID_CREDITORE
+	left join MOV_DES_CC as c
+		on a.CAUSALE_DI_ADDEBITO=c.CD_CAUS_TRANS 
+	join EBIL_AREE.CT_PARAMETRI as p on 1=1
+	where a.DT_EVENTO between add_months(p.DATA_AGGIORNAMENTO+1,-1) and p.DATA_AGGIORNAMENTO
+		and c.DES in ('SDD', 'FINANZIAMENTI', 'POLIZZE')
+)with data primary index(ID_CLIENTE_BIC, ID_MANDATO, ID_CREDITORE, CD_CLIENTE_SORGENTE, NR_RAPPORTO_CC) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+drop table MANDATI_DOMICILIAZIONI;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table MANDATI_DOMICILIAZIONI_BIC;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+--------------------------------------------------------------------------------
+--Estrazione delle Movimentazioni del Conto Corrente
+create volatile table MOVIMENTAZIONI_CONTO as (
+	select
+		a.NR_RAPPORTO
+		, a.NR_MOV -->serve come chiave univoca
+		, a.CD_CAUS_TRANS
+		, a.CD_OPERAZIONE
+		, a.SEGNO
+		, a.CD_FRAZ --> utile per la riclassificazione del CANALE
+		, a.DT_TRANS
+		, count(*) as NUMERO
+		, sum(a.IMP_TRANS) as IMPORTO
+	from V_EDW_DW_BP.CC_MOV_DETT_ST as a
+	join EBIL_AREE.CT_PARAMETRI as p on 1=1
+	where a.DT_TRANS between add_months(p.DATA_AGGIORNAMENTO+1,-1) and p.DATA_AGGIORNAMENTO
+	group by 1,2,3,4,5,6,7
+)with data primary index (NR_RAPPORTO, NR_MOV, CD_OPERAZIONE, CD_FRAZ) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+--Riclassificazione dei Canali
+create volatile table MOVIM_CC_CANALI as (
+	select
+		conv.CD_CLIENTE_SORGENTE
+		, a.NR_RAPPORTO
+		, a.NR_MOV 
+		, a.CD_CAUS_TRANS
+		, a.CD_OPERAZIONE
+		, a.SEGNO
+		, a.CD_FRAZ 
+		, a.DT_TRANS
+		, case 
+			when (b.DES='VERSAMENTI' and a.SEGNO='-')
+				or (b.DES='PRELIEVO' and a.SEGNO='+') then 'VARIE'
+			else b.DES end DES_RICLAS
+		, b.DS_CAUSALE
+		, case 
+			when ((b.DS_CAUSALE like any ('%CENTR%', '%ADDEBIT%', '%ACCREDIT%', '%CANON%TOL%') 
+					and DES_RICLAS not in ('RICARICA_POSTEPAY','RICARICA_TELEFONICA','PAGAMENTI'))
+				or DES_RICLAS in ('COMMISSIONI', 'SDD', 'STORNI', 'CARTA_CREDITO', 'TENUTA_CONTO','VARIE') 
+				or (DES_RICLAS in ('POSTAGIRO_DA_A_LIBRETTI','BONIFICO','POSTAGIRO_DA_A_CONTO','STIPENDIO_PENSIONE','PAGAMENTI') and a.SEGNO='+'))
+				then 'CENTRO'	
+			when b.DS_CAUSALE like '% APP%' and b.DS_CAUSALE not like any ('%APP/WEB%') then 'APP' 				
+			when a.SEGNO='-' and (b.DS_CAUSALE like any ('%APP/WEB%','%DA MOBILE%') 
+				or a.CD_CAUS_TRANS in ('1121', '1122', '1123', '1124', '1125')
+				or a.CD_FRAZ = '77333') then 'DIGITAL'
+			when b.DS_CAUSALE like any ('%INTERNET%', '%ONLINE%', '%ON LINE%','%POSTE%IT%', '%WEB%', '%.IT%', '%BPOL%', '%BPIOL%'
+				, '%PORTA%PAG%', '%PIATTAFORM%PAGA%', '%POSTIN%TELEMATIC%') or a.CD_FRAZ in ('55111') then 'WEB'
+			when b.DS_CAUSALE like any ('%ATM%BANCARIO%', '%SPORTELL%ALTR%ISTITUT%') then 'ATM_BANCARIO' --> esclude quello successivo
+			when b.DS_CAUSALE like any ('%ATM%','%SPORTELL%AUTOMATIC%') then 'ATM_POSTE'
+			when b.DS_CAUSALE like any ('%POS %ESERCENT%','%POS%ALTR%GESTOR%') then 'POS_ESTERNO'
+			when b.DS_CAUSALE like any ('%POS %UP%', '%POS %POSTALE%', '% POS', '%PAGAMENT%POS'
+				'% UP%','%SPORTELLO%', '%UFFICI%POSTAL%', '%UFF%PT%') 
+				or DES_RICLAS like any ('%VERSAMENT%')  --> esclusi tutti i casi precedenti
+					then 'UP' 
+			when b.DS_CAUSALE like any ('%CHIOSC%','%RETI%TERZE%') then 'ALTRO'		
+			when a.CD_FRAZ in ('00130','DIREZ')	then 'CENTRO' --> esclusi tutti i casi precedenti
+			when a.CD_FRAZ <> '00000' then 'UP' -->frazionari fisici
+			else 'ALTRO'
+		end as CANALE	--> riclassificazione del canale
+		, count(*) as NUMERO
+		, sum(a.IMPORTO) as IMPORTO
+	from MOVIMENTAZIONI_CONTO as a
+	left join MOV_DES_CC as b 
+		on a.CD_CAUS_TRANS=b.CD_CAUS_TRANS
+	inner join CONVERSIONE_CONTI_NDG as conv 
+		on a.NR_RAPPORTO=conv.NR_RAPPORTO
+	group by 1,2,3,4,5,6,7,8,9,10,11
+)with data primary index(CD_CLIENTE_SORGENTE, NR_RAPPORTO, NR_MOV, CD_OPERAZIONE, CD_FRAZ) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+--Aggancio ID_CLIENTE_BIC al conto
+create volatile table MOVIM_CC_BIC as (
+	select
+		e.ID_CLIENTE_BIC
+		, a.CD_CLIENTE_SORGENTE
+		, a.NR_RAPPORTO
+		, a.NR_MOV
+		, a.CD_CAUS_TRANS
+		, a.SEGNO
+		, a.DT_TRANS
+		, a.DES_RICLAS
+		, a.CANALE	
+		, a.NUMERO 
+		, a.IMPORTO
+		, row_number() over(partition by e.ID_CLIENTE_BIC, a.NR_RAPPORTO, a.CD_CLIENTE_SORGENTE, a.DT_TRANS, a.IMPORTO, a.SEGNO
+			, case
+				when a.DES_RICLAS in ('BONIFICO','STIPENDIO_PENSIONE','POSTAGIRO_DA_A_LIBRETTI','POSTAGIRO_DA_A_CONTO','POSTAGIRO_DA_A_EVOLUTION') then 1 
+				else 2
+			end order by a.NR_MOV) as JOIN_INDEX_BON
+		, row_number() over(partition by e.ID_CLIENTE_BIC, a.NR_RAPPORTO, a.CD_CLIENTE_SORGENTE, a.DT_TRANS, a.IMPORTO, a.SEGNO
+			, case
+				when a.DES_RICLAS in ('STIPENDIO_PENSIONE') then 1 
+				else 2
+			end order by a.NR_MOV) as JOIN_INDEX_STIP		
+		, row_number() over(partition by e.ID_CLIENTE_BIC, a.NR_RAPPORTO, a.CD_CLIENTE_SORGENTE, a.DT_TRANS, a.IMPORTO, a.SEGNO
+			, case
+				when a.DES_RICLAS in ('POLIZZE','SDD','FINANZIAMENTI') then 1 
+				else 2
+			end order by a.NR_MOV) as JOIN_INDEX_DOM
+	from MOVIM_CC_CANALI as a
+	inner join EBIL_AREE.NDG_BIC as E --> riprendere da cartella di rilascio 'PARAMETRI'
+		on A.CD_CLIENTE_SORGENTE=E.NDG
+)with data primary index(NR_MOV, ID_CLIENTE_BIC, CD_CLIENTE_SORGENTE, NR_RAPPORTO) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table MOVIMENTAZIONI_CONTO;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table MOVIM_CC_CANALI;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table CONVERSIONE_CONTI_NDG;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table MOV_DES_CC;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+--------------------------------------------------------------------------------
+--Aggancio bonifici in entrata e riclassificazione delle causali
+--NB:il canale non è imputato perchè i bonifici in entrata sono assegnati di default al canale centro
+create volatile table MOVIM_CC_BON_E as(
+	select a.ID_CLIENTE_BIC, a.CD_CLIENTE_SORGENTE, a.NR_RAPPORTO, a.NR_MOV, a.CD_CAUS_TRANS, a.SEGNO, a.DT_TRANS
+		, case 
+			when a.FL_BIC_BEN is not null and a.BON_STIPENDIO_PENSIONE_ENTRATA>0 then 'STIPENDIO_PENSIONE' -->si riclassificano anche gli accrediti che risultano come bonifico
+			when a.FL_BIC_BEN is not null then a.TIPO_BON 
+			else a.DES_RICLAS 
+		end as DES_RICLAS -->riclassificazione delle causali
+		, a.CANALE --> non imputare il CANALE perchè sono tutti bonifici in entrata da centro 
+		, case when a.FL_BIC_BEN=1 then a.NUMERO  --> si attribuisce il numero solo al beneficiario del bonifico, e 0 ai cointestatari
+				when a.FL_BIC_BEN=0 then 0
+				else a.NUMERO end as NUMERO
+		, case when a.FL_BIC_BEN=1 then a.IMPORTO --> si attribuisce l'importo solo al beneficiario del bonifico, e 0 ai cointestatari
+				when a.FL_BIC_BEN=0 then 0 
+				else a.IMPORTO end as IMPORTO
+		, coalesce(a.BON_STIPENDIO_PENSIONE_ENTRATA,0) as BON_STIPENDIO_PENSIONE_ENTRATA
+		, coalesce(a.BON_AFFITTO_ENTRATA,0) as BON_AFFITTO_ENTRATA
+		, coalesce(a.BON_MUTUO_ENTRATA,0) as BON_MUTUO_ENTRATA
+		, coalesce(a.BON_RETTA_ENTRATA,0) as BON_RETTA_ENTRATA
+		, coalesce(a.BON_PRESTITO_ENTRATA,0) as BON_PRESTITO_ENTRATA
+		, coalesce(a.BON_TRIBUTO_ENTRATA,0) as BON_TRIBUTO_ENTRATA
+		, coalesce(a.BON_CONDOMINIO_ENTRATA,0) as BON_CONDOMINIO_ENTRATA
+		, coalesce(a.BON_ACQUISTO_CASA_ENTRATA,0) as BON_ACQUISTO_CASA_ENTRATA
+		, coalesce(a.BON_UTENZE_ENTRATA,0) as BON_UTENZE_ENTRATA
+		, coalesce(a.BON_SPESE_SANITARIE_ENTRATA,0) as BON_SPESE_SANITARIE_ENTRATA
+		, coalesce(a.BON_MOTORI_ENTRATA,0) as BON_MOTORI_ENTRATA
+		, coalesce(a.BON_DISOCCUPAZIONE_ENTRATA,0) as BON_DISOCCUPAZIONE_ENTRATA
+		, coalesce(a.BON_NOZZE_ENTRATA,0) as BON_NOZZE_ENTRATA
+		, coalesce(a.BON_MANTENIMENTO_ENTRATA,0) as BON_MANTENIMENTO_ENTRATA
+		, coalesce(a.BON_NUCLEO_FAMIGLIA_ENTRATA,0) as BON_NUCLEO_FAMIGLIA_ENTRATA
+		, coalesce(a.BON_VIAGGI_ENTRATA,0) as BON_VIAGGI_ENTRATA
+		, coalesce(a.BON_ISTRUZIONE_ENTRATA,0) as BON_ISTRUZIONE_ENTRATA
+		, coalesce(a.BON_EREDITA_ENTRATA,0) as BON_EREDITA_ENTRATA
+		, coalesce(a.BON_LIQUIDAZIONE_POLIZZA_ENTRATA,0) as BON_LIQUIDAZIONE_POLIZZA_ENTRATA
+		, coalesce(a.BON_ALTRO_ENTRATA,0) as BON_ALTRO_ENTRATA
+		, a.JOIN_INDEX_BON, a.JOIN_INDEX_STIP, a.JOIN_INDEX_DOM
+	from 
+		(select a.*, b.TIPO_BON, b.TIPO_CANALE, b.FL_BIC_BEN, b.BON_STIPENDIO_PENSIONE_ENTRATA, b.BON_AFFITTO_ENTRATA, b.BON_MUTUO_ENTRATA, b.BON_RETTA_ENTRATA
+			, b.BON_PRESTITO_ENTRATA, b.BON_TRIBUTO_ENTRATA, b.BON_CONDOMINIO_ENTRATA, b.BON_ACQUISTO_CASA_ENTRATA
+			, b.BON_UTENZE_ENTRATA, b.BON_SPESE_SANITARIE_ENTRATA, b.BON_MOTORI_ENTRATA, b.BON_DISOCCUPAZIONE_ENTRATA
+			, b.BON_NOZZE_ENTRATA, b.BON_MANTENIMENTO_ENTRATA, b.BON_NUCLEO_FAMIGLIA_ENTRATA, b.BON_VIAGGI_ENTRATA
+			, b.BON_ISTRUZIONE_ENTRATA, b.BON_EREDITA_ENTRATA, b.BON_LIQUIDAZIONE_POLIZZA_ENTRATA, b.BON_ALTRO_ENTRATA
+		from MOVIM_CC_BIC as a
+		left join BONIFICI_ENTRATA as b
+			on a.ID_CLIENTE_BIC=b.ID_CLIENTE_BIC and a.NR_RAPPORTO=b.NUM_RAP_CLI_CRE and a.CD_CLIENTE_SORGENTE=b.CD_CLIENTE_SORGENTE 
+				and a.DT_TRANS=b.DATA_CONT and a.IMPORTO=b.CONTRO_EUR and a.JOIN_INDEX_BON=b.JOIN_INDEX
+				and a.SEGNO='+' --> solo operazioni in entrata
+				and a.DES_RICLAS in ('BONIFICO','STIPENDIO_PENSIONE','POSTAGIRO_DA_A_LIBRETTI','POSTAGIRO_DA_A_CONTO','POSTAGIRO_DA_A_EVOLUTION')) as a
+)with data primary index(ID_CLIENTE_BIC, CD_CLIENTE_SORGENTE, NR_RAPPORTO, NR_MOV, CD_CAUS_TRANS) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+drop table MOVIM_CC_BIC;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table BONIFICI_ENTRATA;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+--Aggancio bonifici in uscita assegnati al singolo cliente, riclassificazione delle causali e del canale
+create volatile table MOVIM_CC_BON_U as(
+	select a.ID_CLIENTE_BIC, a.CD_CLIENTE_SORGENTE, a.NR_RAPPORTO, a.NR_MOV, a.CD_CAUS_TRANS, a.SEGNO, a.DT_TRANS
+		, case when a.FL_BIC_BEN is not null then a.TIPO_BON else a.DES_RICLAS end as DES_RICLAS -->riclassificazione delle causali
+		, case when a.FL_BIC_BEN is not null then a.tipo_CANALE else a.CANALE end as CANALE -->riclassificazione del canale
+		, case when a.FL_BIC_BEN=1 then a.NUMERO --> si attribuisce il numero solo all'ordinante del bonifico, e 0 ai cointestatari
+				when a.FL_BIC_BEN=0 then 0
+				else a.NUMERO end as NUMERO
+		, case when a.FL_BIC_BEN=1 then a.IMPORTO --> si attribuisce l'importo solo all'ordinante del bonifico, e 0 ai cointestatari
+				when a.FL_BIC_BEN=0 then 0 
+				else a.IMPORTO end as IMPORTO
+		, a.BON_STIPENDIO_PENSIONE_ENTRATA, a.BON_AFFITTO_ENTRATA, a.BON_MUTUO_ENTRATA, a.BON_RETTA_ENTRATA, a.BON_PRESTITO_ENTRATA
+		, a.BON_TRIBUTO_ENTRATA, a.BON_CONDOMINIO_ENTRATA, a.BON_ACQUISTO_CASA_ENTRATA, a.BON_UTENZE_ENTRATA, a.BON_SPESE_SANITARIE_ENTRATA
+		, a.BON_MOTORI_ENTRATA, a.BON_DISOCCUPAZIONE_ENTRATA, a.BON_NOZZE_ENTRATA, a.BON_MANTENIMENTO_ENTRATA, a.BON_NUCLEO_FAMIGLIA_ENTRATA
+		, a.BON_VIAGGI_ENTRATA, a.BON_ISTRUZIONE_ENTRATA, a.BON_EREDITA_ENTRATA, a.BON_LIQUIDAZIONE_POLIZZA_ENTRATA, a.BON_ALTRO_ENTRATA
+		, coalesce(a.BON_STIPENDIO_PENSIONE_USCITA,0) as BON_STIPENDIO_PENSIONE_USCITA
+		, coalesce(a.BON_AFFITTO_USCITA,0) as BON_AFFITTO_USCITA
+		, coalesce(a.BON_MUTUO_USCITA,0) as BON_MUTUO_USCITA
+		, coalesce(a.BON_RETTA_USCITA,0) as BON_RETTA_USCITA
+		, coalesce(a.BON_PRESTITO_USCITA,0) as BON_PRESTITO_USCITA
+		, coalesce(a.BON_TRIBUTO_USCITA,0) as BON_TRIBUTO_USCITA
+		, coalesce(a.BON_CONDOMINIO_USCITA,0) as BON_CONDOMINIO_USCITA
+		, coalesce(a.BON_ACQUISTO_CASA_USCITA,0) as BON_ACQUISTO_CASA_USCITA
+		, coalesce(a.BON_UTENZE_USCITA,0) as BON_UTENZE_USCITA
+		, coalesce(a.BON_SPESE_SANITARIE_USCITA,0) as BON_SPESE_SANITARIE_USCITA
+		, coalesce(a.BON_MOTORI_USCITA,0) as BON_MOTORI_USCITA
+		, coalesce(a.BON_DISOCCUPAZIONE_USCITA,0) as BON_DISOCCUPAZIONE_USCITA
+		, coalesce(a.BON_NOZZE_USCITA,0) as BON_NOZZE_USCITA
+		, coalesce(a.BON_MANTENIMENTO_USCITA,0) as BON_MANTENIMENTO_USCITA
+		, coalesce(a.BON_NUCLEO_FAMIGLIA_USCITA,0) as BON_NUCLEO_FAMIGLIA_USCITA
+		, coalesce(a.BON_VIAGGI_USCITA,0) as BON_VIAGGI_USCITA
+		, coalesce(a.BON_ISTRUZIONE_USCITA,0) as BON_ISTRUZIONE_USCITA
+		, coalesce(a.BON_EREDITA_USCITA,0) as BON_EREDITA_USCITA
+		, coalesce(a.BON_LIQUIDAZIONE_POLIZZA_USCITA,0) as BON_LIQUIDAZIONE_POLIZZA_USCITA
+		, coalesce(a.BON_ALTRO_USCITA,0) as BON_ALTRO_USCITA
+		, a.JOIN_INDEX_BON, a.JOIN_INDEX_STIP, a.JOIN_INDEX_DOM
+	from (
+		select a.*, b.FL_BIC_BEN, b.TIPO_BON, b.TIPO_CANALE, b.BON_STIPENDIO_PENSIONE_USCITA, b.BON_AFFITTO_USCITA, b.BON_MUTUO_USCITA, b.BON_RETTA_USCITA
+			, b.BON_PRESTITO_USCITA, b.BON_TRIBUTO_USCITA, b.BON_CONDOMINIO_USCITA, b.BON_ACQUISTO_CASA_USCITA
+			, b.BON_UTENZE_USCITA, b.BON_SPESE_SANITARIE_USCITA, b.BON_MOTORI_USCITA, b.BON_DISOCCUPAZIONE_USCITA
+			, b.BON_NOZZE_USCITA, b.BON_MANTENIMENTO_USCITA, b.BON_NUCLEO_FAMIGLIA_USCITA, b.BON_VIAGGI_USCITA
+			, b.BON_ISTRUZIONE_USCITA, b.BON_EREDITA_USCITA, b.BON_LIQUIDAZIONE_POLIZZA_USCITA, b.BON_ALTRO_USCITA
+	from MOVIM_CC_BON_E as a
+	left join BONIFICI_USCITA as b
+		on a.ID_CLIENTE_BIC=b.ID_CLIENTE_BIC and a.NR_RAPPORTO=b.NUM_RAP_CLI_DEB and a.CD_CLIENTE_SORGENTE=b.CD_CLIENTE_SORGENTE 
+			and a.DT_TRANS=b.DATA_CONT and a.IMPORTO=b.CONTRO_EUR and a.JOIN_INDEX_BON=b.JOIN_INDEX
+			and a.SEGNO='-' -->solo bonifici in uscita
+			and a.DES_RICLAS in ('BONIFICO','STIPENDIO_PENSIONE','POSTAGIRO_DA_A_LIBRETTI','POSTAGIRO_DA_A_EVOLUTION','POSTAGIRO_DA_A_CONTO')) as a
+)with data primary index(ID_CLIENTE_BIC, CD_CLIENTE_SORGENTE, NR_RAPPORTO, NR_MOV, CD_CAUS_TRANS) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+drop table MOVIM_CC_BON_E;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table BONIFICI_USCITA;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+--Aggancio pensioni e assegnazione univoca al cliente, e riclassificazione delle causali
+create volatile table MOVIM_CC_PENSIONI as (
+	select
+		a.ID_CLIENTE_BIC, a.CD_CLIENTE_SORGENTE, a.NR_RAPPORTO, a.NR_MOV, a.CD_CAUS_TRANS, a.SEGNO, a.DT_TRANS
+		, case when a.FL_BENEF_PENS is not null then 'STIPENDIO_PENSIONE' else a.DES_RICLAS end as DES_RICLAS -->riclassificazione delle causali
+		, a.CANALE
+		, case 
+			when a.FL_BENEF_PENS=1 then a.NUMERO --> si attribuisce il numero solo al beneficiario della pensione, e 0 ai cointestatari
+			when a.FL_BENEF_PENS=0 then 0
+			else a.NUMERO end as NUMERO
+		, case 
+			when a.FL_BENEF_PENS=1 then a.IMPORTO --> si attribuisce l'importo solo al beneficiario della pensione, e 0 ai cointestatari
+			when a.FL_BENEF_PENS=0 then 0
+			else a.IMPORTO end as IMPORTO
+		, a.BON_STIPENDIO_PENSIONE_ENTRATA, a.BON_AFFITTO_ENTRATA, a.BON_MUTUO_ENTRATA, a.BON_RETTA_ENTRATA, a.BON_PRESTITO_ENTRATA
+		, a.BON_TRIBUTO_ENTRATA, a.BON_CONDOMINIO_ENTRATA, a.BON_ACQUISTO_CASA_ENTRATA, a.BON_UTENZE_ENTRATA, a.BON_SPESE_SANITARIE_ENTRATA
+		, a.BON_MOTORI_ENTRATA, a.BON_DISOCCUPAZIONE_ENTRATA, a.BON_NOZZE_ENTRATA, a.BON_MANTENIMENTO_ENTRATA, a.BON_NUCLEO_FAMIGLIA_ENTRATA
+		, a.BON_VIAGGI_ENTRATA, a.BON_ISTRUZIONE_ENTRATA, a.BON_EREDITA_ENTRATA, a.BON_LIQUIDAZIONE_POLIZZA_ENTRATA
+		, a.BON_ALTRO_ENTRATA, a.BON_STIPENDIO_PENSIONE_USCITA, a.BON_AFFITTO_USCITA, a.BON_MUTUO_USCITA, a.BON_RETTA_USCITA, a.BON_PRESTITO_USCITA
+		, a.BON_TRIBUTO_USCITA, a.BON_CONDOMINIO_USCITA, a.BON_ACQUISTO_CASA_USCITA, a.BON_UTENZE_USCITA, a.BON_SPESE_SANITARIE_USCITA
+		, a.BON_MOTORI_USCITA, a.BON_DISOCCUPAZIONE_USCITA, a.BON_NOZZE_USCITA, a.BON_MANTENIMENTO_USCITA, a.BON_NUCLEO_FAMIGLIA_USCITA
+		, a.BON_VIAGGI_USCITA, a.BON_ISTRUZIONE_USCITA, a.BON_EREDITA_USCITA, a.BON_LIQUIDAZIONE_POLIZZA_USCITA, a.BON_ALTRO_USCITA
+		, a.JOIN_INDEX_BON, a.JOIN_INDEX_STIP, a.JOIN_INDEX_DOM		
+	from
+		(select a.*, b.FL_BENEF_PENS
+		from MOVIM_CC_BON_U as a
+		left join PENSIONI_AGGANCI_BIC as b 
+			on a.ID_CLIENTE_BIC=b.ID_CLIENTE_BIC and a.CD_CLIENTE_SORGENTE=b.CD_CLIENTE_SORGENTE and a.NR_RAPPORTO=b.NR_RAPPORTO_ACCR
+				and a.DT_TRANS=b.DT_INI_PAGAMENTO and a.IMPORTO=b.IMPORTO and a.JOIN_INDEX_STIP=b.JOIN_INDEX 
+				and a.SEGNO='+' --> solo operazioni in entrata
+		and a.DES_RICLAS in ('STIPENDIO_PENSIONE')) as a
+)with data primary index(ID_CLIENTE_BIC, CD_CLIENTE_SORGENTE, NR_RAPPORTO, NR_MOV, CD_CAUS_TRANS) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+drop table MOVIM_CC_BON_U;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table PENSIONI_AGGANCI_BIC;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+--Aggancio Domiciliazioni per assegnazione al singolo cliente 
+create volatile table MOVIM_CC_DOMICILIAZIONI as (
+	select
+		a.ID_CLIENTE_BIC, a.CD_CLIENTE_SORGENTE, a.NR_RAPPORTO, a.NR_MOV, a.CD_CAUS_TRANS, a.SEGNO, a.DT_TRANS, a.DES_RICLAS, a.CANALE
+		, case when a.FL_BIC=1 then a.NUMERO --> si attribuisce il numero solo al debitore del mandato, e 0 ai cointestatari
+				when a.FL_BIC=0 then 0
+				else a.NUMERO end as NUMERO
+		, case when a.FL_BIC=1 then a.IMPORTO --> si attribuisce l'importo solo al debitore del mandato, e 0 ai cointestatari
+			when a.FL_BIC=0 then 0 
+			else a.IMPORTO end as IMPORTO
+		, a.BON_STIPENDIO_PENSIONE_ENTRATA, a.BON_AFFITTO_ENTRATA, a.BON_MUTUO_ENTRATA, a.BON_RETTA_ENTRATA, a.BON_PRESTITO_ENTRATA
+		, a.BON_TRIBUTO_ENTRATA, a.BON_CONDOMINIO_ENTRATA, a.BON_ACQUISTO_CASA_ENTRATA, a.BON_UTENZE_ENTRATA, a.BON_SPESE_SANITARIE_ENTRATA
+		, a.BON_MOTORI_ENTRATA, a.BON_DISOCCUPAZIONE_ENTRATA, a.BON_NOZZE_ENTRATA, a.BON_MANTENIMENTO_ENTRATA, a.BON_NUCLEO_FAMIGLIA_ENTRATA
+		, a.BON_VIAGGI_ENTRATA, a.BON_ISTRUZIONE_ENTRATA, a.BON_EREDITA_ENTRATA, a.BON_LIQUIDAZIONE_POLIZZA_ENTRATA
+		, a.BON_ALTRO_ENTRATA, a.BON_STIPENDIO_PENSIONE_USCITA, a.BON_AFFITTO_USCITA, a.BON_MUTUO_USCITA, a.BON_RETTA_USCITA, a.BON_PRESTITO_USCITA
+		, a.BON_TRIBUTO_USCITA, a.BON_CONDOMINIO_USCITA, a.BON_ACQUISTO_CASA_USCITA, a.BON_UTENZE_USCITA, a.BON_SPESE_SANITARIE_USCITA
+		, a.BON_MOTORI_USCITA, a.BON_DISOCCUPAZIONE_USCITA, a.BON_NOZZE_USCITA, a.BON_MANTENIMENTO_USCITA, a.BON_NUCLEO_FAMIGLIA_USCITA
+		, a.BON_VIAGGI_USCITA, a.BON_ISTRUZIONE_USCITA, a.BON_EREDITA_USCITA, a.BON_LIQUIDAZIONE_POLIZZA_USCITA, a.BON_ALTRO_USCITA
+		, a.JOIN_INDEX_BON, a.JOIN_INDEX_STIP, a.JOIN_INDEX_DOM		
+	from (
+		select a.*, b.FL_BIC
+		from MOVIM_CC_PENSIONI as a
+		left join DOMICILIAZIONI_PAGATE as b 
+			on a.ID_CLIENTE_BIC=b.ID_CLIENTE_BIC and a.CD_CLIENTE_SORGENTE=b.CD_CLIENTE_SORGENTE and a.NR_RAPPORTO=b.NR_RAPPORTO_CC
+				and a.DT_TRANS=b.DT_EVENTO and a.IMPORTO=b.IM_ADDEBITATO and a.JOIN_INDEX_DOM=b.JOIN_INDEX
+				and a.SEGNO='-' --> solo operazioni in uscita
+				and a.DES_RICLAS in ('POLIZZE','SDD','FINANZIAMENTI')) as a	
+)with data primary index(ID_CLIENTE_BIC, CD_CLIENTE_SORGENTE, NR_RAPPORTO, NR_MOV, CD_CAUS_TRANS) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+drop table MOVIM_CC_PENSIONI;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table DOMICILIAZIONI_PAGATE;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+--patch MDP
+create volatile table conto_bic as(
+	select distinct nr_rapporto, id_cliente_bic
+	from movim_cc_domiciliazioni
+)with data unique primary index (nr_rapporto, id_cliente_bic) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table conto_bic_cf as(
+	select a.nr_rapporto, a.id_cliente_bic, b.cod_fiscale
+	from EBIL_AREE.CT_PARAMETRI as p
+	join conto_bic as a
+		on 1=1
+	left join EDWAE_VM.cliente as b
+		on a.id_cliente_bic=b.id_cliente_bic and p.data_aggiornamento between b.dt_ini_val and b.dt_fin_val
+)with data unique primary index(nr_rapporto, id_cliente_bic) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table conto_bic;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+CREATE VOLATILE TABLE MDP AS (
+	SEL CAST(DATA_OPERAZIONE AS DATE) AS DT_TRANS
+		,RIGHT('000000000000'||CONTO, 12) AS NR_RAPPORTO
+		,min(CF_USER) as CF_USER
+	FROM EBIL_AREE.CT_PARAMETRI as p
+	join V_EDW_DW_BP.MDP001_MOVIM_ST A
+		on CAST(DATA_OPERAZIONE AS DATE) between add_months(p.data_aggiornamento+1,-1) and p.data_aggiornamento
+	where a.MODALITA_PAGAMENTO=1
+	GROUP BY 1,2
+	having count(distinct CF_USER)=1
+) WITH DATA UNIQUE PRIMARY INDEX (DT_TRANS, NR_RAPPORTO) ON COMMIT PRESERVE ROWS;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table mdp_bic as(
+	sel a.dt_trans, a.nr_rapporto, b.id_cliente_bic
+	from mdp as a
+	join conto_bic_cf as b
+		on a.nr_rapporto=b.nr_rapporto and a.cf_user=b.cod_fiscale
+)with data unique primary index(dt_trans, nr_rapporto, id_cliente_bic) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+drop table mdp;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table conto_bic_cf;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table MOVIM_CC_MDP as (
+	select
+		a.ID_CLIENTE_BIC, a.NR_RAPPORTO, a.NR_MOV, a.SEGNO, a.DT_TRANS, a.DES_RICLAS, a.CANALE, a.CD_CAUS_TRANS
+		, a.NUMERO
+		, a.IMPORTO
+		, a.BON_STIPENDIO_PENSIONE_ENTRATA, a.BON_AFFITTO_ENTRATA, a.BON_MUTUO_ENTRATA, a.BON_RETTA_ENTRATA, a.BON_PRESTITO_ENTRATA
+		, a.BON_TRIBUTO_ENTRATA, a.BON_CONDOMINIO_ENTRATA, a.BON_ACQUISTO_CASA_ENTRATA, a.BON_UTENZE_ENTRATA, a.BON_SPESE_SANITARIE_ENTRATA
+		, a.BON_MOTORI_ENTRATA, a.BON_DISOCCUPAZIONE_ENTRATA, a.BON_NOZZE_ENTRATA, a.BON_MANTENIMENTO_ENTRATA, a.BON_NUCLEO_FAMIGLIA_ENTRATA
+		, a.BON_VIAGGI_ENTRATA, a.BON_ISTRUZIONE_ENTRATA, a.BON_EREDITA_ENTRATA, a.BON_LIQUIDAZIONE_POLIZZA_ENTRATA
+		, a.BON_ALTRO_ENTRATA, a.BON_STIPENDIO_PENSIONE_USCITA, a.BON_AFFITTO_USCITA, a.BON_MUTUO_USCITA, a.BON_RETTA_USCITA, a.BON_PRESTITO_USCITA
+		, a.BON_TRIBUTO_USCITA, a.BON_CONDOMINIO_USCITA, a.BON_ACQUISTO_CASA_USCITA, a.BON_UTENZE_USCITA, a.BON_SPESE_SANITARIE_USCITA
+		, a.BON_MOTORI_USCITA, a.BON_DISOCCUPAZIONE_USCITA, a.BON_NOZZE_USCITA, a.BON_MANTENIMENTO_USCITA, a.BON_NUCLEO_FAMIGLIA_USCITA
+		, a.BON_VIAGGI_USCITA, a.BON_ISTRUZIONE_USCITA, a.BON_EREDITA_USCITA, a.BON_LIQUIDAZIONE_POLIZZA_USCITA, a.BON_ALTRO_USCITA
+		, case
+			when a.CD_CAUS_TRANS IN ('150', '150RAV', '150A', '150AUP', '150P', '150FB',  '150RAVP',  '150RAVPP', '38BOB', '38BOPP',
+        		'1902', '1902P', '1902A','1902F', '1902P', '1902SIS', '190F24F', '1910', '1901', '38ICTO', '38ICTP')
+				and segno='-' then 1
+			else 0
+		end as fl_mdp
+		, case
+			when fl_mdp=1 and sum(numero) over(partition by nr_rapporto,nr_mov,cd_caus_trans)>1 then 1
+			else 0
+		end as fl_mdp_coi
+	from MOVIM_CC_DOMICILIAZIONI as a
+)with data primary index(ID_CLIENTE_BIC, des_riclas, canale) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table MOVIM_CC_DOMICILIAZIONI;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+create volatile table MOVIM_CC_MDP2 as(
+	select
+		a.ID_CLIENTE_BIC, a.NR_RAPPORTO, a.NR_MOV, a.SEGNO, a.DT_TRANS, a.DES_RICLAS, a.CANALE, a.CD_CAUS_TRANS
+		, case
+			when b.id_cliente_bic is null then a.NUMERO
+			when a.id_cliente_bic=b.id_cliente_bic then a.NUMERO
+			else 0
+		end as NUMERO
+		, case
+			when b.id_cliente_bic is null then a.IMPORTO
+			when a.id_cliente_bic=b.id_cliente_bic then a.IMPORTO
+			else 0
+		end as IMPORTO
+		, a.BON_STIPENDIO_PENSIONE_ENTRATA, a.BON_AFFITTO_ENTRATA, a.BON_MUTUO_ENTRATA, a.BON_RETTA_ENTRATA, a.BON_PRESTITO_ENTRATA
+		, a.BON_TRIBUTO_ENTRATA, a.BON_CONDOMINIO_ENTRATA, a.BON_ACQUISTO_CASA_ENTRATA, a.BON_UTENZE_ENTRATA, a.BON_SPESE_SANITARIE_ENTRATA
+		, a.BON_MOTORI_ENTRATA, a.BON_DISOCCUPAZIONE_ENTRATA, a.BON_NOZZE_ENTRATA, a.BON_MANTENIMENTO_ENTRATA, a.BON_NUCLEO_FAMIGLIA_ENTRATA
+		, a.BON_VIAGGI_ENTRATA, a.BON_ISTRUZIONE_ENTRATA, a.BON_EREDITA_ENTRATA, a.BON_LIQUIDAZIONE_POLIZZA_ENTRATA
+		, a.BON_ALTRO_ENTRATA, a.BON_STIPENDIO_PENSIONE_USCITA, a.BON_AFFITTO_USCITA, a.BON_MUTUO_USCITA, a.BON_RETTA_USCITA, a.BON_PRESTITO_USCITA
+		, a.BON_TRIBUTO_USCITA, a.BON_CONDOMINIO_USCITA, a.BON_ACQUISTO_CASA_USCITA, a.BON_UTENZE_USCITA, a.BON_SPESE_SANITARIE_USCITA
+		, a.BON_MOTORI_USCITA, a.BON_DISOCCUPAZIONE_USCITA, a.BON_NOZZE_USCITA, a.BON_MANTENIMENTO_USCITA, a.BON_NUCLEO_FAMIGLIA_USCITA
+		, a.BON_VIAGGI_USCITA, a.BON_ISTRUZIONE_USCITA, a.BON_EREDITA_USCITA, a.BON_LIQUIDAZIONE_POLIZZA_USCITA, a.BON_ALTRO_USCITA
+		, a.fl_mdp_coi
+	from MOVIM_CC_MDP as a
+	left join mdp_bic as b
+		on a.nr_rapporto=b.nr_rapporto and a.dt_trans=b.dt_trans and a.fl_mdp_coi=1
+)with data primary index(id_cliente_bic, des_riclas, canale) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table MOVIM_CC_MDP;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table mdp_bic;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+--patch BPOL
+create volatile table servizi_telematici as(
+	sel lis.nr_rapporto,min(ndgbic.id_cliente_bic) as id_cliente_bic
+	from EBIL_AREE.CT_PARAMETRI as p
+	join EDWAE_VM.RAPPORTO_SERVIZI_TELEMATICI as a
+		on p.data_aggiornamento between a.DT_INI_VAL and a.DT_FIN_VAL
+	join(
+		sel NR_RAPPORTO, CD_PRODOTTO
+		from V_EDW_DW_BP.CC_LISTINO_ST as a
+		join EBIL_AREE.CT_PARAMETRI as p on 1=1
+		where p.DATA_AGGIORNAMENTO >= DT_INI_VAL
+		qualify row_number() over(partition by NR_RAPPORTO order by DT_INI_VAL desc) = 1
+	) as lis
+		on a.numero_rapporto=lis.nr_rapporto
+	left join EBIL_AREE.NDG_BIC as ndgbic	
+		on a.ndg_rapporto=ndgbic.ndg
+	where a.STATO_NATURALE='Attivo' and a.CD_FLUSSO='020'
+		and lis.CD_PRODOTTO in ('CCBP-RETAIL', 'CCBPCONSUMER', 'CC-BASE-BP')
+	group by 1
+	having count(distinct id_cliente_bic)=1
+)with data unique primary index(nr_rapporto, id_cliente_bic) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+create volatile table MOVIM_CC_BPOL as(
+	select
+		a.ID_CLIENTE_BIC, a.NR_RAPPORTO, a.NR_MOV, a.SEGNO, a.DT_TRANS, a.DES_RICLAS, a.CANALE, a.CD_CAUS_TRANS
+		, a.NUMERO
+		, a.IMPORTO
+		, a.BON_STIPENDIO_PENSIONE_ENTRATA, a.BON_AFFITTO_ENTRATA, a.BON_MUTUO_ENTRATA, a.BON_RETTA_ENTRATA, a.BON_PRESTITO_ENTRATA
+		, a.BON_TRIBUTO_ENTRATA, a.BON_CONDOMINIO_ENTRATA, a.BON_ACQUISTO_CASA_ENTRATA, a.BON_UTENZE_ENTRATA, a.BON_SPESE_SANITARIE_ENTRATA
+		, a.BON_MOTORI_ENTRATA, a.BON_DISOCCUPAZIONE_ENTRATA, a.BON_NOZZE_ENTRATA, a.BON_MANTENIMENTO_ENTRATA, a.BON_NUCLEO_FAMIGLIA_ENTRATA
+		, a.BON_VIAGGI_ENTRATA, a.BON_ISTRUZIONE_ENTRATA, a.BON_EREDITA_ENTRATA, a.BON_LIQUIDAZIONE_POLIZZA_ENTRATA
+		, a.BON_ALTRO_ENTRATA, a.BON_STIPENDIO_PENSIONE_USCITA, a.BON_AFFITTO_USCITA, a.BON_MUTUO_USCITA, a.BON_RETTA_USCITA, a.BON_PRESTITO_USCITA
+		, a.BON_TRIBUTO_USCITA, a.BON_CONDOMINIO_USCITA, a.BON_ACQUISTO_CASA_USCITA, a.BON_UTENZE_USCITA, a.BON_SPESE_SANITARIE_USCITA
+		, a.BON_MOTORI_USCITA, a.BON_DISOCCUPAZIONE_USCITA, a.BON_NOZZE_USCITA, a.BON_MANTENIMENTO_USCITA, a.BON_NUCLEO_FAMIGLIA_USCITA
+		, a.BON_VIAGGI_USCITA, a.BON_ISTRUZIONE_USCITA, a.BON_EREDITA_USCITA, a.BON_LIQUIDAZIONE_POLIZZA_USCITA, a.BON_ALTRO_USCITA
+		, a.fl_mdp_coi
+		, case
+			when a.canale in ('WEB'/*, 'DIGITAL', 'APP'*/) then 1
+			else 0
+		end as fl_bpol
+		, case
+			when fl_bpol=1 and sum(numero) over(partition by nr_rapporto,nr_mov,cd_caus_trans)>1 then 1
+			else 0
+		end as fl_bpol_coi
+	from MOVIM_CC_MDP2 as a
+)with data primary index(id_cliente_bic, des_riclas, canale) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+drop table MOVIM_CC_MDP2;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+create volatile table MOVIM_CC_BPOL2 as(
+	select
+		a.ID_CLIENTE_BIC, a.NR_RAPPORTO, a.NR_MOV, a.SEGNO, a.DT_TRANS, a.DES_RICLAS, a.CANALE, a.CD_CAUS_TRANS
+		, case
+			when b.id_cliente_bic is null then a.NUMERO
+			when a.id_cliente_bic=b.id_cliente_bic then a.NUMERO
+			else 0
+		end as NUMERO
+		, case
+			when b.id_cliente_bic is null then a.IMPORTO
+			when a.id_cliente_bic=b.id_cliente_bic then a.IMPORTO
+			else 0
+		end as IMPORTO
+		, a.BON_STIPENDIO_PENSIONE_ENTRATA, a.BON_AFFITTO_ENTRATA, a.BON_MUTUO_ENTRATA, a.BON_RETTA_ENTRATA, a.BON_PRESTITO_ENTRATA
+		, a.BON_TRIBUTO_ENTRATA, a.BON_CONDOMINIO_ENTRATA, a.BON_ACQUISTO_CASA_ENTRATA, a.BON_UTENZE_ENTRATA, a.BON_SPESE_SANITARIE_ENTRATA
+		, a.BON_MOTORI_ENTRATA, a.BON_DISOCCUPAZIONE_ENTRATA, a.BON_NOZZE_ENTRATA, a.BON_MANTENIMENTO_ENTRATA, a.BON_NUCLEO_FAMIGLIA_ENTRATA
+		, a.BON_VIAGGI_ENTRATA, a.BON_ISTRUZIONE_ENTRATA, a.BON_EREDITA_ENTRATA, a.BON_LIQUIDAZIONE_POLIZZA_ENTRATA
+		, a.BON_ALTRO_ENTRATA, a.BON_STIPENDIO_PENSIONE_USCITA, a.BON_AFFITTO_USCITA, a.BON_MUTUO_USCITA, a.BON_RETTA_USCITA, a.BON_PRESTITO_USCITA
+		, a.BON_TRIBUTO_USCITA, a.BON_CONDOMINIO_USCITA, a.BON_ACQUISTO_CASA_USCITA, a.BON_UTENZE_USCITA, a.BON_SPESE_SANITARIE_USCITA
+		, a.BON_MOTORI_USCITA, a.BON_DISOCCUPAZIONE_USCITA, a.BON_NOZZE_USCITA, a.BON_MANTENIMENTO_USCITA, a.BON_NUCLEO_FAMIGLIA_USCITA
+		, a.BON_VIAGGI_USCITA, a.BON_ISTRUZIONE_USCITA, a.BON_EREDITA_USCITA, a.BON_LIQUIDAZIONE_POLIZZA_USCITA, a.BON_ALTRO_USCITA
+		, a.fl_mdp_coi, a.fl_bpol_coi
+	from MOVIM_CC_BPOL as a
+	left join servizi_telematici as b
+		on a.nr_rapporto=b.nr_rapporto and a.fl_bpol_coi=1
+)with data primary index(id_cliente_bic, des_riclas, canale) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+drop table MOVIM_CC_BPOL;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+drop table servizi_telematici;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+
+--Raggruppamento delle operazioni e dei canali
+create volatile table MOVIM_CC_RAGGR as (
+	select
+		a.ID_CLIENTE_BIC, a.DES_RICLAS, a.CANALE
+		, sum(case when a.SEGNO='+' then a.IMPORTO else 0 end) as IMP_AVERE
+		, sum(case when a.SEGNO='-' then a.IMPORTO else 0 end) as IMP_DARE	
+		, sum(case when a.SEGNO='+' then a.NUMERO else 0 end) as NUM_AVERE
+		, sum(case when a.SEGNO='-' then a.NUMERO else 0 end) as NUM_DARE
+		, sum(a.BON_STIPENDIO_PENSIONE_ENTRATA) as BON_STIPENDIO_PENSIONE_ENTRATA
+		, sum(a.BON_AFFITTO_ENTRATA) as BON_AFFITTO_ENTRATA
+		, sum(a.BON_MUTUO_ENTRATA) as BON_MUTUO_ENTRATA
+		, sum(a.BON_RETTA_ENTRATA) as BON_RETTA_ENTRATA
+		, sum(a.BON_PRESTITO_ENTRATA) as BON_PRESTITO_ENTRATA
+		, sum(a.BON_TRIBUTO_ENTRATA) as BON_TRIBUTO_ENTRATA
+		, sum(a.BON_CONDOMINIO_ENTRATA) as BON_CONDOMINIO_ENTRATA
+		, sum(a.BON_ACQUISTO_CASA_ENTRATA) as BON_ACQUISTO_CASA_ENTRATA
+		, sum(a.BON_UTENZE_ENTRATA) as BON_UTENZE_ENTRATA
+		, sum(a.BON_SPESE_SANITARIE_ENTRATA) as BON_SPESE_SANITARIE_ENTRATA
+		, sum(a.BON_MOTORI_ENTRATA) as BON_MOTORI_ENTRATA
+		, sum(a.BON_DISOCCUPAZIONE_ENTRATA) as BON_DISOCCUPAZIONE_ENTRATA
+		, sum(a.BON_NOZZE_ENTRATA) as BON_NOZZE_ENTRATA
+		, sum(a.BON_MANTENIMENTO_ENTRATA) as BON_MANTENIMENTO_ENTRATA
+		, sum(a.BON_NUCLEO_FAMIGLIA_ENTRATA) as BON_NUCLEO_FAMIGLIA_ENTRATA
+		, sum(a.BON_VIAGGI_ENTRATA) as BON_VIAGGI_ENTRATA
+		, sum(a.BON_ISTRUZIONE_ENTRATA) as BON_ISTRUZIONE_ENTRATA
+		, sum(a.BON_EREDITA_ENTRATA) as BON_EREDITA_ENTRATA
+		, sum(a.BON_LIQUIDAZIONE_POLIZZA_ENTRATA) as BON_LIQUIDAZIONE_POLIZZA_ENTRATA
+		, sum(a.BON_ALTRO_ENTRATA) as BON_ALTRO_ENTRATA
+		, sum(a.BON_STIPENDIO_PENSIONE_USCITA) as BON_STIPENDIO_PENSIONE_USCITA
+		, sum(a.BON_AFFITTO_USCITA) as BON_AFFITTO_USCITA
+		, sum(a.BON_MUTUO_USCITA) as BON_MUTUO_USCITA
+		, sum(a.BON_RETTA_USCITA) as BON_RETTA_USCITA
+		, sum(a.BON_PRESTITO_USCITA) as BON_PRESTITO_USCITA
+		, sum(a.BON_TRIBUTO_USCITA) as BON_TRIBUTO_USCITA
+		, sum(a.BON_CONDOMINIO_USCITA) as BON_CONDOMINIO_USCITA
+		, sum(a.BON_ACQUISTO_CASA_USCITA) as BON_ACQUISTO_CASA_USCITA
+		, sum(a.BON_UTENZE_USCITA) as BON_UTENZE_USCITA
+		, sum(a.BON_SPESE_SANITARIE_USCITA) as BON_SPESE_SANITARIE_USCITA
+		, sum(a.BON_MOTORI_USCITA) as BON_MOTORI_USCITA
+		, sum(a.BON_DISOCCUPAZIONE_USCITA) as BON_DISOCCUPAZIONE_USCITA
+		, sum(a.BON_NOZZE_USCITA) as BON_NOZZE_USCITA
+		, sum(a.BON_MANTENIMENTO_USCITA) as BON_MANTENIMENTO_USCITA
+		, sum(a.BON_NUCLEO_FAMIGLIA_USCITA) as BON_NUCLEO_FAMIGLIA_USCITA
+		, sum(a.BON_VIAGGI_USCITA) as BON_VIAGGI_USCITA
+		, sum(a.BON_ISTRUZIONE_USCITA) as BON_ISTRUZIONE_USCITA
+		, sum(a.BON_EREDITA_USCITA) as BON_EREDITA_USCITA
+		, sum(a.BON_LIQUIDAZIONE_POLIZZA_USCITA) as BON_LIQUIDAZIONE_POLIZZA_USCITA
+		, sum(a.BON_ALTRO_USCITA) as BON_ALTRO_USCITA
+	from MOVIM_CC_BPOL2 as a 
+	group by 1,2,3
+)with data primary index(ID_CLIENTE_BIC, DES_RICLAS, CANALE) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+drop table MOVIM_CC_BPOL2;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+--------------------------------------------------------------------------------
+--Definizione Customer Table
+create volatile table CT_MOV_CC as (
+	select b.ID_CLIENTE_BIC
+	       ,b.ID_PERIODO_TEMPORALE
+		---assegni bancari up, centro
+		, sum(case when a.DES_RICLAS='ASSEGNI_BANCARI' and a.CANALE='UP' then IMP_AVERE else 0 end) as CC_ASSEGNI_BANCARI_UP_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='ASSEGNI_BANCARI' and a.CANALE='UP' then NUM_AVERE else 0 end) as CC_ASSEGNI_BANCARI_UP_NUM_ENTRATA	
+		, sum(case when a.DES_RICLAS='ASSEGNI_BANCARI' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_ASSEGNI_BANCARI_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='ASSEGNI_BANCARI' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_ASSEGNI_BANCARI_CENTRO_NUM_ENTRATA	
+		---assegni postali centro, up, web
+		, sum(case when a.DES_RICLAS='ASSEGNI_POSTALI' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_ASSEGNI_POSTALI_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='ASSEGNI_POSTALI' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_ASSEGNI_POSTALI_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='ASSEGNI_POSTALI' and a.CANALE='CENTRO' then IMP_DARE else 0 end) as CC_ASSEGNI_POSTALI_CENTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='ASSEGNI_POSTALI' and a.CANALE='CENTRO' then NUM_DARE else 0 end) as CC_ASSEGNI_POSTALI_CENTRO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='ASSEGNI_POSTALI' and a.CANALE='UP' then IMP_AVERE else 0 end) as CC_ASSEGNI_POSTALI_UP_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='ASSEGNI_POSTALI' and a.CANALE='UP' then NUM_AVERE else 0 end) as CC_ASSEGNI_POSTALI_UP_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='ASSEGNI_POSTALI' and a.CANALE='UP' then IMP_DARE else 0 end) as CC_ASSEGNI_POSTALI_UP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='ASSEGNI_POSTALI' and a.CANALE='UP' then NUM_DARE else 0 end) as CC_ASSEGNI_POSTALI_UP_NUM_USCITA			
+		, sum(case when a.DES_RICLAS='ASSEGNI_POSTALI' and a.CANALE='WEB' then IMP_AVERE else 0 end) as CC_ASSEGNI_POSTALI_WEB_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='ASSEGNI_POSTALI' and a.CANALE='WEB' then NUM_AVERE else 0 end) as CC_ASSEGNI_POSTALI_WEB_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='ASSEGNI_POSTALI' and a.CANALE='WEB' then IMP_DARE else 0 end) as CC_ASSEGNI_POSTALI_WEB_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='ASSEGNI_POSTALI' and a.CANALE='WEB' then NUM_DARE else 0 end) as CC_ASSEGNI_POSTALI_WEB_NUM_USCITA
+		---BFP centro, up, web
+		, sum(case when a.DES_RICLAS='BFP' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_BFP_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='BFP' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_BFP_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='BFP' and a.CANALE='CENTRO' then IMP_DARE else 0 end) as CC_BFP_CENTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='BFP' and a.CANALE='CENTRO' then NUM_DARE else 0 end) as CC_BFP_CENTRO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='BFP' and a.CANALE='UP' then IMP_AVERE else 0 end) as CC_BFP_UP_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='BFP' and a.CANALE='UP' then NUM_AVERE else 0 end) as CC_BFP_UP_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='BFP' and a.CANALE='UP' then IMP_DARE else 0 end) as CC_BFP_UP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='BFP' and a.CANALE='UP' then NUM_DARE else 0 end) as CC_BFP_UP_NUM_USCITA			
+		, sum(case when a.DES_RICLAS='BFP' and a.CANALE='WEB' then IMP_AVERE else 0 end) as CC_BFP_WEB_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='BFP' and a.CANALE='WEB' then NUM_AVERE else 0 end) as CC_BFP_WEB_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='BFP' and a.CANALE='WEB' then IMP_DARE else 0 end) as CC_BFP_WEB_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='BFP' and a.CANALE='WEB' then NUM_DARE else 0 end) as CC_BFP_WEB_NUM_USCITA
+		---BONIFICI centro, up, web, app
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_BONIFICO_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_BONIFICO_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE='CENTRO' then IMP_DARE else 0 end) as CC_BONIFICO_CENTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE='CENTRO' then NUM_DARE else 0 end) as CC_BONIFICO_CENTRO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE='UP' then IMP_DARE else 0 end) as CC_BONIFICO_UP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE='UP' then NUM_DARE else 0 end) as CC_BONIFICO_UP_NUM_USCITA			
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE='APP' then IMP_DARE else 0 end) as CC_BONIFICO_APP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE='APP' then NUM_DARE else 0 end) as CC_BONIFICO_APP_NUM_USCITA		
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE='DIGITAL' then IMP_DARE else 0 end) as CC_BONIFICO_DIGITAL_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE='DIGITAL' then NUM_DARE else 0 end) as CC_BONIFICO_DIGITAL_NUM_USCITA			
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE='WEB' then IMP_DARE else 0 end) as CC_BONIFICO_WEB_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='BONIFICO' and a.CANALE='WEB' then NUM_DARE else 0 end) as CC_BONIFICO_WEB_NUM_USCITA		
+		---CARTA DI CREDITO centro
+		, sum(case when a.DES_RICLAS='CARTA_CREDITO' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_CARTA_CREDITO_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='CARTA_CREDITO' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_CARTA_CREDITO_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='CARTA_CREDITO' and a.CANALE='CENTRO' then IMP_DARE else 0 end) as CC_CARTA_CREDITO_CENTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='CARTA_CREDITO' and a.CANALE='CENTRO' then NUM_DARE else 0 end) as CC_CARTA_CREDITO_CENTRO_NUM_USCITA
+		---COMMISSIONI centro
+		, sum(case when a.DES_RICLAS='COMMISSIONI' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_COMMISSIONI_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='COMMISSIONI' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_COMMISSIONI_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='COMMISSIONI' and a.CANALE='CENTRO' then IMP_DARE else 0 end) as CC_COMMISSIONI_CENTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='COMMISSIONI' and a.CANALE='CENTRO' then NUM_DARE else 0 end) as CC_COMMISSIONI_CENTRO_NUM_USCITA
+		---FINANZIAMENTI centro
+		, sum(case when a.DES_RICLAS='FINANZIAMENTI' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_FINANZIAMENTI_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='FINANZIAMENTI' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_FINANZIAMENTI_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='FINANZIAMENTI' and a.CANALE='CENTRO' then IMP_DARE else 0 end) as CC_FINANZIAMENTI_CENTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='FINANZIAMENTI' and a.CANALE='CENTRO' then NUM_DARE else 0 end) as CC_FINANZIAMENTI_CENTRO_NUM_USCITA
+		---FONDI centro,up
+		, sum(case when a.DES_RICLAS='FONDI' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_FONDI_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='FONDI' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_FONDI_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='FONDI' and a.CANALE='CENTRO' then IMP_DARE else 0 end) as CC_FONDI_CENTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='FONDI' and a.CANALE='CENTRO' then NUM_DARE else 0 end) as CC_FONDI_CENTRO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='FONDI' and a.CANALE='UP' then IMP_AVERE else 0 end) as CC_FONDI_UP_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='FONDI' and a.CANALE='UP' then NUM_AVERE else 0 end) as CC_FONDI_UP_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='FONDI' and a.CANALE='UP' then IMP_DARE else 0 end) as CC_FONDI_UP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='FONDI' and a.CANALE='UP' then NUM_DARE else 0 end) as CC_FONDI_UP_NUM_USCITA		
+		---PAGAMENTI CENTRO,up,app,atm_poste, pos esterno, web, altro
+		, sum(case when a.DES_RICLAS='PAGAMENTI' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_PAGAMENTI_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='PAGAMENTI' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_PAGAMENTI_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='PAGAMENTI' and a.CANALE='CENTRO' then IMP_DARE else 0 end) as CC_PAGAMENTI_CENTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='PAGAMENTI' and a.CANALE='CENTRO' then NUM_DARE else 0 end) as CC_PAGAMENTI_CENTRO_NUM_USCITA		
+		, sum(case when a.DES_RICLAS='PAGAMENTI' and a.CANALE='UP' then IMP_DARE else 0 end) as CC_PAGAMENTI_UP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='PAGAMENTI' and a.CANALE='UP' then NUM_DARE else 0 end) as CC_PAGAMENTI_UP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='PAGAMENTI' and a.CANALE='APP' then IMP_DARE else 0 end) as CC_PAGAMENTI_APP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='PAGAMENTI' and a.CANALE='APP' then NUM_DARE else 0 end) as CC_PAGAMENTI_APP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='PAGAMENTI' and a.CANALE='ATM_POSTE' then IMP_DARE else 0 end) as CC_PAGAMENTI_ATM_POSTE_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='PAGAMENTI' and a.CANALE='ATM_POSTE' then NUM_DARE else 0 end) as CC_PAGAMENTI_ATM_POSTE_NUM_USCITA
+		, sum(case when a.DES_RICLAS='PAGAMENTI' and a.CANALE='POS_ESTERNO' then IMP_DARE else 0 end) as CC_PAGAMENTI_POS_ESTERNO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='PAGAMENTI' and a.CANALE='POS_ESTERNO' then NUM_DARE else 0 end) as CC_PAGAMENTI_POS_ESTERNO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='PAGAMENTI' and a.CANALE='WEB' then IMP_DARE else 0 end) as CC_PAGAMENTI_WEB_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='PAGAMENTI' and a.CANALE='WEB' then NUM_DARE else 0 end) as CC_PAGAMENTI_WEB_NUM_USCITA
+		, sum(case when a.DES_RICLAS='PAGAMENTI' and a.CANALE='DIGITAL' then IMP_DARE else 0 end) as CC_PAGAMENTI_DIGITAL_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='PAGAMENTI' and a.CANALE='DIGITAL' then NUM_DARE else 0 end) as CC_PAGAMENTI_DIGITAL_NUM_USCITA		
+		, sum(case when a.DES_RICLAS='PAGAMENTI' and a.CANALE='ALTRO' then IMP_DARE else 0 end) as CC_PAGAMENTI_ALTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='PAGAMENTI' and a.CANALE='ALTRO' then NUM_DARE else 0 end) as CC_PAGAMENTI_ALTRO_NUM_USCITA
+		---polizze centro, up
+		, sum(case when a.DES_RICLAS='POLIZZE' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_POLIZZE_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='POLIZZE' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_POLIZZE_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='POLIZZE' and a.CANALE='CENTRO' then IMP_DARE else 0 end) as CC_POLIZZE_CENTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='POLIZZE' and a.CANALE='CENTRO' then NUM_DARE else 0 end) as CC_POLIZZE_CENTRO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='POLIZZE' and a.CANALE='UP' then IMP_DARE else 0 end) as CC_POLIZZE_UP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='POLIZZE' and a.CANALE='UP' then NUM_DARE else 0 end) as CC_POLIZZE_UP_NUM_USCITA
+		--postagiro da a conto
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_POSTAGIRO_DA_CC_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_POSTAGIRO_DA_CC_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' and a.CANALE='CENTRO' then IMP_DARE else 0 end) as CC_POSTAGIRO_A_CC_CENTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' and a.CANALE='CENTRO' then NUM_DARE else 0 end) as CC_POSTAGIRO_A_CC_CENTRO_NUM_USCITA		
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' and a.CANALE='UP' then IMP_DARE else 0 end) as CC_POSTAGIRO_A_CC_UP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' and a.CANALE='UP' then NUM_DARE else 0 end) as CC_POSTAGIRO_A_CC_UP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' and a.CANALE='APP' then IMP_DARE else 0 end) as CC_POSTAGIRO_A_CC_APP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' and a.CANALE='APP' then NUM_DARE else 0 end) as CC_POSTAGIRO_A_CC_APP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' and a.CANALE='WEB' then IMP_DARE else 0 end) as CC_POSTAGIRO_A_CC_WEB_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' and a.CANALE='WEB' then NUM_DARE else 0 end) as CC_POSTAGIRO_A_CC_WEB_NUM_USCITA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' and a.CANALE='DIGITAL' then IMP_DARE else 0 end) as CC_POSTAGIRO_A_CC_DIGITAL_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_CONTO' and a.CANALE='DIGITAL' then NUM_DARE else 0 end) as CC_POSTAGIRO_A_CC_DIGITAL_NUM_USCITA			
+		--postagiro da a lib
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_LIBRETTI' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_POSTAGIRO_DA_LIB_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_LIBRETTI' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_POSTAGIRO_DA_LIB_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_LIBRETTI' and a.CANALE='UP' then IMP_DARE else 0 end) as CC_POSTAGIRO_A_LIB_UP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_LIBRETTI' and a.CANALE='UP' then NUM_DARE else 0 end) as CC_POSTAGIRO_A_LIB_UP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_LIBRETTI' and a.CANALE='APP' then IMP_DARE else 0 end) as CC_POSTAGIRO_A_LIB_APP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_LIBRETTI' and a.CANALE='APP' then NUM_DARE else 0 end) as CC_POSTAGIRO_A_LIB_APP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_LIBRETTI' and a.CANALE='ATM_POSTE' then IMP_DARE else 0 end) as CC_POSTAGIRO_A_LIB_ATM_POSTE_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_LIBRETTI' and a.CANALE='ATM_POSTE' then NUM_DARE else 0 end) as CC_POSTAGIRO_A_LIB_ATM_POSTE_NUM_USCITA		
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_LIBRETTI' and a.CANALE='WEB' then IMP_DARE else 0 end) as CC_POSTAGIRO_A_LIB_WEB_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_LIBRETTI' and a.CANALE='WEB' then NUM_DARE else 0 end) as CC_POSTAGIRO_A_LIB_WEB_NUM_USCITA		
+		---postagiro da a evo
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_EVOLUTION' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_POSTAGIRO_DA_EVO_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_EVOLUTION' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_POSTAGIRO_DA_EVO_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_EVOLUTION' and a.CANALE='UP' then IMP_DARE else 0 end) as CC_POSTAGIRO_A_EVO_UP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_EVOLUTION' and a.CANALE='UP' then NUM_DARE else 0 end) as CC_POSTAGIRO_A_EVO_UP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_EVOLUTION' and a.CANALE='APP' then IMP_DARE else 0 end) as CC_POSTAGIRO_A_EVO_APP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_EVOLUTION' and a.CANALE='APP' then NUM_DARE else 0 end) as CC_POSTAGIRO_A_EVO_APP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_EVOLUTION' and a.CANALE='WEB' then IMP_DARE else 0 end) as CC_POSTAGIRO_A_EVO_WEB_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='POSTAGIRO_DA_A_EVOLUTION' and a.CANALE='WEB' then NUM_DARE else 0 end) as CC_POSTAGIRO_A_EVO_WEB_NUM_USCITA
+		---prelievo
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE='UP' then IMP_DARE else 0 end) as CC_PRELIEVO_UP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE='UP' then NUM_DARE else 0 end) as CC_PRELIEVO_UP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE='ATM_POSTE' then IMP_DARE else 0 end) as CC_PRELIEVO_ATM_POSTE_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE='ATM_POSTE' then NUM_DARE else 0 end) as CC_PRELIEVO_ATM_POSTE_NUM_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE='ATM_BANCARIO' then IMP_DARE else 0 end) as CC_PRELIEVO_ATM_BANCARIO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE='ATM_BANCARIO' then NUM_DARE else 0 end) as CC_PRELIEVO_ATM_BANCARIO_NUM_USCITA
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE='POS_ESTERNO' then IMP_DARE else 0 end) as CC_PRELIEVO_POS_ESTERNO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='PRELIEVO' and a.CANALE='POS_ESTERNO' then NUM_DARE else 0 end) as CC_PRELIEVO_POS_ESTERNO_NUM_USCITA
+		--ricarica postepay
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE='CENTRO' then IMP_DARE else 0 end) as CC_RICARICA_POSTEPAY_CENTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE='CENTRO' then NUM_DARE else 0 end) as CC_RICARICA_POSTEPAY_CENTRO_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE='UP' then IMP_DARE else 0 end) as CC_RICARICA_POSTEPAY_UP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE='UP' then NUM_DARE else 0 end) as CC_RICARICA_POSTEPAY_UP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE='APP' then IMP_DARE else 0 end) as CC_RICARICA_POSTEPAY_APP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE='APP' then NUM_DARE else 0 end) as CC_RICARICA_POSTEPAY_APP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE='DIGITAL' then IMP_DARE else 0 end) as CC_RICARICA_POSTEPAY_DIGITAL_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='RICARICA_POSTEPAY' and a.CANALE='DIGITAL' then NUM_DARE else 0 end) as CC_RICARICA_POSTEPAY_DIGITAL_NUM_USCITA		
+		---ricarica telefonica
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE='CENTRO' then IMP_DARE else 0 end) as CC_RICARICA_TELEFONICA_CENTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE='CENTRO' then NUM_DARE else 0 end) as CC_RICARICA_TELEFONICA_CENTRO_NUM_USCITA	
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE='UP' then IMP_DARE else 0 end) as CC_RICARICA_TELEFONICA_UP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE='UP' then NUM_DARE else 0 end) as CC_RICARICA_TELEFONICA_UP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE='DIGITAL' then IMP_DARE else 0 end) as CC_RICARICA_TELEFONICA_DIGITAL_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE='DIGITAL' then NUM_DARE else 0 end) as CC_RICARICA_TELEFONICA_DIGITAL_NUM_USCITA
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE='ATM_POSTE' then IMP_DARE else 0 end) as CC_RICARICA_TELEFONICA_ATM_POSTE_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='RICARICA_TELEFONICA' and a.CANALE='ATM_POSTE' then NUM_DARE else 0 end) as CC_RICARICA_TELEFONICA_ATM_POSTE_NUM_USCITA		
+		---scoperto conto
+		, sum(case when a.DES_RICLAS='SCOPERTO_CONTO' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_SCOPERTO_CONTO_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='SCOPERTO_CONTO' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_SCOPERTO_CONTO_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='SCOPERTO_CONTO' and a.CANALE='CENTRO' then IMP_DARE else 0 end) as CC_SCOPERTO_CONTO_CENTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='SCOPERTO_CONTO' and a.CANALE='CENTRO' then NUM_DARE else 0 end) as CC_SCOPERTO_CONTO_CENTRO_NUM_USCITA
+		---sdd
+		, sum(case when a.DES_RICLAS='SDD' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_SDD_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='SDD' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_SDD_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='SDD' and a.CANALE='CENTRO' then IMP_DARE else 0 end) as CC_SDD_CENTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='SDD' and a.CANALE='CENTRO' then NUM_DARE else 0 end) as CC_SDD_CENTRO_NUM_USCITA							
+		---stipendio pensione
+		, sum(case when a.DES_RICLAS='STIPENDIO_PENSIONE' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_STIPENDIO_PENSIONE_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='STIPENDIO_PENSIONE' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_STIPENDIO_PENSIONE_CENTRO_NUM_ENTRATA	
+		---storni
+		, sum(case when a.DES_RICLAS='STORNI' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_STORNI_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='STORNI' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_STORNI_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='STORNI' and a.CANALE='CENTRO' then IMP_DARE else 0 end) as CC_STORNI_CENTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='STORNI' and a.CANALE='CENTRO' then NUM_DARE else 0 end) as CC_STORNI_CENTRO_NUM_USCITA
+		---tenuta conto
+		, sum(case when a.DES_RICLAS='TENUTA_CONTO' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_TENUTA_CONTO_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='TENUTA_CONTO' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_TENUTA_CONTO_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='TENUTA_CONTO' and a.CANALE='CENTRO' then IMP_DARE else 0 end) as CC_TENUTA_CONTO_CENTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='TENUTA_CONTO' and a.CANALE='CENTRO' then NUM_DARE else 0 end) as CC_TENUTA_CONTO_CENTRO_NUM_USCITA		
+		---titoli
+		, sum(case when a.DES_RICLAS='TITOLI' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_TITOLI_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='TITOLI' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_TITOLI_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='TITOLI' and a.CANALE='CENTRO' then IMP_DARE else 0 end) as CC_TITOLI_CENTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='TITOLI' and a.CANALE='CENTRO' then NUM_DARE else 0 end) as CC_TITOLI_CENTRO_NUM_USCITA		
+		, sum(case when a.DES_RICLAS='TITOLI' and a.CANALE='UP' then IMP_AVERE else 0 end) as CC_TITOLI_UP_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='TITOLI' and a.CANALE='UP' then NUM_AVERE else 0 end) as CC_TITOLI_UP_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='TITOLI' and a.CANALE='UP' then IMP_DARE else 0 end) as CC_TITOLI_UP_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='TITOLI' and a.CANALE='UP' then NUM_DARE else 0 end) as CC_TITOLI_UP_NUM_USCITA
+		, sum(case when a.DES_RICLAS='TITOLI' and a.CANALE='WEB' then IMP_AVERE else 0 end) as CC_TITOLI_WEB_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='TITOLI' and a.CANALE='WEB' then NUM_AVERE else 0 end) as CC_TITOLI_WEB_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='TITOLI' and a.CANALE='WEB' then IMP_DARE else 0 end) as CC_TITOLI_WEB_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='TITOLI' and a.CANALE='WEB' then NUM_DARE else 0 end) as CC_TITOLI_WEB_NUM_USCITA
+		---varie
+		, sum(case when a.DES_RICLAS='VARIE' and a.CANALE='CENTRO' then IMP_AVERE else 0 end) as CC_VARIE_CENTRO_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='VARIE' and a.CANALE='CENTRO' then NUM_AVERE else 0 end) as CC_VARIE_CENTRO_NUM_ENTRATA		
+		, sum(case when a.DES_RICLAS='VARIE' and a.CANALE='CENTRO' then IMP_DARE else 0 end) as CC_VARIE_CENTRO_IMP_USCITA 
+		, sum(case when a.DES_RICLAS='VARIE' and a.CANALE='CENTRO' then NUM_DARE else 0 end) as CC_VARIE_CENTRO_NUM_USCITA
+		---versamento
+		, sum(case when a.DES_RICLAS='VERSAMENTI' and a.CANALE='UP' then IMP_AVERE else 0 end) as CC_VERSAMENTI_UP_IMP_ENTRATA 
+		, sum(case when a.DES_RICLAS='VERSAMENTI' and a.CANALE='UP' then NUM_AVERE else 0 end) as CC_VERSAMENTI_UP_NUM_ENTRATA	
+		---riclassificazione dei bonifici
+		, sum(coalesce(a.BON_ACQUISTO_CASA_ENTRATA,0)) as CC_BON_ACQUISTO_CASA_NUM_ENTRATA
+		, sum(coalesce(a.BON_AFFITTO_ENTRATA,0)) as CC_BON_AFFITTO_NUM_ENTRATA
+		, sum(coalesce(a.BON_CONDOMINIO_ENTRATA,0)) as CC_BON_CONDOMINIO_NUM_ENTRATA
+		, sum(coalesce(a.BON_DISOCCUPAZIONE_ENTRATA,0)) as CC_BON_DISOCCUPAZIONE_NUM_ENTRATA
+		, sum(coalesce(a.BON_EREDITA_ENTRATA,0)) as CC_BON_EREDITA_NUM_ENTRATA
+		, sum(coalesce(a.BON_ISTRUZIONE_ENTRATA,0)) as CC_BON_ISTRUZIONE_NUM_ENTRATA
+		, sum(coalesce(a.BON_LIQUIDAZIONE_POLIZZA_ENTRATA,0)) as CC_BON_LIQUIDAZIONE_POLIZZA_NUM_ENTRATA
+		, sum(coalesce(a.BON_MANTENIMENTO_ENTRATA,0)) as CC_BON_MANTENIMENTO_NUM_ENTRATA
+		, sum(coalesce(a.BON_MOTORI_ENTRATA,0)) as CC_BON_MOTORI_NUM_ENTRATA
+		, sum(coalesce(a.BON_MUTUO_ENTRATA,0)) as CC_BON_MUTUO_NUM_ENTRATA
+		, sum(coalesce(a.BON_NOZZE_ENTRATA,0)) as CC_BON_NOZZE_NUM_ENTRATA
+		, sum(coalesce(a.BON_NUCLEO_FAMIGLIA_ENTRATA,0)) as CC_BON_NUCLEO_FAMIGLIA_NUM_ENTRATA
+		, sum(coalesce(a.BON_PRESTITO_ENTRATA,0)) as CC_BON_PRESTITO_NUM_ENTRATA
+		, sum(coalesce(a.BON_RETTA_ENTRATA,0)) as CC_BON_RETTA_NUM_ENTRATA
+		, sum(coalesce(a.BON_SPESE_SANITARIE_ENTRATA,0)) as CC_BON_SPESE_SANITARIE_NUM_ENTRATA
+		, sum(coalesce(a.BON_STIPENDIO_PENSIONE_ENTRATA,0)) as CC_BON_STIPENDIO_PENSIONE_NUM_ENTRATA
+		, sum(coalesce(a.BON_TRIBUTO_ENTRATA,0)) as CC_BON_TRIBUTO_NUM_ENTRATA
+		, sum(coalesce(a.BON_UTENZE_ENTRATA,0)) as CC_BON_UTENZE_NUM_ENTRATA
+		, sum(coalesce(a.BON_VIAGGI_ENTRATA,0)) as CC_BON_VIAGGI_NUM_ENTRATA
+		, sum(coalesce(a.BON_ALTRO_ENTRATA,0)) as CC_BON_ALTRO_NUM_ENTRATA
+		, sum(coalesce(a.BON_ACQUISTO_CASA_USCITA,0)) as CC_BON_ACQUISTO_CASA_NUM_USCITA
+		, sum(coalesce(a.BON_AFFITTO_USCITA,0)) as CC_BON_AFFITTO_NUM_USCITA
+		, sum(coalesce(a.BON_CONDOMINIO_USCITA,0)) as CC_BON_CONDOMINIO_NUM_USCITA
+		, sum(coalesce(a.BON_DISOCCUPAZIONE_USCITA,0)) as CC_BON_DISOCCUPAZIONE_NUM_USCITA
+		, sum(coalesce(a.BON_EREDITA_USCITA,0)) as CC_BON_EREDITA_NUM_USCITA
+		, sum(coalesce(a.BON_ISTRUZIONE_USCITA,0)) as CC_BON_ISTRUZIONE_NUM_USCITA
+		, sum(coalesce(a.BON_LIQUIDAZIONE_POLIZZA_USCITA,0)) as CC_BON_LIQUIDAZIONE_POLIZZA_NUM_USCITA
+		, sum(coalesce(a.BON_MANTENIMENTO_USCITA,0)) as CC_BON_MANTENIMENTO_NUM_USCITA
+		, sum(coalesce(a.BON_MOTORI_USCITA,0)) as CC_BON_MOTORI_NUM_USCITA
+		, sum(coalesce(a.BON_MUTUO_USCITA,0)) as CC_BON_MUTUO_NUM_USCITA
+		, sum(coalesce(a.BON_NOZZE_USCITA,0)) as CC_BON_NOZZE_NUM_USCITA
+		, sum(coalesce(a.BON_NUCLEO_FAMIGLIA_USCITA,0)) as CC_BON_NUCLEO_FAMIGLIA_NUM_USCITA
+		, sum(coalesce(a.BON_PRESTITO_USCITA,0)) as CC_BON_PRESTITO_NUM_USCITA
+		, sum(coalesce(a.BON_RETTA_USCITA,0)) as CC_BON_RETTA_NUM_USCITA
+		, sum(coalesce(a.BON_SPESE_SANITARIE_USCITA,0)) as CC_BON_SPESE_SANITARIE_NUM_USCITA
+		, sum(coalesce(a.BON_STIPENDIO_PENSIONE_USCITA,0)) as CC_BON_STIPENDIO_PENSIONE_NUM_USCITA
+		, sum(coalesce(a.BON_TRIBUTO_USCITA,0)) as CC_BON_TRIBUTO_NUM_USCITA
+		, sum(coalesce(a.BON_UTENZE_USCITA,0)) as CC_BON_UTENZE_NUM_USCITA
+		, sum(coalesce(a.BON_VIAGGI_USCITA,0)) as CC_BON_VIAGGI_NUM_USCITA
+		, sum(coalesce(a.BON_ALTRO_USCITA,0)) as CC_BON_ALTRO_NUM_USCITA
+		-----------------------totali per canali
+		---IMPORTO entrata CANALE fisico		
+		, (CC_ASSEGNI_BANCARI_UP_IMP_ENTRATA + CC_ASSEGNI_POSTALI_UP_IMP_ENTRATA + CC_BFP_UP_IMP_ENTRATA
+			+ CC_FONDI_UP_IMP_ENTRATA + CC_VERSAMENTI_UP_IMP_ENTRATA + CC_TITOLI_UP_IMP_ENTRATA) as CC_TOT_OPER_FISICO_IMP_ENTRATA
+		---NUMERO entrata CANALE fisico			
+		, (CC_ASSEGNI_BANCARI_UP_NUM_ENTRATA + CC_ASSEGNI_POSTALI_UP_NUM_ENTRATA + CC_BFP_UP_NUM_ENTRATA
+			+ CC_FONDI_UP_NUM_ENTRATA + CC_VERSAMENTI_UP_NUM_ENTRATA + CC_TITOLI_UP_NUM_ENTRATA) as CC_TOT_OPER_FISICO_NUM_ENTRATA
+		---IMPORTO uscita CANALE fisico
+		, (CC_ASSEGNI_POSTALI_UP_IMP_USCITA + CC_BFP_UP_IMP_USCITA	+ CC_BONIFICO_UP_IMP_USCITA + CC_FONDI_UP_IMP_USCITA
+			+ CC_PAGAMENTI_UP_IMP_USCITA + CC_POLIZZE_UP_IMP_USCITA + CC_POSTAGIRO_A_CC_UP_IMP_USCITA + CC_POSTAGIRO_A_LIB_UP_IMP_USCITA
+			+ CC_POSTAGIRO_A_EVO_UP_IMP_USCITA + CC_PRELIEVO_UP_IMP_USCITA + CC_RICARICA_POSTEPAY_UP_IMP_USCITA + CC_RICARICA_TELEFONICA_UP_IMP_USCITA
+			+ CC_TITOLI_UP_IMP_USCITA + CC_PAGAMENTI_ATM_POSTE_IMP_USCITA + CC_PAGAMENTI_POS_ESTERNO_IMP_USCITA + CC_PAGAMENTI_ALTRO_IMP_USCITA
+			+ CC_POSTAGIRO_A_LIB_ATM_POSTE_IMP_USCITA + CC_PRELIEVO_ATM_POSTE_IMP_USCITA + CC_PRELIEVO_ATM_BANCARIO_IMP_USCITA
+			+ CC_PRELIEVO_POS_ESTERNO_IMP_USCITA + CC_RICARICA_TELEFONICA_ATM_POSTE_IMP_USCITA) as CC_TOT_OPER_FISICO_IMP_USCITA
+		---NUMERO uscita CANALE fisico
+		, (CC_ASSEGNI_POSTALI_UP_NUM_USCITA + CC_BFP_UP_NUM_USCITA + CC_BONIFICO_UP_NUM_USCITA + CC_FONDI_UP_NUM_USCITA
+			+ CC_PAGAMENTI_UP_NUM_USCITA + CC_POLIZZE_UP_NUM_USCITA + CC_POSTAGIRO_A_CC_UP_NUM_USCITA + CC_POSTAGIRO_A_LIB_UP_NUM_USCITA
+			+ CC_POSTAGIRO_A_EVO_UP_NUM_USCITA + CC_PRELIEVO_UP_NUM_USCITA + CC_RICARICA_POSTEPAY_UP_NUM_USCITA + CC_RICARICA_TELEFONICA_UP_NUM_USCITA 
+			+ CC_TITOLI_UP_NUM_USCITA + CC_PAGAMENTI_ATM_POSTE_NUM_USCITA + CC_PAGAMENTI_POS_ESTERNO_NUM_USCITA + CC_PAGAMENTI_ALTRO_NUM_USCITA
+			+ CC_POSTAGIRO_A_LIB_ATM_POSTE_NUM_USCITA + CC_PRELIEVO_ATM_POSTE_NUM_USCITA + CC_PRELIEVO_ATM_BANCARIO_NUM_USCITA
+			+ CC_PRELIEVO_POS_ESTERNO_NUM_USCITA + CC_RICARICA_TELEFONICA_ATM_POSTE_NUM_USCITA) as CC_TOT_OPER_FISICO_NUM_USCITA
+		---IMPORTO entrata CANALE centro		
+		, (CC_ASSEGNI_BANCARI_CENTRO_IMP_ENTRATA + CC_ASSEGNI_POSTALI_CENTRO_IMP_ENTRATA + CC_BFP_CENTRO_IMP_ENTRATA + CC_BONIFICO_CENTRO_IMP_ENTRATA
+			+ CC_CARTA_CREDITO_CENTRO_IMP_ENTRATA + CC_COMMISSIONI_CENTRO_IMP_ENTRATA + CC_FINANZIAMENTI_CENTRO_IMP_ENTRATA + CC_FONDI_CENTRO_IMP_ENTRATA
+			+ CC_PAGAMENTI_CENTRO_IMP_ENTRATA + CC_POLIZZE_CENTRO_IMP_ENTRATA + CC_POSTAGIRO_DA_CC_CENTRO_IMP_ENTRATA + CC_POSTAGIRO_DA_LIB_CENTRO_IMP_ENTRATA
+			+ CC_POSTAGIRO_DA_EVO_CENTRO_IMP_ENTRATA + CC_SCOPERTO_CONTO_CENTRO_IMP_ENTRATA + CC_SDD_CENTRO_IMP_ENTRATA + CC_STIPENDIO_PENSIONE_CENTRO_IMP_ENTRATA
+			+ CC_STORNI_CENTRO_IMP_ENTRATA + CC_TENUTA_CONTO_CENTRO_IMP_ENTRATA	+ CC_TITOLI_CENTRO_IMP_ENTRATA + CC_VARIE_CENTRO_IMP_ENTRATA
+			) as CC_TOT_OPER_CENTRO_IMP_ENTRATA
+		---NUMERO entrata CANALE centro
+		, (CC_ASSEGNI_BANCARI_CENTRO_NUM_ENTRATA + CC_ASSEGNI_POSTALI_CENTRO_NUM_ENTRATA + CC_BFP_CENTRO_NUM_ENTRATA + CC_BONIFICO_CENTRO_NUM_ENTRATA
+			+ CC_CARTA_CREDITO_CENTRO_NUM_ENTRATA + CC_COMMISSIONI_CENTRO_NUM_ENTRATA + CC_FINANZIAMENTI_CENTRO_NUM_ENTRATA + CC_FONDI_CENTRO_NUM_ENTRATA
+			+ CC_PAGAMENTI_CENTRO_NUM_ENTRATA + CC_POLIZZE_CENTRO_NUM_ENTRATA + CC_POSTAGIRO_DA_CC_CENTRO_NUM_ENTRATA + CC_POSTAGIRO_DA_LIB_CENTRO_NUM_ENTRATA
+			+ CC_POSTAGIRO_DA_EVO_CENTRO_NUM_ENTRATA + CC_SCOPERTO_CONTO_CENTRO_NUM_ENTRATA + CC_SDD_CENTRO_NUM_ENTRATA + CC_STIPENDIO_PENSIONE_CENTRO_NUM_ENTRATA
+			+ CC_STORNI_CENTRO_NUM_ENTRATA + CC_TENUTA_CONTO_CENTRO_NUM_ENTRATA + CC_TITOLI_CENTRO_NUM_ENTRATA + CC_VARIE_CENTRO_NUM_ENTRATA
+			) as CC_TOT_OPER_CENTRO_NUM_ENTRATA
+		---IMPORTO uscita CANALE centro
+		, (CC_ASSEGNI_POSTALI_CENTRO_IMP_USCITA + CC_BFP_CENTRO_IMP_USCITA + CC_BONIFICO_CENTRO_IMP_USCITA + CC_CARTA_CREDITO_CENTRO_IMP_USCITA
+			+ CC_COMMISSIONI_CENTRO_IMP_USCITA + CC_FINANZIAMENTI_CENTRO_IMP_USCITA + CC_FONDI_CENTRO_IMP_USCITA + CC_PAGAMENTI_CENTRO_IMP_USCITA
+			+ CC_POLIZZE_CENTRO_IMP_USCITA + CC_POSTAGIRO_A_CC_CENTRO_IMP_USCITA + CC_RICARICA_POSTEPAY_CENTRO_IMP_USCITA + CC_RICARICA_TELEFONICA_CENTRO_IMP_USCITA
+			+ CC_SCOPERTO_CONTO_CENTRO_IMP_USCITA + CC_SDD_CENTRO_IMP_USCITA + CC_STORNI_CENTRO_IMP_USCITA + CC_TENUTA_CONTO_CENTRO_IMP_USCITA
+			+ CC_TITOLI_CENTRO_IMP_USCITA + CC_VARIE_CENTRO_IMP_USCITA
+			) as CC_TOT_OPER_CENTRO_IMP_USCITA
+		---NUMERO uscita CANALE centro
+		, (CC_ASSEGNI_POSTALI_CENTRO_NUM_USCITA + CC_BFP_CENTRO_NUM_USCITA + CC_BONIFICO_CENTRO_NUM_USCITA + CC_CARTA_CREDITO_CENTRO_NUM_USCITA
+			+ CC_COMMISSIONI_CENTRO_NUM_USCITA + CC_FINANZIAMENTI_CENTRO_NUM_USCITA + CC_FONDI_CENTRO_NUM_USCITA + CC_PAGAMENTI_CENTRO_NUM_USCITA
+			+ CC_POLIZZE_CENTRO_NUM_USCITA + CC_POSTAGIRO_A_CC_CENTRO_NUM_USCITA + CC_RICARICA_POSTEPAY_CENTRO_NUM_USCITA + CC_RICARICA_TELEFONICA_CENTRO_NUM_USCITA
+			+ CC_SCOPERTO_CONTO_CENTRO_NUM_USCITA + CC_SDD_CENTRO_NUM_USCITA + CC_STORNI_CENTRO_NUM_USCITA + CC_TENUTA_CONTO_CENTRO_NUM_USCITA
+			+ CC_TITOLI_CENTRO_NUM_USCITA + CC_VARIE_CENTRO_NUM_USCITA
+			) as CC_TOT_OPER_CENTRO_NUM_USCITA
+		---Importo entrata canale digital
+		, (CC_ASSEGNI_POSTALI_WEB_IMP_ENTRATA + CC_BFP_WEB_IMP_ENTRATA + CC_TITOLI_WEB_IMP_ENTRATA) as CC_TOT_OPER_DIGITAL_IMP_ENTRATA
+		---NUMERO entrata canale digital
+		, (CC_ASSEGNI_POSTALI_WEB_NUM_ENTRATA + CC_BFP_WEB_NUM_ENTRATA + CC_TITOLI_WEB_NUM_ENTRATA) as CC_TOT_OPER_DIGITAL_NUM_ENTRATA
+		---Importo uscita canale digital
+		, (CC_ASSEGNI_POSTALI_WEB_IMP_USCITA + CC_BFP_WEB_IMP_USCITA + CC_BONIFICO_APP_IMP_USCITA + CC_BONIFICO_WEB_IMP_USCITA + CC_BONIFICO_DIGITAL_IMP_USCITA
+			+ CC_PAGAMENTI_APP_IMP_USCITA + CC_PAGAMENTI_WEB_IMP_USCITA + CC_PAGAMENTI_DIGITAL_IMP_USCITA + CC_POSTAGIRO_A_CC_APP_IMP_USCITA 
+			+ CC_POSTAGIRO_A_CC_WEB_IMP_USCITA + CC_POSTAGIRO_A_LIB_APP_IMP_USCITA + CC_POSTAGIRO_A_LIB_WEB_IMP_USCITA + CC_POSTAGIRO_A_LIB_WEB_NUM_USCITA 
+			+ CC_POSTAGIRO_A_EVO_APP_IMP_USCITA + CC_POSTAGIRO_A_EVO_WEB_IMP_USCITA + CC_RICARICA_POSTEPAY_APP_IMP_USCITA + CC_RICARICA_POSTEPAY_DIGITAL_IMP_USCITA
+			+ CC_RICARICA_TELEFONICA_DIGITAL_IMP_USCITA + CC_TITOLI_WEB_IMP_USCITA + CC_POSTAGIRO_A_CC_DIGITAL_IMP_USCITA) as CC_TOT_OPER_DIGITAL_IMP_USCITA
+		---numero uscita canale digital
+		, (CC_ASSEGNI_POSTALI_WEB_NUM_USCITA + CC_BFP_WEB_NUM_USCITA + CC_BONIFICO_APP_NUM_USCITA + CC_BONIFICO_WEB_NUM_USCITA + CC_BONIFICO_DIGITAL_NUM_USCITA
+			+ CC_PAGAMENTI_APP_NUM_USCITA + CC_PAGAMENTI_WEB_NUM_USCITA + CC_PAGAMENTI_DIGITAL_NUM_USCITA + CC_RICARICA_POSTEPAY_DIGITAL_NUM_USCITA 
+			+ CC_POSTAGIRO_A_CC_APP_NUM_USCITA + CC_POSTAGIRO_A_CC_WEB_NUM_USCITA + CC_POSTAGIRO_A_LIB_APP_NUM_USCITA + CC_POSTAGIRO_A_LIB_WEB_NUM_USCITA
+			+ CC_POSTAGIRO_A_EVO_APP_NUM_USCITA + CC_POSTAGIRO_A_EVO_WEB_NUM_USCITA + CC_RICARICA_POSTEPAY_APP_NUM_USCITA + CC_RICARICA_TELEFONICA_DIGITAL_NUM_USCITA 
+			+ CC_TITOLI_WEB_NUM_USCITA + CC_POSTAGIRO_A_CC_DIGITAL_NUM_USCITA) as CC_TOT_OPER_DIGITAL_NUM_USCITA		
+	from EBIL_AREE.CT_PERIMETRO as b
+	left join MOVIM_CC_RAGGR as a
+	on a.ID_CLIENTE_BIC=b.ID_CLIENTE_BIC
+	group by 1,2
+)with data primary index(ID_CLIENTE_BIC, ID_PERIODO_TEMPORALE) on commit preserve rows;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+--------------------------------------------------------------------------------
+--------Creazione tabella finale ---
+
+BT
+
+;DELETE EBIL_AREE.CT_OPERAT_CONTO
+WHERE ID_PERIODO_TEMPORALE= (SELECT ID_PERIODO_TEMPORALE FROM  EBIL_AREE.CT_PARAMETRI)
+
+;INSERT INTO EBIL_AREE.CT_OPERAT_CONTO 
+	sel * from CT_MOV_CC
+	WHERE ID_PERIODO_TEMPORALE= (SELECT ID_PERIODO_TEMPORALE FROM  EBIL_AREE.CT_PARAMETRI)
+
+
+;ET;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+
+
+CREATE VOLATILE TABLE VTB_OPERAT_CONTO_SV AS
+(SELECT ID_PERIODO_TEMPORALE, ROW_NUMBER () over ( ORDER BY ID_PERIODO_TEMPORALE  DESC) AS ORDINAMENTO
+FROM  EBIL_AREE.CT_OPERAT_CONTO
+GROUP BY 1)
+WITH DATA PRIMARY INDEX (ID_PERIODO_TEMPORALE) ON COMMIT PRESERVE ROWS;
+.IF ERRORCODE > 0 THEN .QUIT 16;
+
+DELETE EBIL_AREE.CT_OPERAT_CONTO
+WHERE ID_PERIODO_TEMPORALE IN ( SELECT ID_PERIODO_TEMPORALE 
+FROM VTB_OPERAT_CONTO_SV
+WHERE ORDINAMENTO >25);
+.IF ERRORCODE > 0 THEN .QUIT 16;
+	

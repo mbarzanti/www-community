@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<results version="2">
+<cppcheck version="4.00"/>
+<errors>
+    <error id="Injection04" severity="Blocker" msg="Injection" verbose="" FP="No" cwe="73" OWASP="A3" >
+        <location file0="src/XPath_Injection/XPath_Injection.java" file="src/XPath_Injection/XPath_Injection.java" line="35" />
+    </error>
+    <error id="Injection04" severity="Blocker" msg="Injection" verbose="" FP="No" cwe="73" OWASP="A3" >
+        <location file0="src/XPath_Injection/XPath_Injection.java" file="src/XPath_Injection/XPath_Injection.java" line="68" />
+    </error>
+    <error id="JAVA_32" severity="Critical" msg="Cryptographic Failures" verbose="" FP="No" cwe="328" OWASP="A2" >
+        <location file0="src/Unsafe_Hash_Algorithm/Unsafe_Hash_Algorithm.java" file="src/Unsafe_Hash_Algorithm/Unsafe_Hash_Algorithm.java" line="21" />
+    </error>
+    <error id="AvoidEquals" severity="Blocker" msg="Broken Access Control" verbose="" FP="No" cwe="581" OWASP="A1" >
+        <location file0="src/Just_one_of_Equals_or_hashCode_defined/Just_one_of_Equals_or_hashCode_defined_bad.java" file="src/Just_one_of_Equals_or_hashCode_defined/Just_one_of_Equals_or_hashCode_defined_bad.java" line="13" />
+    </error>
+    <error id="Csrf01" severity="Major" msg="Software and Data Integrity Failures" verbose="" FP="No" cwe="113" OWASP="A8" >
+        <location file0="src/HTTP_Response_Splitting/HTTP_Response_Splitting.java" file="src/HTTP_Response_Splitting/HTTP_Response_Splitting.java" line="13" />
+    </error>
+    <error id="JAVA_29" severity="Blocker" msg="Cryptographic Failures" verbose="" FP="No" cwe="325" OWASP="A2" >
+        <location file0="src/Weak_Encryption/Weak_Encryption.java" file="src/Weak_Encryption/Weak_Encryption.java" line="59" />
+    </error>
+    <error id="jcs04" severity="Critical" msg="Insecure Design" verbose="" FP="No" cwe="257" OWASP="A4" >
+        <location file0="src/Hard_Coded_Password/Hard_Coded_Password.java" file="src/Hard_Coded_Password/Hard_Coded_Password.java" line="20" />
+    </error>
+    <error id="jcs04" severity="Critical" msg="Insecure Design" verbose="" FP="No" cwe="257" OWASP="A4" >
+        <location file0="src/Hard_Coded_Password/Hard_Coded_Password.java" file="src/Hard_Coded_Password/Hard_Coded_Password.java" line="20" />
+    </error>
+    <error id="JAVA_29" severity="Blocker" msg="Cryptographic Failures" verbose="" FP="No" cwe="325" OWASP="A2" >
+        <location file0="src/Hard_Coded_Password/Hard_Coded_Password.java" file="src/Hard_Coded_Password/Hard_Coded_Password.java" line="36" />
+    </error>
+    <error id="Ics07Java" severity="Critical" msg="Cryptographic Failures" verbose="" FP="No" cwe="338" OWASP="A2" >
+        <location file0="src/Insecuere_Randomness/Insecuere_Randomness.java" file="src/Insecuere_Randomness/Insecuere_Randomness.java" line="16" />
+    </error>
+    <error id="PoorSeeding" severity="Critical" msg="Cryptographic Failures" verbose="" FP="No" cwe="336" OWASP="A2" >
+        <location file0="src/Insecuere_Randomness/Insecuere_Randomness.java" file="src/Insecuere_Randomness/Insecuere_Randomness.java" line="18" />
+    </error>
+    <error id="JAVA_29" severity="Blocker" msg="Cryptographic Failures" verbose="" FP="No" cwe="325" OWASP="A2" >
+        <location file0="src/Null_Password/Null_Password.java" file="src/Null_Password/Null_Password.java" line="36" />
+    </error>
+    <error id="Injection04" severity="Blocker" msg="Injection" verbose="" FP="No" cwe="73" OWASP="A3" >
+        <location file0="src/XPath_Injection/XPath_Injection.java" file="src/XPath_Injection/XPath_Injection.java" line="35" />
+    </error>
+    <error id="Injection04" severity="Blocker" msg="Injection" verbose="" FP="No" cwe="73" OWASP="A3" >
+        <location file0="src/XPath_Injection/XPath_Injection.java" file="src/XPath_Injection/XPath_Injection.java" line="68" />
+    </error>
+    <error id="JAVA_32" severity="Critical" msg="Cryptographic Failures" verbose="" FP="No" cwe="328" OWASP="A2" >
+        <location file0="src/Unsafe_Hash_Algorithm/Unsafe_Hash_Algorithm.java" file="src/Unsafe_Hash_Algorithm/Unsafe_Hash_Algorithm.java" line="21" />
+    </error>
+    <error id="AvoidEquals" severity="Blocker" msg="Broken Access Control" verbose="" FP="No" cwe="581" OWASP="A1" >
+        <location file0="src/Just_one_of_Equals_or_hashCode_defined/Just_one_of_Equals_or_hashCode_defined_bad.java" file="src/Just_one_of_Equals_or_hashCode_defined/Just_one_of_Equals_or_hashCode_defined_bad.java" line="13" />
+    </error>
+    <error id="Csrf01" severity="Major" msg="Software and Data Integrity Failures" verbose="" FP="No" cwe="113" OWASP="A8" >
+        <location file0="src/HTTP_Response_Splitting/HTTP_Response_Splitting.java" file="src/HTTP_Response_Splitting/HTTP_Response_Splitting.java" line="13" />
+    </error>
+    <error id="JAVA_29" severity="Blocker" msg="Cryptographic Failures" verbose="" FP="No" cwe="325" OWASP="A2" >
+        <location file0="src/Weak_Encryption/Weak_Encryption.java" file="src/Weak_Encryption/Weak_Encryption.java" line="59" />
+    </error>
+    <error id="jcs04" severity="Critical" msg="Insecure Design" verbose="" FP="No" cwe="257" OWASP="A4" >
+        <location file0="src/Hard_Coded_Password/Hard_Coded_Password.java" file="src/Hard_Coded_Password/Hard_Coded_Password.java" line="20" />
+    </error>
+    <error id="jcs04" severity="Critical" msg="Insecure Design" verbose="" FP="No" cwe="257" OWASP="A4" >
+        <location file0="src/Hard_Coded_Password/Hard_Coded_Password.java" file="src/Hard_Coded_Password/Hard_Coded_Password.java" line="20" />
+    </error>
+    <error id="JAVA_29" severity="Blocker" msg="Cryptographic Failures" verbose="" FP="No" cwe="325" OWASP="A2" >
+        <location file0="src/Hard_Coded_Password/Hard_Coded_Password.java" file="src/Hard_Coded_Password/Hard_Coded_Password.java" line="36" />
+    </error>
+    <error id="Ics07Java" severity="Critical" msg="Cryptographic Failures" verbose="" FP="No" cwe="338" OWASP="A2" >
+        <location file0="src/Insecuere_Randomness/Insecuere_Randomness.java" file="src/Insecuere_Randomness/Insecuere_Randomness.java" line="16" />
+    </error>
+    <error id="PoorSeeding" severity="Critical" msg="Cryptographic Failures" verbose="" FP="No" cwe="336" OWASP="A2" >
+        <location file0="src/Insecuere_Randomness/Insecuere_Randomness.java" file="src/Insecuere_Randomness/Insecuere_Randomness.java" line="18" />
+    </error>
+    <error id="JAVA_29" severity="Blocker" msg="Cryptographic Failures" verbose="" FP="No" cwe="325" OWASP="A2" >
+        <location file0="src/Null_Password/Null_Password.java" file="src/Null_Password/Null_Password.java" line="36" />
+    </error>
+</errors>
+</results>

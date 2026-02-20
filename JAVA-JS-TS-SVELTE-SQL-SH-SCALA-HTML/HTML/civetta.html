@@ -1,0 +1,76 @@
+<html>
+	<head>
+		<meta http-equiv="refresh" content="30"> <!-- VIOLAZ Deprecated tag by W3C -->
+		<meta name="robots" content="noindex, nofollow" /> <!-- VIOLAZ robots disabled -->		
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /> <!-- ok -->
+		<meta https-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /> <!-- VIOLAZ Incorrect attribute name -->
+	</head>
+
+	<body>
+		<iframe src="/test-assets/sc2-4-2-title-page-with-title.html"></iframe> <!-- VIOLAZ title in costante-->
+		<iframe title="Map of Siteimprove office" src="siteimproveoffice.html"></iframe> <!-- VIOLAZ -->
+		<frame src="nav.html" /> <!-- VIOLAZ Frames should have a ‘title’ attribute -->
+		<frame src="nav.html" title="Main menu" /> <!-- OK -->
+		<iframe src="banner-ad.html" id="testiframe" <!-- OK -->
+		  name="testiframe" title="Advertisement">
+			<a href="banner-ad.html">Advertisement</a>
+		</iframe>
+		<em>Note:</em>  <!-- VIOLAZ <strong> and <em> tags should be used -->
+		Her favorite food is <strong>bambusa vulgaris</strong> <!-- VIOLAZ <strong> and <em> tags should be used -->
+
+		<a href="image.png">here</a>  <!-- VIOLAZ Links should not directly target images -->
+		<form>
+		  <fieldset>  <!-- VIOLAZ <fieldset> tags should contain a visible <legend> -->
+			<label for="name">Name:</label>
+			<input type="text" id="name" name="name"><br>
+			<label for="email">Email:</label>
+			<input type="email" id="email" name="email"><br>
+			<label for="phone">Phone Number:</label>
+			<input type="tel" id="phone" name="phone"><br>
+		  </fieldset>
+		</form>
+		<form>
+		  <fieldset>
+			<legend style="display: none;">Personal Information</legend> <!-- VIOLAZ -->
+			<label for="name">Name:</label>
+			<input type="text" id="name" name="name"><br>
+			<label for="email">Email:</label>
+			<input type="email" id="email" name="email"><br>
+			<label for="phone">Phone Number:</label>
+			<input type="tel" id="phone" name="phone"><br>
+		  </fieldset>
+		</form>
+		<div style="border:solid 1px red;">
+			<li>Item</li> <!-- VIOLAZ Invalid tag position -->
+			<li>Another Item</li> <!-- VIOLAZ Invalid tag position -->
+			<li>Yet Another Item</li> <!-- VIOLAZ Invalid tag position -->
+		</div>
+		<embed src="abc.pdf" type="application/pdf" /> <!-- VIOLAZ Invalid tag psitin -->
+		<object data="abc.pdf" type="application/pdf">
+			<embed src="abc.pdf" type="application/pdf" /> <!-- OK -->
+		</object>
+		<img src="img_girl.jpg" alt=" " width="500" height="600"> <!-- VIOLAZ Missing ‘alt’ attribute -->
+		<img src="img_girl.jpg" width="500" height="600"> <!-- VIOLAZ Missing ‘alt’ attribute -->
+		<img src="world_map.png" ismap> <!-- VIOLAZ Server-Side image maps attribute should not be used  -->
+		<!-- VIOLAZ -->
+		<a href="http://example.com"Sample/a>
+		<!-- VIOLAZ -->
+		<a href='http://example.com'Sample/a>
+		<!-- VIOLAZ -->
+		<a href=http://example.comSample/a>
+		<!-- VIOLAZ -->
+		<a class="foo" href="http://example.com"Sample/a>
+		<!-- VIOLAZ -->
+		<a class='foo' href='http://example.com'Sample/a>
+		<!-- VIOLAZ -->
+		<a class=foo href=http://example.comSample/a>
+		<!-- VIOLAZ -->
+		<a href="HTTP://EXAMPLE.COM"Sample/a>
+		<!-- ok -->
+		<a href="https://example.com"Sample/a>
+		<!-- ok -->
+		<a href="https://example.com/http://"Sample/a>
+		<!-- ok -->
+		<a href="javascript:alert(1)"Sample/a>
+	</body>
+</html>

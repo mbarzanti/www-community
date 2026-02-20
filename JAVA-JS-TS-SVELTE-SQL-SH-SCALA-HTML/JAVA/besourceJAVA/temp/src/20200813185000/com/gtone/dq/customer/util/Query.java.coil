@@ -1,0 +1,117 @@
+{
+   ("case-sensitive", "true");
+   ("hash", "405359464");
+   ("encoding", "KSC5601");
+   ("filename", "C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/util/Query.java");
+   ("version", "1.2.4");
+}
+{
+   (!1, "C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/util/Query.java");
+   (!2, ""S);
+   (!3, "selectQuery");
+   (!4, "this");
+   (!5, "insertQuery");
+   (!6, "deleteQuery");
+}
+[
+   {"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/util/Query.java",
+   CL([public],(com.gtone.dq.customer.util,Query),(java.lang,Object),[])
+   {
+      ([private],"insertQuery":string,{!2,string,(12#38,12#39,!1)},(12#24,12#34,!1));
+      ([private],"deleteQuery":string,{!2,string,(13#38,13#39,!1)},(13#24,13#34,!1));
+      ([private],"selectQuery":string,{!2,string,(14#38,14#39,!1)},(14#24,14#34,!1))
+   }
+   ,(10#8,54#1,!1)},
+
+   {"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/util/Query.java",
+   CN([public],(com.gtone.dq.customer.util,Query),[],[],
+   {[
+      {RE0
+      ,(!)}
+      ]
+   ,(10#8,10#8,!1)}
+   )
+   ,(10#8,10#8,!1)},
+
+   {"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/util/Query.java",
+   FN([public],((com.gtone.dq.customer.util,Query),"selectQuery"):unit,[(!3:string,(19#40,19#50,!1))],[],
+   {[
+      {({LO({V(!4),class((com.gtone.dq.customer.util,Query)),(20#17,20#20,!1)},"insertQuery"),string,(20#22,20#32,!1)},{V(!3),string,(20#36,20#46,!1)})
+      ,(20#22,20#32,!1)};
+      {RE0
+      ,(!)}
+      ]
+   ,(19#16,21#9,!1)}
+   )
+   ,(19#16,21#9,!1)},
+
+   {"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/util/Query.java",
+   FN([public],((com.gtone.dq.customer.util,Query),"getSelectQuery"):string,[],[],
+   {[
+      {RE({OA({V(!4),class((com.gtone.dq.customer.util,Query)),(27#24,27#27,!1)},"selectQuery"),string,(27#29,27#39,!1)})
+      ,(27#17,27#40,!1)}
+      ]
+   ,(26#16,28#9,!1)}
+   )
+   ,(26#16,28#9,!1)},
+
+   {"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/util/Query.java",
+   FN([public],((com.gtone.dq.customer.util,Query),"setInsertQuery"):unit,[(!5:string,(33#43,33#53,!1))],[],
+   {[
+      {({LO({V(!4),class((com.gtone.dq.customer.util,Query)),(34#17,34#20,!1)},"insertQuery"),string,(34#22,34#32,!1)},{V(!5),string,(34#36,34#46,!1)})
+      ,(34#22,34#32,!1)};
+      {RE0
+      ,(!)}
+      ]
+   ,(33#16,35#9,!1)}
+   )
+   ,(33#16,35#9,!1)},
+
+   {"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/util/Query.java",
+   FN([public],((com.gtone.dq.customer.util,Query),"setDeleteQuery"):unit,[(!6:string,(39#43,39#53,!1))],[],
+   {[
+      {({LO({V(!4),class((com.gtone.dq.customer.util,Query)),(40#17,40#20,!1)},"deleteQuery"),string,(40#22,40#32,!1)},{V(!6),string,(40#36,40#46,!1)})
+      ,(40#22,40#32,!1)};
+      {RE0
+      ,(!)}
+      ]
+   ,(39#16,41#9,!1)}
+   )
+   ,(39#16,41#9,!1)},
+
+   {"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/util/Query.java",
+   FN([public],((com.gtone.dq.customer.util,Query),"getInsertQuery"):string,[],[],
+   {[
+      {RE({OA({V(!4),class((com.gtone.dq.customer.util,Query)),(46#24,46#34,!1)},"insertQuery"),string,(46#24,46#34,!1)})
+      ,(46#17,46#35,!1)}
+      ]
+   ,(45#16,47#9,!1)}
+   )
+   ,(45#16,47#9,!1)},
+
+   {"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/util/Query.java",
+   FN([public],((com.gtone.dq.customer.util,Query),"getDeleteQuery"):string,[],[],
+   {[
+      {RE({OA({V(!4),class((com.gtone.dq.customer.util,Query)),(52#24,52#34,!1)},"deleteQuery"),string,(52#24,52#34,!1)})
+      ,(52#17,52#35,!1)}
+      ]
+   ,(51#16,53#9,!1)}
+   )
+   ,(51#16,53#9,!1)},
+
+
+   {"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/util/Query.java",
+   [
+      D("/***************************************************************************\r\n*                                                                           \r\n\r\n*\r\n**************************************************************************/",3,(3#1,7#75,"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/util/Query.java")),
+      S("//SQL Query문\r\n",12),
+      S("//SQL Query문\r\n",13),
+      S("//SQL Query문\r\n",14),
+      D("/*****\r\n\r\n	 */",16,(16#9,18#11,"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/util/Query.java")),
+      D("/*****\r\n\r\n	 */",23,(23#9,25#11,"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/util/Query.java")),
+      D("/*****\r\n\r\n	 */",30,(30#9,32#11,"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/util/Query.java")),
+      D("/*****\r\n\r\n	 */",36,(36#9,38#11,"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/util/Query.java")),
+      D("/*****\r\n\r\n	 */",42,(42#9,44#11,"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/util/Query.java")),
+      D("/*****\r\n\r\n	 */",48,(48#9,50#11,"C:/Users/S&SSLAWKS/Desktop/Project/JAVA/src/20200813185000/com/gtone/dq/customer/util/Query.java"))
+   ]
+   }
+]

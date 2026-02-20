@@ -1,0 +1,38 @@
+/*
+Noncompliant Code Example (Symmetry)
+This noncompliant code example defines a CaseInsensitiveString class that includes a String and overrides the equals() method. The CaseInsensitiveString class knows about ordinary strings, but the String class has no knowledge of case-insensitive strings. Consequently, the CaseInsensitiveString.equals() method should not attempt to interoperate with objects of the String class.
+*/
+
+
+public final class CaseInsensitiveString {
+  private String s;
+
+  public CaseInsensitiveString(String s) {
+    if (s == null) {
+      throw new NullPointerException();
+    }
+    this.s = s;
+  }
+
+  // This method violates symmetry
+  public boolean equals(Object o) {
+    if (o instanceof CaseInsensitiveString) {
+      return s.equalsIgnoreCase(((CaseInsensitiveString)o).s);
+    }
+
+    if (o instanceof String) {
+      return s.equalsIgnoreCase((String)o);
+    }
+    return false;
+  }
+
+  // Comply with MET09-J
+  public int hashCode() {/* ... */}
+
+  public static void main(String[] args) {
+    CaseInsensitiveString cis = new CaseInsensitiveString("Java");
+    String s = "java";
+    System.out.println(cis.equals(s)); // Returns true
+    System.out.println(s.equals(cis)); // Returns false
+  }
+}

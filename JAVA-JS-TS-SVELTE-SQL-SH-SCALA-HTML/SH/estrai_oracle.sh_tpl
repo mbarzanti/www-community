@@ -1,0 +1,11 @@
+%SQLPLUSPATH% -s %ORACLE_USR%/%ORACLE_PWD%@%ORACLE_CON% <<EOF>%OUTFILEEXPORT%
+set head off
+set pagesize 0
+set feed off
+set verify off
+set line 1000
+
+%QUERY%;
+exit
+EOF
+

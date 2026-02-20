@@ -1,0 +1,14 @@
+/*
+Noncompliant Code Example (toUpperCase())
+Many web apps, such as forum or blogging software, input HTML and then display it. Displaying untrusted HTML can subject a web app to cross-site scripting (XSS) or HTML injection vulnerabilities. Therefore, it is vital that HTML be sanitized before sending it to a web browser.
+
+One common step in sanitization is identifying tags that may contain malicious content. The <SCRIPT> tag typically contains JavaScript code that is executed by a client's browser. Consequently, HTML input is commonly filtered for <SCRIPT> tags. However, identifying <SCRIPT> tags is not as simple as it appears.
+
+In HTML, tags are case-insensitive and consequently can be specified using uppercase, lowercase, or any mixture of cases. This noncompliant code example uses the locale-dependent String.toUpperCase() method to convert an HTML tag to uppercase to check it for further processing. The code must ignore <SCRIPT> tags, as they indicate code that is to be discarded. Whereas the English locale would convert "script" to "SCRIPT", the Turkish locale will convert "script" to "SCRİPT", and the check will fail to detect the <SCRIPT> tag.
+*/
+public static void processTag(String tag) {
+  if (tag.toUpperCase().equals("SCRIPT")) {
+    return;
+  } 
+  // Process tag
+}

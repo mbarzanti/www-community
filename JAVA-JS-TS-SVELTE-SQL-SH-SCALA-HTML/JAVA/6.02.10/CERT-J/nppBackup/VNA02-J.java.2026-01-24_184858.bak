@@ -1,0 +1,53 @@
+/*
+Noncompliant Code Example (Logical Negation)
+This noncompliant code example declares a shared boolean flag variable and provides a toggle() method that negates the current value of flag:
+Execution of this code may result in a data race because the value of flag is read, negated, and written back.
+*/
+
+final class Flag {
+  private boolean flag = true;
+
+  public void toggle() {  // Unsafe
+    flag = !flag;
+  }
+
+  public boolean getFlag() { // Unsafe
+    return flag;
+  }
+}
+/*
+Noncompliant Code Example (Bitwise Negation)
+The toggle() method may also use the compound assignment operator ^= to negate the current value of flag:
+
+This code is also not thread-safe. A data race exists because ^= is a non-atomic compound operation.
+*/
+
+final class Flag {
+  private boolean flag = true;
+
+  public void toggle() {  // Unsafe
+    flag ^= true;  // Same as flag = !flag;
+  }
+
+  public boolean getFlag() { // Unsafe
+    return flag;
+  }
+}
+
+/*
+Noncompliant Code Example (Volatile)
+Declaring flag volatile also fails to solve the problem:
+
+This code remains unsuitable for multithreaded use because declaring a variable volatile fails to guarantee the atomicity of compound operations on the variable.
+*/
+final class Flag {
+  private volatile boolean flag = true;
+
+  public void toggle() {  // Unsafe
+    flag ^= true;
+  }
+
+  public boolean getFlag() { // Safe
+    return flag;
+  }
+}

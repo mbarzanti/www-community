@@ -1,0 +1,1 @@
+echo "nome file non valido"

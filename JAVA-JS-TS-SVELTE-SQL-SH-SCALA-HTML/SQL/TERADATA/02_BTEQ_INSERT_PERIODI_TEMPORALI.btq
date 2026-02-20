@@ -1,0 +1,217 @@
+/*
+POPOLAMENTO TABELLA EDWAE_DW.PERIODI_TEMPORALI
+
+*/
+
+.set errorout stdout;
+.set errorlevel 3807 severity 0;
+
+Select * FROM DBC.Tables 
+where 
+TableName    = 'PERIODI_TEMPORALI_Pasqua' and 
+DatabaseName = 'EDWAE_DW'
+;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+.if activitycount > 0 Then .GOTO cancella ;
+
+CREATE SET TABLE EDWAE_DW.PERIODI_TEMPORALI_Pasqua ,NO FALLBACK ,
+     NO BEFORE JOURNAL,
+     NO AFTER JOURNAL,
+     CHECKSUM = DEFAULT
+     (
+      IDPERIODOTEMPORALE INTEGER TITLE 'IDENTIFICATIVO PERIODO TEMPORALE' NOT NULL,
+      codgiorno INTEGER TITLE 'CODICE GIORNO',
+      dsdescrizionegiorno VARCHAR(50) CHARACTER SET LATIN NOT CASESPECIFIC TITLE 'DESCRIZIONE GIORNO',
+      codcodicegiornosettimana INTEGER TITLE 'CODICE GIORNO SETTIMANA',
+      dsdescrizionegiornosettimana VARCHAR(50) CHARACTER SET LATIN NOT CASESPECIFIC TITLE 'DESCRIZIONE GIORNO SETTIMANA',
+      codcodicesettimana INTEGER TITLE 'CODICE SETTIMANA',
+      dsdescrizionesettimana VARCHAR(28) CHARACTER SET LATIN NOT CASESPECIFIC TITLE 'DESCRIZIONE SETTIMANA',
+      codcodicemese INTEGER TITLE 'CODICE MESE',
+      dsdescrizionemese VARCHAR(50) CHARACTER SET LATIN NOT CASESPECIFIC TITLE 'DESCRIZIONE MESE',
+      codcodicebimestre INTEGER TITLE 'CODICE MESE',
+      dsdescrizionebimestre VARCHAR(50) CHARACTER SET LATIN NOT CASESPECIFIC TITLE 'DESCRIZIONE MESE',
+      codcodicetrimestre INTEGER TITLE 'CODICE TRIMESTRE',
+      dsdescrizionetrimestre VARCHAR(50) CHARACTER SET LATIN NOT CASESPECIFIC TITLE 'DESCRIZIONE TRIMESTRE',
+      codcodicesemestre INTEGER TITLE 'CODICE SEMESTRE',
+      dsdescrizionesemestre VARCHAR(50) CHARACTER SET LATIN NOT CASESPECIFIC TITLE 'DESCRIZIONE SEMESTRE',
+      codCodiceAnno INTEGER TITLE 'CODICE ANNO',
+      dsDescrizionePeriodo VARCHAR(50) CHARACTER SET LATIN NOT CASESPECIFIC TITLE 'DESCRIZIONE PERIODO',
+      dtdatagiorno DATE FORMAT 'YYYY-MM-DD' TITLE 'DATA GIORNO',
+      idtipoperiodotemporale VARCHAR(1) CHARACTER SET LATIN NOT CASESPECIFIC TITLE 'ID TIPO PERIODO TEMPORALE',
+      dsdescrizionenomemese VARCHAR(50) CHARACTER SET LATIN NOT CASESPECIFIC TITLE 'DESCRIZIONE NOME MESE',
+      codcodicenomemese CHAR(2) CHARACTER SET LATIN NOT CASESPECIFIC TITLE 'CODICE NOME MESE',
+      Flag_Festivita CHAR(1) CHARACTER SET LATIN NOT CASESPECIFIC TITLE 'FLAG FESTIVITA' DEFAULT '0',
+      DTINIZIOPERIODO DATE FORMAT 'YYYY-MM-DD' TITLE 'DATA INIZIO PERIODO',
+      DTFINEPERIODO DATE FORMAT 'YYYY-MM-DD' TITLE 'DATA FINE PERIODO')
+PRIMARY INDEX ( IDPERIODOTEMPORALE );
+
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+.GOTO inserisci;
+
+.label cancella
+Delete FROM EDWAE_DW.PERIODI_TEMPORALI_Pasqua;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+.label inserisci
+insert into EDWAE_DW.PERIODI_TEMPORALI_Pasqua
+Select 
+id_period_tmp as idPeriodoTemporale,
+case when cadenza = 'Giornaliero' then extract (day from dt_in_periodo) else NULL end as codGiorno,
+ds_giorno as dsDescrizioneGiorno,
+cd_giorno_settimana as codCodiceGiornoSettimana,
+ds_giorno_settimana as dsDescrizioneGiornoSettimana,
+cd_settimana as codCodiceSettimana,
+case cadenza when 'Settimanale' then 'dal '|| (dt_in_periodo (format 'dd/mm/yyyy')) || ' al ' || (dt_fin_periodo (format 'dd/mm/yyyy')) end as dsDescrizioneSettimana,
+cd_mese as codCodiceMese,
+upper(substr(ds_mese,1,1)) || substr(ds_mese,2) as dsDescrizioneMese,
+Case
+			WHEN	COALESCE(cd_mese,0) <> 0
+		THEN
+			CASE
+					WHEN	(cd_mese - cd_anno * 100) IN(1,2)
+					Then CAST(cd_anno!!'01' AS int)
+					WHEN	(cd_mese - cd_anno * 100) IN(3,4)
+					Then CAST(cd_anno!!'02' AS int)
+					WHEN	(cd_mese - cd_anno * 100) IN(5,6)
+					Then CAST(cd_anno!!'03' AS int)
+					WHEN	(cd_mese - cd_anno * 100) IN(7,8)
+					Then CAST(cd_anno!!'04' AS int)
+					WHEN	(cd_mese - cd_anno * 100) IN(9,10)
+					Then CAST(cd_anno!!'05' AS int)
+					WHEN	(cd_mese - cd_anno * 100) IN(11,12)
+					Then CAST(cd_anno!!'06' AS int)
+					Else	999999
+		END
+			Else	Null
+		End As codCodiceBimestre,
+		Case
+			WHEN	COALESCE(cd_mese,0) <> 0
+		THEN
+			CASE
+					WHEN	(cd_mese - cd_anno * 100) IN(1,2)
+					Then '1° Bimestre '|| CAST(cd_anno AS CHAR(4))
+					WHEN	(cd_mese - cd_anno * 100) IN(3,4)
+					Then '2° Bimestre '|| CAST(cd_anno AS CHAR(4))
+					WHEN	(cd_mese - cd_anno * 100) IN(5,6)
+					Then '3° Bimestre '|| CAST(cd_anno AS CHAR(4))
+					WHEN	(cd_mese - cd_anno * 100) IN(7,8)
+					Then '4° Bimestre '|| CAST(cd_anno AS CHAR(4))
+					WHEN	(cd_mese - cd_anno * 100) IN(9,10)
+					Then '5° Bimestre '|| CAST(cd_anno AS CHAR(4))
+					WHEN	(cd_mese - cd_anno * 100) IN(11,12)
+					Then '6° Bimestre '|| CAST(cd_anno AS CHAR(4))
+					Else	'ERRORE NEL cd_mese'
+		END
+			Else	Null
+		End As dsDescrizioneBimestre,
+
+cd_trimestre as codCodiceTrimestre,
+ds_trimestre as dsDescrizioneTrimestre,
+cd_semestre as codCodiceSemestre,
+ds_semestre as dsDescrizioneSemestre,
+cd_anno as codCodiceAnno,
+NULL as dsDescrizionePeriodo,
+dt_in_periodo as dtDataGiorno,
+case  
+ when cadenza = 'Annuale' then 'Y'
+ when cadenza = 'Trimestrale' then 'Q'
+ when cadenza = 'Semestrale' then 'S'
+ when cadenza = 'Mensile' then 'M' 
+ when cadenza = 'Settimanale' then 'W' end as idTipoPeriodoTemporale,
+(SUBSTRING(TRIM(upper(substr(ds_mese,1,1)) || substr(ds_mese,2)) FROM 1 FOR (index(upper(substr(ds_mese,1,1)) || substr(ds_mese,2),'2')-1))) AS dsDescrizioneNomeMese,
+SUBSTR(cast(cd_mese as varchar(6)),5,2) as codCodiceNomeMese,
+'0' AS fLAG_FESTIVO,dt_in_periodo,dt_fin_periodo
+from EDWAE_DW.CD_PERIOD_TMP
+where cadenza <> 'giornaliero'
+
+and cd_anno BETWEEN 2003 AND 2020
+union
+
+select 
+giorn.id_period_tmp as idPeriodoTemporale,
+extract (day from giorn.dt_in_periodo) as codGiorno,
+giorn.ds_giorno as dsDescrizioneGiorno,
+giorn.cd_giorno_settimana as codCodiceGiornoSettimana,
+giorn.ds_giorno_settimana as dsDescrizioneGiornoSettimana,
+giorn.cd_settimana as codCodiceSettimana,
+'dal '|| (sett.dt_in_periodo (format 'dd/mm/yyyy')) || ' al ' || (sett.dt_fin_periodo (format 'dd/mm/yyyy')) as dsDescrizioneSettimana,
+giorn.cd_mese as codCodiceMese,
+upper(substr(giorn.ds_mese,1,1)) || substr(giorn.ds_mese,2) as dsDescrizioneMese,
+Case
+			WHEN	COALESCE(giorn.cd_mese,0) <> 0
+		THEN
+			CASE
+					WHEN	(giorn.cd_mese - giorn.cd_anno * 100) IN(1,2)
+					Then CAST(giorn.cd_anno!!'01' AS int)
+					WHEN	(giorn.cd_mese - giorn.cd_anno * 100) IN(3,4)
+					Then CAST(giorn.cd_anno!!'02' AS int)
+					WHEN	(giorn.cd_mese - giorn.cd_anno * 100) IN(5,6)
+					Then CAST(giorn.cd_anno!!'03' AS int)
+					WHEN	(giorn.cd_mese - giorn.cd_anno * 100) IN(7,8)
+					Then CAST(giorn.cd_anno!!'04' AS int)
+					WHEN	(giorn.cd_mese - giorn.cd_anno * 100) IN(9,10)
+					Then CAST(giorn.cd_anno!!'05' AS int)
+					WHEN	(giorn.cd_mese - giorn.cd_anno * 100) IN(11,12)
+					Then CAST(giorn.cd_anno!!'06' AS int)
+					Else	999999
+		END
+			Else	Null
+		End As codCodiceBimestre,
+		Case
+			WHEN	COALESCE(giorn.cd_mese,0) <> 0
+		THEN
+			CASE
+					WHEN	(giorn.cd_mese - giorn.cd_anno * 100) IN(1,2)
+					Then '1° Bimestre '|| CAST(giorn.cd_anno AS CHAR(4))
+					WHEN	(giorn.cd_mese - giorn.cd_anno * 100) IN(3,4)
+					Then '2° Bimestre '|| CAST(giorn.cd_anno AS CHAR(4))
+					WHEN	(giorn.cd_mese - giorn.cd_anno * 100) IN(5,6)
+					Then '3° Bimestre '|| CAST(giorn.cd_anno AS CHAR(4))
+					WHEN	(giorn.cd_mese - giorn.cd_anno * 100) IN(7,8)
+					Then '4° Bimestre '|| CAST(giorn.cd_anno AS CHAR(4))
+					WHEN	(giorn.cd_mese - giorn.cd_anno * 100) IN(9,10)
+					Then '5° Bimestre '|| CAST(giorn.cd_anno AS CHAR(4))
+					WHEN	(giorn.cd_mese - giorn.cd_anno * 100) IN(11,12)
+					Then '6° Bimestre '|| CAST(giorn.cd_anno AS CHAR(4))
+					Else	'ERRORE NEL giorn.cd_mese'
+		END
+			Else	Null
+		End As dsDescrizioneBimestre,
+giorn.cd_trimestre as codCodiceTrimestre,
+giorn.ds_trimestre as dsDescrizioneTrimestre,
+giorn.cd_semestre as codCodiceSemestre,
+giorn.ds_semestre as dsDescrizioneSemestre,
+giorn.cd_anno as codCodiceAnno,
+NULL as dsDescrizionePeriodo,
+giorn.dt_in_periodo as dtDataGiorno,
+'D' as idTipoPeriodoTemporale,
+(SUBSTRING(TRIM(upper(substr(giorn.ds_mese,1,1)) || substr(giorn.ds_mese,2)) FROM 1 FOR (index(upper(substr(giorn.ds_mese,1,1)) || substr(giorn.ds_mese,2),'2')-1))) AS dsDescrizioneNomeMese,
+SUBSTR (cast(giorn.cd_mese as varchar(6)),5,2) as codCodiceNomeMese,
+'0' AS fLAG_FESTIVO,giorn.dt_in_periodo,giorn.dt_fin_periodo
+from EDWAE_DW.CD_PERIOD_TMP  giorn
+left outer join EDWAE_DW.CD_PERIOD_TMP  sett
+on giorn.dt_in_periodo between sett.dt_in_periodo and sett.dt_fin_periodo
+and sett.cadenza = 'settimanale'
+where 
+ giorn.cadenza = 'Giornaliero'
+ 
+ And GIORN.DT_IN_PERIODO BETWEEN DATE'2003-01-01' AND DATE'2020-12-31';
+   
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+	
+DROP TABLE EDWAE_DW.PERIODI_TEMPORALI_OLD;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+RENAME TABLE EDWAE_DW.PERIODI_TEMPORALI TO EDWAE_DW.PERIODI_TEMPORALI_OLD; 
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+	
+RENAME TABLE EDWAE_DW.PERIODI_TEMPORALI_Pasqua TO EDWAE_DW.PERIODI_TEMPORALI; 
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+	
+DROP TABLE EDWAE_DW.PERIODI_TEMPORALI_OLD;
+.IF ERRORLEVEL > 0 THEN .QUIT 16;
+
+
+.LOGOFF;
+
+.QUIT;

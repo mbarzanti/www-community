@@ -1,0 +1,139 @@
+/*
+Noncompliant Code Example (Symmetry)
+This noncompliant code example defines a CaseInsensitiveString class that includes a String and overrides the equals() method. The CaseInsensitiveString class knows about ordinary strings, but the String class has no knowledge of case-insensitive strings. Consequently, the CaseInsensitiveString.equals() method should not attempt to interoperate with objects of the String class.
+*/
+
+
+public final class CaseInsensitiveString {
+  private String s;
+
+  public CaseInsensitiveString(String s) {
+    if (s == null) {
+      throw new NullPointerException();
+    }
+    this.s = s;
+  }
+
+  // This method violates symmetry
+  public boolean equals(Object o) {
+    if (o instanceof CaseInsensitiveString) {
+      return s.equalsIgnoreCase(((CaseInsensitiveString)o).s);
+    }
+
+    if (o instanceof String) {
+      return s.equalsIgnoreCase((String)o);
+    }
+    return false;
+  }
+
+  // Comply with MET09-J
+  public int hashCode() {/* ... */}
+
+  public static void main(String[] args) {
+    CaseInsensitiveString cis = new CaseInsensitiveString("Java");
+    String s = "java";
+    System.out.println(cis.equals(s)); // Returns true
+    System.out.println(s.equals(cis)); // Returns false
+  }
+}
+/*
+Noncompliant Code Example (Transitivity)
+This noncompliant code example defines an XCard class that extends the Card class.
+
+In the noncompliant code example, p1 and p2 compare equal and p2 and p3 compare equal, but p1 and p3 compare unequal, violating the transitivity requirement. The problem is that the Card class has no knowledge of the XCard class and consequently cannot determine that p2 and p3 have different values for the field type.
+*/
+public class Card {
+  private final int number;
+
+  public Card(int number) {
+    this.number = number;
+  }
+
+  public boolean equals(Object o) {
+    if (!(o instanceof Card)) {
+      return false;
+    }
+
+    Card c = (Card)o;
+    return c.number == number;
+  }
+
+  public int hashCode() {/* ... */}
+
+}
+
+class XCard extends Card {
+  private String type;
+  public XCard(int number, String type) {
+    super(number);
+    this.type = type;
+  }
+
+  public boolean equals(Object o) {
+    if (!(o instanceof Card)) {
+      return false;
+    }
+
+    // Normal Card, do not compare type
+    if (!(o instanceof XCard)) {
+      return o.equals(this);
+    }
+
+    // It is an XCard, compare type as well
+    XCard xc = (XCard)o;
+    return super.equals(o) && xc.type == type;
+  }
+
+  public int hashCode() {/* ... */}
+
+  public static void main(String[] args) {
+    XCard p1 = new XCard(1, "type1");
+    Card p2 = new Card(1);
+    XCard p3 = new XCard(1, "type2");
+    System.out.println(p1.equals(p2)); // Returns true
+    System.out.println(p2.equals(p3)); // Returns true
+    System.out.println(p1.equals(p3)); // Returns false
+                                       // violating transitivity
+  }
+}
+/*
+Noncompliant Code Example (Consistency)
+A uniform resource locator (URL) specifies both the location of a resource and a method to access it. According to the Java API documentation for Class URL [API 2014]:
+
+Two URL objects are equal if they have the same protocol, reference equivalent hosts, have the same port number on the host, and the same file and fragment of the file.
+
+Two hosts are considered equivalent if both host names can be resolved into the same IP addresses; else if either host name can't be resolved, the host names must be equal without regard to case; or both host names equal to null.
+
+The defined behavior for the equals() method is known to be inconsistent with virtual hosting in HTTP.
+
+Virtual hosting allows a web server to host multiple websites on the same computer, sometimes sharing the same IP address. Unfortunately, this technique was unanticipated when the URL class was designed. Consequently, when two completely different URLs resolve to the same IP address, the URL class considers them to be equal.
+
+Another risk associated with the equals() method for URL objects is that the logic it uses when connected to the Internet differs from that used when disconnected. When connected to the Internet, the equals() method follows the steps described in the Java API; when disconnected, it performs a string compare on the two URLs. Consequently, the URL.equals() method violates the consistency requirement for equals().
+
+Consider an application that allows an organization's employees to access an external mail service via http://mailwebsite.com. The application is designed to deny access to other websites by behaving as a makeshift firewall. However, a crafty or malicious user could nevertheless access an illegitimate website http://illegitimatewebsite.com if it were hosted on the same computer as the legitimate website and consequently shared the same IP address. Even worse, if the legitimate website were hosted on a server in a commercial pool of servers, an attacker could register multiple websites in the pool (for phishing purposes) until one was registered on the same computer as the legitimate website, consequently defeating the firewall.
+*/
+
+
+public class Filter {
+  public static void main(String[] args) throws MalformedURLException {
+    final URL allowed = new URL("http://mailwebsite.com");
+    if (!allowed.equals(new URL(args[0]))) {
+      throw new SecurityException("Access Denied");
+    }
+    // Else proceed
+  }
+}
+/*
+Noncompliant Code Example (java.security.Key)
+The method java.lang.Object.equals() by default is unable to compare composite objects such as cryptographic keys. Most Key classes lack an equals() implementation that would override Object's default implementation. In such cases, the components of the composite object must be compared individually to ensure correctness.
+
+This noncompliant code example compares two keys using the equals() method. The comparison may return false even when the key instances represent the same logical key.
+*/
+
+
+private static boolean keysEqual(Key key1, Key key2) {
+  if (key1.equals(key2)) {
+    return true;
+  }
+  return false;
+}

@@ -1,0 +1,14 @@
+CREATE OR REPLACE PROCEDURE UPDATE_SUSPECT_GROUP_ID() 
+RETURNS CHARACTER VARYING(ANY) EXECUTE AS CALLER
+LANGUAGE NZPLSQL AS
+BEGIN_PROC
+WITH hospital (hosp_id, hosp_name, hosp_dept, hosp_type) AS 
+(SELECT hosp_id, hosp_name, hosp_dept, hosp_type
+FROM hospitals
+Where hosp_type = ‘MSH’),
+Patients (pat_id,pat_name,pat_hosp_id) AS
+(SELECT pat_id,pat_name,pat_hosp_id
+FROM patient JOIN hospital
+On(pat_hosp_id = hosp_id)
+SELECT * FROM patients;
+END_PROC;

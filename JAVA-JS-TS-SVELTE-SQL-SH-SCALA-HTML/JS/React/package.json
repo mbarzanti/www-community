@@ -1,0 +1,26 @@
+{
+  "name": "react4shell",
+  "version": "1.0.0",
+  "description": "react4shell vulnerable libs",
+  "dependencies": {
+    "react": "19.2.0",
+    "react-dom": "19.0.1",
+    "react-server-dom-webpack": "19.0.0",
+    "react-server-dom-parcel": "19.1.2",
+    "react-server-dom-turbopack": "19.2.0",
+    "react-router": "6.0.0",
+    "@vitejs/plugin-rsc":  "0.5.8",
+    "waku":  "0.25.0",
+    "rwsdk":  "0.3.0",
+    "@parcel/rsc": "2.0.0", 
+    "next": "13.3.0", 
+    "express": "^4.18.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@next/third-parties": "^15.3.5",
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0"
+  }
+}
+

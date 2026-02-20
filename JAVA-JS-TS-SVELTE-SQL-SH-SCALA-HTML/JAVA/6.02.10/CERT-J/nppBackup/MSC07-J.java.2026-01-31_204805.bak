@@ -1,0 +1,55 @@
+/*
+Noncompliant Code Example (Nonprivate Constructor)
+This noncompliant code example uses a nonprivate constructor for instantiating a singleton:
+A malicious subclass may extend the accessibility of the constructor from protected to public, allowing untrusted code to create multiple instances of the singleton. Also, the class field Instance has not been declared final.
+*/
+
+class MySingleton {
+  private static MySingleton instance;
+
+  protected MySingleton() {    
+    instance = new MySingleton();
+  }
+
+  public static MySingleton getInstance() {    
+    return instance;
+  }
+}
+/*
+Noncompliant Code Example (Visibility across Threads)
+Multiple instances of the Singleton class can be created when the getter method is tasked with initializing the singleton when necessary, and the getter method is invoked by two or more threads simultaneously.
+
+A singleton initializer method in a multithreaded program must employ some form of locking to prevent construction of multiple singleton objects.
+*/
+
+class MySingleton {
+  private static MySingleton instance;
+
+  private MySingleton() {    
+    // Private constructor prevents instantiation by untrusted callers
+  }
+
+  // Lazy initialization
+  public static MySingleton getInstance() { // Not synchronized
+    if (instance == null) {
+      instance = new MySingleton();
+    }
+    return instance;
+  }
+}
+
+/*
+Noncompliant Code Example (Inappropriate Synchronization)
+Multiple instances can be created even when the singleton construction is encapsulated in a synchronized block, as in this noncompliant code example:
+
+The reason multiple instances can be created in this case is that two or more threads may simultaneously see the field instance as null in the if condition and enter the synchronized block one at a time.
+*/
+
+public static MySingleton getInstance() {
+  if (instance == null) {
+    synchronized (MySingleton.class) {
+      instance = new MySingleton();
+    }
+  }
+  return instance;
+}

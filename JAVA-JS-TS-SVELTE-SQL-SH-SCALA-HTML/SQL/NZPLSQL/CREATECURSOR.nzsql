@@ -1,0 +1,35 @@
+CREATE OR REPLACE PROCEDURE SP_NEW_PROCEDURE1( )
+RETURNS REFTABLE(employees)
+LANGUAGE NZPLSQL AS
+BEGIN_PROC
+  DECLARE
+
+l_conditions  varchar(1000);
+p_rec         RECORD;
+
+BEGIN
+
+FOR P_REC IN  select empid, mgrid, empname, salary  from employees where mgrid = 7 
+LOOP
+
+
+        l_conditions  :=  'insert into  '  || 
+                          REFTABLENAME     || 
+                          '  VALUES ('     || 
+                          quote_literal(P_REC.EMPID)  || 
+                          ','              || 
+                          quote_literal(P_REC.MGRID)    || 
+                          ','              || 
+                          quote_literal(P_REC.EMPNAME)   || 
+                          ','              || 
+                          quote_literal(P_REC.SALARY )    || 
+                          '  ) ; ' ;
+
+ execute immediate l_conditions; 
+
+  l_conditions  := ' ';
+
+END LOOP;      
+RETURN REFTABLE;
+END;
+END_PROC;

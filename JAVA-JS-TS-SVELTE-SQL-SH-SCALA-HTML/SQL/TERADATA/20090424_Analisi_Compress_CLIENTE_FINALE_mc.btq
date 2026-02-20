@@ -1,0 +1,18 @@
+.SET WIDTH 240;
+.SET ERROROUT STDOUT
+.SET ERRORLEVEL 3803 SEVERITY 0;
+.SET ERRORLEVEL 3807 SEVERITY 0;
+
+Select * From dbc.DBCInfo Order By 1 Desc
+;
+select current_timestamp
+;
+
+
+.run file=/data/DWH/EDWAE_DM/WORK/Analisi_Compress_CLIENTE_FINALE.sql
+
+
+
+
+.logoff;
+.quit;

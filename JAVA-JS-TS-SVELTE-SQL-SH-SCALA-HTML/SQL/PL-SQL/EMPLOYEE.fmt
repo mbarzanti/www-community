@@ -1,0 +1,77 @@
+-- ORACLE FORM CRASH 
+-- https://forums.oracle.com/ords/apexds/post/help-problem-with-forms-crashing-urgent-3916
+EMPLOYEE form:
+When_Form_Navigate trigger:
+--Checks to see if the search form has run and if so
+--populates the employee form
+IF :GLOBAL.emp_id IS NOT NULL THEN
+Execute_Query;
+--If the messages below are not commented out the crash
+--never happens
+--message('Found the data');
+--message(' ');
+Set_Item_Property('FIND_EMP', ENABLED, PROPERTY_FALSE);
+ELSE
+--Enable the insert button
+Set_Item_Property('INSERT_EMP', ENABLED, PROPERTY_TRUE);
+END IF;
+
+Pre_Query trigger
+--sets employee_id field equal to the employee id selected on
+--the search form
+:employee.emp_id := :GLOBAL.emp_id;
+
+Erase(:GLOBAL.emp_id);
+
+When_Button_Pressed trigger:
+--Disable the insert button
+Set_Item_Property('INSERT_EMP', ENABLED, PROPERTY_FALSE);
+
+declare
+webhandle ole2.obj_type;
+args ole2.list_type;
+begin
+synchronize;
+-- VIOLAZ ActiveX/OCX deprecated
+-- https://docs.oracle.com/cd/E26401_01/doc.122/e22961/T302934T302936.htm
+webhandle := forms_ole.get_interface_pointer('block.web');
+-- to go to the home page use this command : ole2.invoke(webhandle,'GoHome');
+args:=OLE2.CREATE_ARGLIST;
+/* Add as argument an url or a html document.In this example we use an url.
+OLE2.ADD_ARG(args,'d:\documenten\webdb\tip56.htm');
+OR
+OLE2.ADD_ARG(args,'www.oracle.com');
+*/
+OLE2.ADD_ARG(args,'www.oracle.com');
+OLE2.INVOKE(webhandle,'Navigate',args);
+OLE2.DESTROY_ARGLIST(args);
+ole2.release_obj(webhandle);
+end;
+
+-- VIOLAZ WHEN_WINDOW_ACTIVATED deprecated
+--  https://docs.oracle.com/cd/E26401_01/doc.122/e22961/T302934T302936.htm
+WHEN_WINDOW_ACTIVATED trigger:
+
+--Clear the form if there is data on it
+Clear_Form(NO_VALIDATE);
+
+--Open the search form
+open_form('C:\WORK\TODAY\EMPLOYEE_SEARCH');
+
+
+EMPLOYEE_SEARCH form:
+
+When_Mouse_Click trigger - selects the employee record and returns the user to the data entry form
+--Check to see if the record clicked on is a populated record
+IF :emp_lookup.emp_id IS NOT NULL THEN
+--Check to see if the mouse has actually clicked on a
+--record
+IF :System.Mouse_Item IS NOT NULL THEN
+--set global variable to emp_id of the selected
+--record
+:GLOBAL.emp_id := :emp_lookup.emp_id;
+
+--Close the form
+Close_Form('EMPLOYEE_SEARCH');
+END IF;
+END IF;
